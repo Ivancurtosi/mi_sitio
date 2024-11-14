@@ -1,0 +1,170 @@
+/* Fondo de pantalla */
+body {
+    background: url("imagenes/STARWARS.jfif") no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Audiowide', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Logo */
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    max-width: 500px;
+    width: 100%;
+}
+
+/* Descripción */
+.description {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Botón de WhatsApp */
+.whatsapp-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.whatsapp-button {
+    display: flex;
+    align-items: center;
+    background-color: #25D366;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 20px;
+}
+
+.whatsapp-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+}
+
+/* Título principal */
+h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+/* Cuadrícula de productos */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.product:hover {
+    transform: scale(1.05);
+}
+
+.product-name {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.product-image-container {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+}
+
+.price {
+    font-size: 24px;
+    margin-top: 10px;
+}
+
+/* Modal de imagen ampliada */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #bbb;
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+    .logo {
+        max-width: 300px;
+    }
+
+    .description {
+        font-size: 18px;
+    }
+
+    .whatsapp-button {
+        font-size: 18px;
+        padding: 10px 20px;
+    }
+
+    .product-name {
+        font-size: 20px;
+    }
+
+    .price {
+        font-size: 22px;
+    }
+}
