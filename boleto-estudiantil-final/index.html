@@ -1,29 +1,1184 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-AR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Boleto Estudiantil | UTN FRH</title>
+  <title>Boleto Estudiantil | UTN Facultad Regional Haedo</title>
+  <meta name="description" content="Guía interactiva para tramitar y resolver problemas del Boleto Estudiantil UTN FRH.">
   <style>
-    :root{--azul:#00455C;--celeste:#00D2F2;--verde:#8DCC3D;--naranja:#FFAB00;--rojo:#FF2644;--violeta:#824DE8;--texto:#17323A;--muted:#66777C;--linea:#DCE7EA;--fondo:#F3FAFB;--card:#fff;--shadow:0 18px 45px rgba(0,69,92,.12)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--texto);background:radial-gradient(circle at 95% 2%,rgba(0,210,242,.16),transparent 26rem),radial-gradient(circle at 8% 18%,rgba(141,204,61,.13),transparent 24rem),#fff;line-height:1.5}button,a{-webkit-tap-highlight-color:transparent}.wrap{max-width:1000px;margin:0 auto;padding:0 18px}.brand{display:flex;justify-content:center;align-items:center;padding:34px 16px 30px;background:#fff;border-bottom:1px solid var(--linea)}.logo{font-weight:900;font-size:clamp(2rem,10vw,4rem);letter-spacing:.04em;color:#006056}.logo span{font-size:.85em;margin:0 .18em}.hero{background:linear-gradient(180deg,#eafcff,#fff);padding:42px 0}.card{background:var(--card);border:1px solid var(--linea);border-radius:30px;box-shadow:var(--shadow);padding:clamp(24px,5vw,46px)}.kicker{display:flex;align-items:center;justify-content:center;text-align:center;border:2px solid #23C7D9;background:linear-gradient(180deg,#f3feff,#eafbfc);border-radius:999px;color:var(--azul);font-weight:900;padding:12px 22px;margin:0 auto 28px;max-width:760px}h1{font-size:clamp(2.4rem,9vw,5rem);line-height:.96;margin:0 0 28px;color:var(--azul);letter-spacing:-.05em}.lead{font-size:clamp(1.15rem,4.8vw,1.7rem);color:var(--muted);margin:0 0 28px}.choice{width:100%;display:block;text-align:left;background:#fff;border:1px solid var(--linea);border-radius:26px;padding:26px;margin:20px 0;cursor:pointer;color:var(--texto);box-shadow:0 10px 24px rgba(0,0,0,.04);position:relative;overflow:hidden}.choice:before{content:"";position:absolute;left:0;right:0;top:0;height:9px}.choice.tramite:before{background:var(--celeste)}.choice.error:before{background:var(--rojo)}.choice strong{display:block;color:var(--azul);font-size:clamp(1.7rem,7vw,2.5rem);line-height:1.05;margin-bottom:12px}.choice span{display:block;color:var(--muted);font-size:clamp(1rem,4.5vw,1.35rem)}.choice .arrow{color:var(--azul);font-weight:900;margin-top:18px}.line{height:10px;display:flex;gap:18px;margin:28px 12px 0}.line i{height:10px;border-radius:30px;flex:1}.line i:nth-child(1){background:var(--celeste)}.line i:nth-child(2){background:var(--verde)}.line i:nth-child(3){background:var(--naranja)}.line i:nth-child(4){background:var(--rojo)}.line i:nth-child(5){background:var(--violeta)}.panel{display:none;padding:38px 0}.panel.active{display:block}.panel-card{background:#fff;border:1px solid var(--linea);border-radius:28px;box-shadow:var(--shadow);padding:24px}.steps{border:1px solid var(--linea);border-radius:22px;padding:14px;background:#f8fcfd;margin-bottom:30px}.step{display:flex;align-items:center;gap:16px;padding:16px;border-radius:18px;color:var(--muted);font-weight:900}.step.active{background:#fff;color:var(--azul);box-shadow:0 10px 24px rgba(0,0,0,.05)}.num{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#eafbfc;color:var(--azul)}h2{font-size:clamp(2rem,8vw,3.3rem);line-height:1.05;color:var(--azul);margin:18px 0 24px}h3{font-size:1.55rem;color:var(--azul);margin:28px 0 12px}.req,.check{border:1px solid var(--linea);border-radius:18px;padding:18px;margin:14px 0}.req strong,.check strong{color:var(--azul);font-size:1.08rem;display:block}.req p,.check p{margin:6px 0 0;color:var(--muted)}label.check{display:flex;gap:14px;cursor:pointer}input[type=checkbox]{width:26px;height:26px;accent-color:var(--azul);flex:0 0 auto}.btn{display:flex;align-items:center;justify-content:center;text-align:center;min-height:58px;border-radius:18px;border:0;padding:16px 20px;text-decoration:none;font-weight:900;font-size:1.05rem;cursor:pointer}.primary{background:var(--azul);color:#fff}.secondary{background:#fff;color:var(--azul);border:1px solid var(--linea)}.warn{background:var(--naranja);color:#111}.small{font-size:.92rem;min-height:46px}.row{display:grid;gap:14px;margin-top:20px}.callout{border-radius:22px;padding:20px;margin:18px 0}.ok{background:#f1faeb;border:1px solid #d8efc6;border-left:8px solid var(--verde);color:#244b1c}.danger{background:#fff0f3;border:1px solid #ffcdd7;border-left:8px solid var(--rojo);color:#6f1322}.info{background:#eafbfc;border:1px solid #bdeff5;border-left:8px solid var(--celeste);color:#123f49}.case-grid{display:grid;gap:14px}.case-card{text-align:left;border:1px solid var(--linea);background:#fff;border-radius:18px;padding:18px;cursor:pointer}.case-card strong{display:block;color:var(--azul);font-size:1.12rem}.case-card span{display:block;color:var(--muted);margin-top:4px}.result{display:none;overflow:hidden;margin-top:24px;border:1px solid var(--linea);border-radius:24px;background:#fff;box-shadow:var(--shadow)}.result.active{display:block}.result-head{background:var(--azul);color:#fff;padding:26px}.result-head b{text-transform:uppercase;letter-spacing:.08em;opacity:.85}.result-head h2{color:#fff;margin:10px 0}.result-body{padding:24px}.result-body li{margin:9px 0;color:var(--muted);font-size:1.08rem}.mail-card{margin-top:18px;border:1px solid var(--linea);border-radius:18px;padding:16px;background:#f8fcfd}.mail-message{white-space:pre-line;background:#fff;border:1px solid var(--linea);border-radius:14px;padding:12px}.hidden{display:none!important}.footer{background:var(--azul);color:#fff;padding:28px 18px;margin-top:40px;text-align:center}@media(min-width:760px){.primary-choice{display:grid;grid-template-columns:1fr 1fr;gap:20px}.choice{margin:0}.row{grid-template-columns:1fr 1fr}.case-grid{grid-template-columns:1fr 1fr}.panel-card{padding:34px}.steps{display:flex}.step{flex:1}}
-  </style>
+    :root {
+      --azul: #004A5F;
+      --azul2: #006B7C;
+      --celeste: #17CDE2;
+      --celeste2: #CFF8FC;
+      --verde: #84CE36;
+      --naranja: #FFAB0D;
+      --rojo: #FF2450;
+      --texto: #0B2E38;
+      --muted: #64767E;
+      --fondo: #F2FBFC;
+      --fondo2: #E8F8FA;
+      --linea: #DCE9EC;
+      --sombra: 0 20px 50px rgba(0, 74, 95, .12);
+      --radio: 26px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--texto);
+      background:
+        radial-gradient(circle at 8% 4%, rgba(23,205,226,.18), transparent 28%),
+        linear-gradient(180deg, #FFFFFF 0%, var(--fondo) 52%, #FFFFFF 100%);
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .topbar {
+      background: var(--azul);
+      color: white;
+      font-size: .92rem;
+    }
+    .topbar .inner, .header-inner, main, .footer-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+    .topbar .inner {
+      padding: 9px 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .topbar a { color: white; text-underline-offset: 3px; }
+
+    header {
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid var(--linea);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-align: center;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-decoration: none;
+      min-width: 0;
+      width: 100%;
+    }
+    .brand img {
+      width: 320px;
+      max-width: 80vw;
+      height: auto;
+      display: block;
+    }
+    .brand span {
+      display: none;
+      border-left: 1px solid var(--linea);
+      padding-left: 14px;
+      color: var(--azul);
+      font-weight: 700;
+      font-size: .88rem;
+      line-height: 1.2;
+    }
+    nav {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+      justify-content: center;
+      width: 100%;
+    }
+    nav a {
+      white-space: nowrap;
+      color: var(--azul);
+      text-decoration: none;
+      font-weight: 800;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: .9rem;
+    }
+    nav a:hover { background: var(--fondo2); }
+
+    main { padding: 28px 16px 60px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+      gap: 22px;
+      align-items: stretch;
+      margin-top: 12px;
+    }
+    .hero-card, .visual-card, .section-card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--linea);
+      border-radius: 30px;
+      box-shadow: var(--sombra);
+    }
+    .hero-card {
+      padding: clamp(24px, 4vw, 44px);
+      position: relative;
+      overflow: hidden;
+      min-height: 430px;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      color: var(--azul);
+      background: #EAF7F8;
+      border: 1px solid #CDEBED;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      font-size: .86rem;
+      margin-bottom: 18px;
+    }
+    .kicker:before {
+      content: none;
+      display: none;
+    }
+    h1 {
+      margin: 0;
+      color: var(--azul);
+      font-size: clamp(2.2rem, 6vw, 5rem);
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      max-width: 720px;
+      margin: 22px 0 28px;
+    }
+    .primary-choice {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .choice {
+      appearance: none;
+      border: 1px solid var(--linea);
+      background: white;
+      border-radius: 24px;
+      padding: 22px;
+      text-align: left;
+      min-height: 168px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 28px rgba(0,0,0,.05);
+      transition: transform .18s ease, box-shadow .18s ease;
+      font: inherit;
+      color: var(--texto);
+    }
+    .choice:hover { transform: translateY(-2px); box-shadow: 0 18px 35px rgba(0,74,95,.13); }
+    .choice:before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; right: 0;
+      height: 8px;
+      background: var(--celeste);
+    }
+    .choice.error:before { background: var(--rojo); }
+    .choice strong {
+      display: block;
+      color: var(--azul);
+      font-size: 1.42rem;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .choice span { display: block; color: var(--muted); }
+    .choice .arrow {
+      margin-top: 18px;
+      color: var(--azul);
+      font-weight: 900;
+    }
+    .visual-card {
+      padding: 24px;
+      background:
+        linear-gradient(135deg, rgba(23,205,226,.14), rgba(255,255,255,.96) 50%),
+        white;
+    }
+    .mock {
+      background: var(--azul);
+      border-radius: 26px;
+      padding: 20px;
+      color: white;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .mock-title { font-weight: 900; letter-spacing: .02em; font-size: 1.1rem; }
+    .mock-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+    }
+    .mock-step i {
+      flex: 0 0 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: white;
+      color: var(--azul);
+      font-style: normal;
+      font-weight: 900;
+    }
+    .mock-step strong { display:block; font-size: .98rem; }
+    .mock-step span { display:block; color: rgba(255,255,255,.78); font-size: .9rem; }
+    .mock-note {
+      background: var(--naranja);
+      color: #2d1b00;
+      border-radius: 18px;
+      padding: 14px;
+      font-weight: 800;
+      font-size: .94rem;
+    }
+
+    section { margin-top: 28px; }
+    .hidden-panel { display: none; }
+    .hidden-panel.active { display: block; }
+    .section-card { padding: clamp(22px, 4vw, 40px); }
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .section-head h2 {
+      margin: 0;
+      color: var(--azul);
+      font-size: clamp(1.8rem, 3.4vw, 3.3rem);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+    .section-head p {
+      max-width: 680px;
+      color: var(--muted);
+      margin: 10px 0 0;
+      font-size: 1.05rem;
+    }
+    .back-home {
+      border: 1px solid var(--linea);
+      background: white;
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-weight: 900;
+      color: var(--azul);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .wizard {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .steps-nav {
+      position: sticky;
+      top: 104px;
+      display: grid;
+      gap: 10px;
+    }
+    .step-pill {
+      border: 1px solid var(--linea);
+      border-radius: 18px;
+      background: white;
+      padding: 14px;
+      color: var(--muted);
+      font-weight: 800;
+      text-align: left;
+    }
+    .step-pill.active {
+      border-color: var(--celeste);
+      color: var(--azul);
+      background: #EFFFFF;
+      box-shadow: 0 8px 24px rgba(23,205,226,.15);
+    }
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; }
+    .wizard-step h3 {
+      color: var(--azul);
+      font-size: clamp(1.8rem, 3.6vw, 3.1rem);
+      line-height: 1;
+      margin: 0 0 18px;
+      letter-spacing: -.04em;
+    }
+    .plain-intro {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 760px;
+    }
+    .requirements {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .req {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: #FAFEFF;
+      border: 1px solid var(--linea);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .req .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: var(--celeste2);
+      color: var(--azul);
+      font-weight: 900;
+      flex: 0 0 28px;
+    }
+    .req strong { color: var(--azul); display: block; margin-bottom: 3px; }
+    .req span { color: var(--muted); font-size: .95rem; }
+
+    .callout {
+      border-radius: 22px;
+      padding: 16px 18px;
+      margin: 18px 0;
+      border: 1px solid transparent;
+      color: var(--texto);
+    }
+    .callout.info { background: #EAFBFE; border-color: #BFEFF5; border-left: 8px solid var(--celeste); }
+    .callout.warn { background: #FFF4D8; border-color: #FFE0A1; border-left: 8px solid var(--naranja); }
+    .callout.ok { background: #EFFBEA; border-color: #D4F2C9; border-left: 8px solid var(--verde); }
+    .timer-box {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+      background: var(--azul);
+      color: white;
+      border-radius: 26px;
+      padding: 18px;
+      margin: 20px 0;
+    }
+    .timer-circle {
+      height: 108px;
+      width: 108px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--naranja) 0 25%, var(--celeste) 25% 100%);
+      color: white;
+      font-weight: 900;
+      font-size: 1.8rem;
+      box-shadow: inset 0 0 0 12px rgba(0,74,95,.65);
+    }
+    .timer-box strong { display:block; font-size: 1.25rem; margin-bottom: 4px; }
+    .timer-box p { margin: 0; color: rgba(255,255,255,.82); }
+    .checklist {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .checkitem {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--linea);
+      cursor: pointer;
+      background: white;
+    }
+    .checkitem input { margin-top: 5px; width: 18px; height: 18px; accent-color: var(--azul); }
+    .checkitem strong { color: var(--azul); }
+    .checkitem span { color: var(--muted); display:block; font-size: .94rem; }
+    .progress-note {
+      color: var(--muted);
+      font-weight: 800;
+      margin: 10px 0 0;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 50px;
+      font-size: 1rem;
+    }
+    .btn.primary { background: var(--azul); color: white; }
+    .btn.secondary { background: white; color: var(--azul); border: 1px solid var(--linea); }
+    .btn.warn { background: var(--naranja); color: #231600; }
+    .btn:disabled, .btn.disabled {
+      opacity: .45;
+      pointer-events: none;
+      filter: grayscale(.2);
+    }
+
+    .case-layout {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .case-filter {
+      width: 100%;
+      border: 1px solid var(--linea);
+      border-radius: 16px;
+      padding: 14px 14px;
+      font: inherit;
+      margin-bottom: 12px;
+      outline-color: var(--celeste);
+    }
+    .case-list { display: grid; gap: 10px; }
+    .case-card {
+      appearance: none;
+      border: 1px solid var(--linea);
+      background: white;
+      border-radius: 18px;
+      padding: 15px;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      transition: border-color .15s, background .15s, transform .15s;
+    }
+    .case-card:hover { transform: translateY(-1px); border-color: var(--celeste); }
+    .case-card.active { background: #EFFFFF; border-color: var(--celeste); }
+    .case-card strong { color: var(--azul); display:block; line-height: 1.15; }
+    .case-card span { display:block; color: var(--muted); font-size:.9rem; margin-top: 5px; }
+    .result-box {
+      min-height: 520px;
+      border-radius: 28px;
+      border: 1px solid var(--linea);
+      background: white;
+      overflow: hidden;
+      box-shadow: 0 16px 35px rgba(0,74,95,.08);
+    }
+    .placeholder {
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      padding: 30px;
+    }
+    .placeholder b { display:block; color: var(--azul); font-size: 1.4rem; }
+    .result-header {
+      background: var(--azul);
+      color: white;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-header:after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      bottom: -80px;
+      width: 260px;
+      height: 160px;
+      background: linear-gradient(135deg, transparent, rgba(255,36,80,.65));
+      transform: rotate(8deg);
+    }
+    .result-kicker { text-transform: uppercase; letter-spacing: .1em; font-size: .78rem; opacity:.72; font-weight:900; }
+    .result-title { margin: 8px 0 6px; font-size: clamp(1.7rem, 3vw, 2.7rem); line-height:1; font-weight: 900; }
+    .result-subtitle { color: rgba(255,255,255,.85); margin: 0; max-width: 720px; }
+    .result-body { padding: 26px; }
+    .result-body h3 { color: var(--azul); margin: 22px 0 8px; font-size: 1.25rem; }
+    .result-body h3:first-child { margin-top: 0; }
+    .result-body ul { padding-left: 22px; }
+    .result-body li { margin: 7px 0; }
+    .copy-box {
+      background: #F7FBFC;
+      border: 1px dashed #BCD9DF;
+      border-radius: 18px;
+      padding: 15px;
+      color: var(--texto);
+      margin-top: 18px;
+      white-space: pre-wrap;
+    }
+    .mini-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .mail-gate {
+      margin-top: 18px;
+      border: 1px solid var(--linea);
+      border-radius: 20px;
+      padding: 16px;
+      background: #FBFEFF;
+    }
+    .mail-gate label { display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
+    .mail-gate input { width: 18px; height: 18px; accent-color: var(--azul); margin-top: 4px; }
+    .mail-gate .btn { margin-top: 14px; width: 100%; }
+
+    .faq-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+    details {
+      border: 1px solid var(--linea);
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+    }
+    summary { cursor:pointer; color: var(--azul); font-weight:900; }
+    details p, details ul { color: var(--muted); }
+
+    .footer {
+      background: #F8FCFD;
+      border-top: 1px solid var(--linea);
+      color: var(--muted);
+    }
+    .footer-inner {
+      padding: 24px 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: .94rem;
+    }
+    .motion-line {
+      display:flex;
+      gap:8px;
+      margin-top: 24px;
+    }
+    .motion-line i {
+      display:block;
+      height: 10px;
+      flex:1;
+      border-radius:999px;
+      background: var(--celeste);
+    }
+    .motion-line i:nth-child(2){ background: var(--verde); }
+    .motion-line i:nth-child(3){ background: var(--naranja); }
+    .motion-line i:nth-child(4){ background: var(--rojo); }
+    .motion-line i:nth-child(5){ background: #AD4FB5; }
+
+    @media (max-width: 920px) {
+      .hero, .wizard, .case-layout { grid-template-columns: 1fr; }
+      .visual-card { display:none; }
+      .steps-nav { position: static; grid-template-columns: repeat(3,1fr); }
+      .requirements, .faq-grid { grid-template-columns: 1fr; }
+      .primary-choice { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .topbar { display:none; }
+      header { position: static; }
+      .header-inner {
+        padding: 26px 14px;
+        gap: 12px;
+      }
+      .brand img {
+        width: 270px;
+        max-width: 78vw;
+      }
+      nav { display: none; }
+      main { padding: 20px 12px 44px; }
+      .hero-card, .section-card { border-radius: 24px; padding: 22px 16px; }
+      .lead { font-size: 1rem; }
+      .choice { min-height: 0; padding: 20px; }
+      .choice strong { font-size: 1.35rem; }
+      .steps-nav { grid-template-columns: 1fr; }
+      .timer-box { grid-template-columns: 1fr; }
+      .timer-circle { margin: 0 auto; }
+      .button-row { display:grid; }
+      .btn { width: 100%; }
+      .result-body, .result-header { padding: 22px 18px; }
+      .case-list { max-height: none; }
+      .footer-inner { display:block; }
+    }
+  
+.eyebrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 760px;
+      min-height: 58px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      border: 2px solid #23C7D9;
+      background: linear-gradient(180deg, #F3FEFF 0%, #EAFBFC 100%);
+      color: var(--azul);
+      font-weight: 900;
+      font-size: clamp(.98rem, 3.7vw, 1.3rem);
+      line-height: 1.2;
+      text-align: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+      margin-bottom: 28px;
+    }
+    .eyebrow i,
+    .eyebrow .dots,
+    .eyebrow span.dot {
+      display: none !important;
+    }
+</style>
 </head>
 <body>
-  <header class="brand"><div class="logo">UTN <span>✣</span> HAEDO</div></header>
-  <main id="inicio" class="hero"><div class="wrap"><section class="card"><div class="kicker">Secretaría de Asuntos Estudiantiles (SAE)</div><h1>Tramitá tu Boleto Estudiantil</h1><p class="lead">Una guía rápida para iniciar el trámite desde Autogestión y resolver errores.</p><div class="primary-choice"><button class="choice tramite" data-open="tramite"><strong>Todavía no lo tramité</strong><span>Primero revisás requisitos, después preparás los datos y recién al final aparece el acceso al módulo.</span><span class="arrow">Tramitar boleto →</span></button><button class="choice error" data-open="errores"><strong>Tengo un error</strong><span>Seleccionás el mensaje que te aparece y la guía te indica qué hacer.</span><span class="arrow">Ver errores →</span></button></div><div class="line"><i></i><i></i><i></i><i></i><i></i></div></section></div></main>
-  <section id="tramite" class="panel"><div class="wrap"><div class="panel-card"><div class="steps"><div class="step active"><span class="num">1</span>Requisitos</div><div class="step"><span class="num">2</span>Datos y advertencia</div><div class="step"><span class="num">3</span>Ingreso al módulo</div></div><h2>Primero: leé los requisitos</h2><p class="lead">Antes de ingresar a Autogestión, verificá que cumplís los requisitos principales.</p><div class="req"><strong>Residir en Provincia de Buenos Aires</strong><p>Tenés que vivir en Provincia de Buenos Aires y a más de 2.000 metros de la Facultad. Si vivís en CABA, no corresponde este boleto provincial.</p></div><div class="req"><strong>SUBE física registrada</strong><p>Necesitás tener una tarjeta SUBE física registrada y asociada al beneficio.</p></div><div class="req"><strong>Materias aprobadas</strong><p>Para el boleto universitario, se exige cumplir los requisitos académicos informados por Provincia.</p></div><label class="check"><input type="checkbox" id="reqOk"><span><strong>Leí los requisitos y los cumplo</strong><p>Se habilita el siguiente paso.</p></span></label><div class="row"><button class="btn secondary" data-home>Volver al inicio</button><button class="btn primary" id="goDatos" disabled>Continuar</button></div><div id="datos" class="hidden"><h2>Antes de entrar a Autogestión</h2><div class="callout danger"><strong>Antes de ingresar:</strong> no ingreses al apartado Boleto Estudiantil dentro de Autogestión sin tener todos los datos necesarios a mano. En cuanto hacés clic en Boleto Estudiantil, comienza a correr un tiempo aproximado de <strong>20 minutos</strong>. Si ese tiempo se termina, el formulario se cierra y no vas a poder volver a abrirlo hasta que te reiniciemos la cuenta.</div><p>Marcá que ya tenés preparada esta información.</p><label class="check"><input type="checkbox" class="prep"><span><strong>DNI propio</strong><p>Documento personal para completar datos.</p></span></label><label class="check"><input type="checkbox" class="prep"><span><strong>CUIL propio</strong><p>Tenelo a mano para evitar errores de carga.</p></span></label><label class="check"><input type="checkbox" class="prep"><span><strong>SUBE física registrada</strong><p>Usá la tarjeta física que corresponde al beneficio.</p></span></label><label class="check"><input type="checkbox" class="prep"><span><strong>DNI y CUIL de madre/padre/tutor</strong><p>El formulario puede pedir datos familiares; preparalos antes de ingresar.</p></span></label><button class="btn primary" id="goModulo" disabled>Ya tengo todo preparado</button></div><div id="modulo" class="hidden"><h2>Ahora sí: ingresá al módulo</h2><p>Este botón es un acceso directo al apartado de Boleto Estudiantil. Podés ingresar sin pasar por la fila virtual de Autogestión.</p><div class="callout info"><strong>Importante:</strong> este botón es un acceso directo al apartado de Boleto Estudiantil. Podés ingresar sin pasar por la fila virtual de Autogestión.</div><div class="callout warn"><strong>Si al ingresar te aparece “El trámite caducó”:</strong> refrescá o actualizá la página hasta que vuelva a cargar correctamente.</div><div class="req"><strong>Ejemplo del mensaje</strong><p><strong>El trámite caducó</strong></p></div><div class="row"><a class="btn primary" href="https://boletoestudiantil.frh.utn.edu.ar/" target="_blank" rel="noopener">Ingresar al apartado Boleto Estudiantil</a><button class="btn secondary" data-open="errores">Ya ingresé y tuve un error</button></div><div class="callout ok"><strong>Si al finalizar te aparece “Trámite finalizado / beneficio otorgado”:</strong> el beneficio ya está aprobado, pero la precarga no se acredita automáticamente en el momento.<br><br>Por ejemplo: si completás el formulario antes del 17 de abril, cobrás el beneficio después del 17 de mayo. Si lo completás después del 17 de abril, cobrás el beneficio después del 17 de junio. Las precargas empiezan a acreditarse a partir del 16/17 de cada mes, en días hábiles. No siempre se acreditan el mismo día para todas las personas y pueden demorar algunos días más.<br><br>Cuando la precarga esté disponible, tenés que acreditarla en tu SUBE física. Podés hacerlo en Terminal Automática SUBE, desde la app SUBE si tu celular tiene NFC, o con Carga a Bordo en colectivos habilitados. Recordá hacerlo con la SUBE física registrada y asociada al beneficio.<br><br>Si ya pasó el plazo correspondiente y todavía no recibiste la precarga, entrá en la parte de errores de esta página, elegí la opción “Trámite finalizado / beneficio otorgado” y completá el formulario del Ministerio de Transporte usando la opción “No recibí mi precarga”.</div></div></div></div></section>
-  <section id="errores" class="panel"><div class="wrap"><div class="panel-card"><h2>Seleccioná el error</h2><div class="case-grid"><button class="case-card" data-case="caducado"><strong>El trámite caducó</strong><span>La página del Ministerio puede mostrar ese mensaje.</span></button><button class="case-card" data-case="incompleto"><strong>Trámite incompleto / comunicarse con administrador</strong><span>Necesitás reiniciar el acceso.</span></button><button class="case-card" data-case="otorgado"><strong>Trámite finalizado / beneficio otorgado</strong><span>No es un error: revisá fechas y acreditación.</span></button><button class="case-card" data-case="deshabilitado"><strong>La persona tiene un beneficio, pero deshabilitado</strong><span>Puede estar asociado a otra institución.</span></button><button class="case-card" data-case="credenciales"><strong>Error de credenciales</strong><span>No permite validar el acceso.</span></button><button class="case-card" data-case="noacredita"><strong>Completé el formulario, pero no me acreditaron</strong><span>Revisá tiempos, SUBE física y reclamo.</span></button><button class="case-card" data-case="digital"><strong>Tengo SUBE Digital</strong><span>El beneficio universitario/terciario PBA se acredita en SUBE física.</span></button><button class="case-card" data-case="legajo"><strong>Curso dos carreras / tengo más de un legajo</strong><span>El sistema puede estar mirando otra carrera.</span></button></div><div id="resultado" class="result"></div></div></div></section>
-  <footer class="footer">UTN Facultad Regional Haedo · Secretaría de Asuntos Estudiantiles</footer>
+<div></div>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="#inicio" aria-label="UTN Haedo">
+        <img src="data:image/png;base64,{LOGO_B64_PLACEHOLDER}" alt="UTN Haedo">
+        <span>Boleto Estudiantil<br>Guía interactiva</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="hero" aria-label="Inicio">
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="kicker">Secretaría de Asuntos Estudiantiles (SAE)</div>
+          <h1>Tramitá tu Boleto Estudiantil</h1>
+          <p class="lead">
+            Una guía rápida para iniciar el trámite desde Autogestión y resolver errores.
+          </p>
+
+          <div class="primary-choice">
+            <button class="choice tramite" type="button" data-open="tramite">
+              <strong>Todavía no lo tramité</strong>
+              <span>Primero revisás requisitos, después preparás los datos y recién al final aparece el acceso al módulo.</span>
+              <span class="arrow">Tramitar boleto →</span>
+            </button>
+            <button class="choice error" type="button" data-open="errores">
+              <strong>Tengo un error</strong>
+              <span>Seleccionás el mensaje que te aparece y la guía te indica qué hacer.</span>
+              <span class="arrow">Ver errores →</span>
+            </button>
+          </div>
+
+          <div class="motion-line" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+
+      <aside class="visual-card" aria-label="Resumen visual">
+        <div class="mock">
+          <div class="mock-title">Recorrido recomendado</div>
+          <div class="mock-step"><i>1</i><div><strong>Requisitos</strong><span>Confirmá si cumplís antes de iniciar.</span></div></div>
+          <div class="mock-step"><i>2</i><div><strong>Datos listos</strong><span>Prepará DNI, CUIL, SUBE y datos familiares.</span></div></div>
+          <div class="mock-step"><i>3</i><div><strong>20 minutos</strong><span>Completá el formulario apenas ingreses.</span></div></div>
+          <div class="mock-note">No abras el formulario solo para mirar: el tiempo empieza a correr.</div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="tramite" class="hidden-panel" aria-label="Recorrido para iniciar trámite">
+      <div class="section-card">
+        <div class="section-head">
+          <div>
+            <h2>Antes de ingresar al formulario</h2>
+          </div>
+          <button class="back-home" type="button" data-close="tramite">Volver al inicio</button>
+        </div>
+
+        <div class="wizard">
+          <aside class="steps-nav" aria-label="Pasos">
+            <button class="step-pill active" type="button" data-step="1">1. Requisitos</button>
+            <button class="step-pill" type="button" data-step="2">2. Datos y advertencia</button>
+            <button class="step-pill" type="button" data-step="3">3. Ingreso al módulo</button>
+          </aside>
+
+          <article id="step-1" class="wizard-step active">
+            <h3>Primero: leé los requisitos</h3>
+            <div class="requirements">
+              <div class="req"><div class="icon">✓</div><div><strong>Residencia</strong><span>Vivir en Provincia de Buenos Aires y a más de 2.000 metros de la sede. Si vivís en CABA, no corresponde este beneficio.</span></div></div>
+              <div class="req"><div class="icon">✓</div><div><strong>SUBE física</strong><span>Tener una tarjeta SUBE física registrada a tu nombre. El beneficio no se acredita en SUBE Digital.</span></div></div>
+              <div class="req"><div class="icon">✓</div><div><strong>Materias aprobadas</strong><span>Cumplir con la cantidad mínima de materias aprobadas que exige el beneficio universitario.</span></div></div>
+              <div class="req"><div class="icon">✓</div><div><strong>Ingresantes</strong><span>Contar con el secundario finalizado, sin adeudar materias.</span></div></div>
+              <div class="req"><div class="icon">✓</div><div><strong>Sin título previo</strong><span>No poseer título universitario o terciario.</span></div></div>
+              <div class="req"><div class="icon">✓</div><div><strong>Sin otro subsidio igual</strong><span>No contar con otro beneficio o subsidio de transporte con el mismo fin.</span></div></div>
+            </div>
+            <div class="callout info">
+              Si cumplís los requisitos, seguí al paso siguiente. Si tenés dudas sobre tu situación académica, revisá primero tu estado antes de iniciar.
+            </div>
+            <div class="button-row">
+              <button class="btn primary" type="button" data-next-step="2">Continuar</button>
+            </div>
+          </article>
+
+          <article id="step-2" class="wizard-step">
+            <h3>Prepará los datos antes de tocar “Boleto Estudiantil”</h3>
+            <div class="timer-box">
+              <div class="timer-circle">20’</div>
+              <div>
+                <strong>El tiempo empieza cuando entrás al apartado Boleto Estudiantil.</strong>
+                <p>No empieza cuando completás el formulario: empieza cuando hacés clic en Boleto Estudiantil dentro de Autogestión.</p>
+              </div>
+            </div>
+            <div class="callout warn">
+              No ingreses al apartado <strong>Boleto Estudiantil</strong> dentro de Autogestión sin tener todos los datos necesarios a mano. En cuanto hacés clic en Boleto Estudiantil, comienza a correr un tiempo aproximado de 20 minutos. Si ese tiempo se termina, el formulario se cierra y no vas a poder volver a abrirlo hasta que te reiniciemos la cuenta.
+            </div>
+            <p class="plain-intro"><strong>Marcá estos datos cuando los tengas preparados:</strong></p>
+            <div class="checklist" id="dataChecklist">
+              <label class="checkitem"><input type="checkbox"><div><strong>DNI propio</strong><span>Usá tus datos personales tal como figuran en la documentación.</span></div></label>
+              <label class="checkitem"><input type="checkbox"><div><strong>CUIL propio</strong><span>Tenelo a mano para evitar errores de carga.</span></div></label>
+              <label class="checkitem"><input type="checkbox"><div><strong>SUBE física registrada</strong><span>Usá la tarjeta física que corresponde al beneficio.</span></div></label>
+              <label class="checkitem"><input type="checkbox"><div><strong>DNI y CUIL de madre/padre/tutor</strong><span>El formulario puede pedir datos familiares; preparalos antes de ingresar.</span></div></label>
+            </div>
+            <div class="progress-note" id="checkProgress">Faltan datos por confirmar.</div>
+
+            <div class="button-row">
+              <button class="btn secondary" type="button" data-next-step="1">Volver a requisitos</button>
+              <button class="btn primary" type="button" id="toStep3" data-next-step="3" disabled>Ya tengo todo preparado</button>
+            </div>
+          </article>
+
+          <article id="step-3" class="wizard-step">
+            <h3 style="color:var(--azul);font-size:1.45rem;margin-top:0">Ahora sí: ingresá al acceso directo</h3>
+            <p style="color:var(--muted)">
+              Ingresá con tu legajo y contraseña habitual de Autogestión/SYSACAD, completá el formulario en el momento y revisá bien CUIL, SUBE, carrera y legajo antes de enviarlo.
+            </p>
+            <div class="callout ok">
+              <strong>Recordatorio:</strong> si cursás dos carreras o tenés más de un legajo, asegurate de usar el legajo/carrera donde cumplís los requisitos académicos.
+            </div>
+            
+            <div class="callout info">
+              <strong>Importante:</strong> este botón es un acceso directo al apartado de <strong>Boleto Estudiantil</strong>. Podés ingresar sin pasar por la fila virtual de Autogestión.
+            </div>
+
+            <div class="callout warn">
+              <strong>Si al ingresar te aparece “El trámite caducó”:</strong> refrescá o actualizá la página hasta que vuelva a cargar correctamente.
+            </div>
+            
+            <div style="border:1px solid var(--linea);border-radius:18px;padding:6px;background:#fff;margin:14px auto 18px;max-width:740px">
+              <img src="data:image/jpeg;base64,{CADUCO_B64_PLACEHOLDER}" alt="Ejemplo del mensaje El trámite caducó" style="width:100%;display:block;border-radius:12px;border:1px solid #e6e6e6;background:#fff">
+              <div style="font-size:.9rem;color:var(--muted);margin-top:8px;text-align:center">Ejemplo de cómo se ve <strong>“El trámite caducó”</strong>.</div>
+            </div>
+
+
+            <div class="button-row">
+              <a class="btn primary" href="https://boletoestudiantil.frh.utn.edu.ar/" target="_blank" rel="noopener">Ingresar al apartado Boleto Estudiantil</a>
+              <button class="btn secondary" type="button" data-open="errores">Ya ingresé y tuve un error</button>
+            </div>
+
+            <div class="callout ok" style="margin-top:18px">
+              <strong>Si al finalizar te aparece “Trámite finalizado / beneficio otorgado”:</strong>
+              el beneficio ya está aprobado, pero la precarga no se acredita automáticamente en el momento.
+              <br><br>
+              Por ejemplo: si completás el formulario antes del 17 de abril, cobrás el beneficio después del 17 de mayo. Si lo completás después del 17 de abril, cobrás el beneficio después del 17 de junio.
+              Las precargas empiezan a acreditarse a partir del 16/17 de cada mes, en días hábiles. No siempre se acreditan el mismo día para todas las personas y pueden demorar algunos días más.
+              <br><br>
+              Cuando la precarga esté disponible, tenés que acreditarla en tu SUBE física. Podés hacerlo en una <strong>Terminal Automática SUBE</strong>, desde la <strong>app SUBE</strong> si tu celular tiene NFC, o con <strong>Carga a Bordo</strong> en colectivos habilitados. Recordá hacerlo con la SUBE física registrada y asociada al beneficio.
+              <br><br>
+              También puede pasar que queden montos acumulados de meses anteriores, porque el monto otorgado por el Ministerio puede ser mayor al límite que la SUBE permite acreditar en una sola vez. A veces esos acumulados se habilitan más adelante, incluso en enero o febrero, aunque en esos meses no se pague un nuevo beneficio por no haber clases.
+              <br><br>
+              Si se acumulan precargas disponibles y no las acreditás, el sistema puede interpretar que no estás utilizando el beneficio y suspender la cuenta momentáneamente. En ese caso, completá el formulario de reclamo del Ministerio de Transporte y elegí la opción <strong>“No recibí la precarga”</strong>.
+              <br><br>
+              Si ya pasó el plazo correspondiente y todavía no recibiste la precarga, entrá en la parte de <strong>errores</strong> de esta página, elegí la opción <strong>“Trámite finalizado / beneficio otorgado”</strong> y completá el formulario del Ministerio de Transporte usando la opción <strong>“No recibí la precarga”</strong>.
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="errores" class="hidden-panel" aria-label="Errores frecuentes">
+      <div class="section-card">
+        <div class="section-head">
+          <div>
+          <h2>¿Tenés algún error con tu Boleto Estudiantil?</h2>
+          <p>Seleccioná el mensaje o situación que te aparece. La guía te muestra la explicación y los pasos correspondientes.</p>
+        </div>
+      </div>
+
+      <div class="case-layout">
+        <aside>
+          <input class="case-filter" id="caseFilter" type="search" placeholder="Buscar: incompleto, caducó, SUBE, credenciales..." aria-label="Buscar error">
+          <div class="case-list" id="caseList">
+            <button class="case-card" type="button" data-case="caducado"><strong>El trámite caducó</strong><span>Se colgó o no cargó la web del Ministerio.</span></button>
+            <button class="case-card" type="button" data-case="incompleto"><strong>Trámite incompleto / comunicarse con el administrador</strong><span>Se pasó el tiempo o quedó sin finalizar.</span></button>
+            <button class="case-card" type="button" data-case="otorgado"><strong>Trámite finalizado / beneficio otorgado</strong><span>El trámite está otorgado, pero la carga no es inmediata.</span></button>
+            <button class="case-card" type="button" data-case="deshabilitado"><strong>Beneficio deshabilitado</strong><span>Puede haber boleto activo o pendiente en otra institución.</span></button>
+            <button class="case-card" type="button" data-case="credenciales"><strong>Error de credenciales</strong><span>No podés ingresar o validar el acceso.</span></button>
+            <button class="case-card" type="button" data-case="blanco"><strong>Me aparece todo en blanco</strong><span>La pantalla queda vacía o no carga ningún dato.</span></button>
+            <button class="case-card" type="button" data-case="noacredita"><strong>Completé el formulario, pero no me acreditaron</strong><span>Revisá tiempos, SUBE física y reclamo.</span></button>
+            <button class="case-card" type="button" data-case="subedigital"><strong>Tengo SUBE Digital</strong><span>El beneficio universitario/terciario PBA se acredita en SUBE física.</span></button>
+            <button class="case-card" type="button" data-case="doblelegajo"><strong>Curso dos carreras / tengo más de un legajo</strong><span>El sistema puede estar mirando otra carrera.</span></button>
+          </div>
+        </aside>
+
+        <article class="result-box" id="resultBox">
+          <div class="placeholder">
+            <div>
+              <b>Seleccioná un error</b>
+              Elegí una opción de la lista para ver los pasos a seguir.
+            </div>
+          </div>
+        </article>
+      </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="section-card">
+        <div class="section-head">
+          <div>
+            <h2>Preguntas rápidas</h2>
+            <p>Respuestas cortas para evitar errores comunes durante el trámite.</p>
+          </div>
+        </div>
+        <div class="faq-grid">
+          <details>
+            <summary>¿Puedo usar SUBE Digital?</summary>
+            <p>Para el Boleto Estudiantil universitario/terciario de Provincia de Buenos Aires, la acreditación corresponde a la SUBE física registrada.</p>
+          </details>
+          <details>
+            <summary>¿Cuánto tarda la precarga?</summary>
+            <p>Depende de la fecha en que completaste el formulario y del corte administrativo mensual. La precarga no aparece automáticamente al finalizar el trámite.</p>
+          </details>
+          <details>
+            <summary>¿La Facultad puede modificar mi formulario del Ministerio?</summary>
+            <p>No. La Facultad no puede editar los datos cargados en el formulario del Ministerio. Si cargaste mal un dato, corresponde realizar el reclamo indicado.</p>
+          </details>
+          <details>
+            <summary>¿Qué pasa si se vencen las precargas?</summary>
+            <p>Si no acreditás las precargas disponibles, el beneficio puede quedar suspendido temporalmente. En ese caso, corresponde reclamar ante el Ministerio.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>UTN Facultad Regional Haedo · Secretaría de Asuntos Estudiantiles</div>
+      <div>Guía informativa para orientar el trámite del Boleto Estudiantil.</div>
+    </div>
+  </footer>
+
 <script>
-const LINKS={reinicio:'https://docs.google.com/forms/d/e/1FAIpQLScRXGzTNJk7bG64u7e_1dvv3Ur3LDaI3EbfNU_jLOD6_iWAXw/viewform',ministerio:'https://denuncias-bes.transporte.gba.gob.ar/denunciasboleto.php',modulo:'https://boletoestudiantil.frh.utn.edu.ar/'};
-const mail=(sub,body)=>'mailto:asuntos@frh.utn.edu.ar?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body);
-LINKS.mailReinicio=mail('Reinicio de Boleto Estudiantil','Hola, completé el formulario para reinicio de cuenta.\nNecesito que me reinicien el acceso.\nEspero respuesta.\nMuchas gracias.\nSaludos.');
-LINKS.mailDeshabilitado=mail('Boleto Estudiantil - Beneficio deshabilitado','Hola, ya solicité la baja del beneficio en mi facultad/universidad anterior y completé el formulario de reclamo del Ministerio de Transporte por cambio de universidad.\n\nNecesito continuar el trámite en UTN FRH.\n\nDatos:\nNombre y apellido:\nDNI:\nLegajo:\nCarrera:\n\nMuchas gracias.\nSaludos.');
-LINKS.mailCred=mail('Boleto Estudiantil - Error de credenciales','Hola, tengo un error de credenciales al ingresar al Boleto Estudiantil.\n\nDatos:\nNombre y apellido:\nDNI:\nLegajo:\nCarrera:\n\nAdjunto captura del error.\n\nMuchas gracias.\nSaludos.');
-function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(id)?.classList.add('active');document.getElementById(id)?.scrollIntoView({behavior:'smooth'});}document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>show(b.dataset.open));document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>scrollTo({top:0,behavior:'smooth'}));reqOk.onchange=()=>goDatos.disabled=!reqOk.checked;goDatos.onclick=()=>datos.classList.remove('hidden');document.querySelectorAll('.prep').forEach(c=>c.onchange=()=>{goModulo.disabled=[...document.querySelectorAll('.prep')].some(x=>!x.checked)});goModulo.onclick=()=>modulo.classList.remove('hidden');
-const cases={caducado:{k:'Tiempo vencido',t:'El trámite caducó',s:'Primero refrescá o actualizá la página.',b:'<h3>Qué hacer</h3><ul><li>Refrescá o actualizá la página e intentá nuevamente.</li><li>Si vuelve a cargar, continuá el trámite normalmente.</li><li>Si queda incompleto, completá el formulario de reinicio.</li></ul>',a:[['Formulario de reinicio',LINKS.reinicio,'warn']],gate:true},incompleto:{k:'Reinicio',t:'Trámite incompleto / comunicarse con administrador',s:'Necesitás reiniciar el acceso para volver a intentarlo.',b:'<h3>Qué hacer</h3><ul><li>Completá el formulario de reinicio de UTN FRH.</li><li>Después enviá mail a SAE avisando que completaste el formulario.</li></ul>',a:[['Completar formulario de reinicio',LINKS.reinicio,'warn']],gate:true},otorgado:{k:'Beneficio otorgado',t:'Trámite finalizado / beneficio otorgado',s:'El beneficio ya está aprobado, pero la precarga no se acredita automáticamente en el momento.',b:'<h3>Qué significa</h3><ul><li>El trámite ya está aprobado, pero la precarga no aparece en el momento.</li><li><strong>Ejemplo:</strong> si completás el formulario antes del 17 de abril, cobrás el beneficio después del 17 de mayo. Si lo completás después del 17 de abril, cobrás el beneficio después del 17 de junio.</li><li>Las precargas empiezan a acreditarse a partir del 16/17 de cada mes, en días hábiles. No siempre se acreditan el mismo día para todas las personas y pueden demorar algunos días más.</li></ul><h3>Importante</h3><ul><li>El beneficio se acredita únicamente en la SUBE física.</li><li>Asegurate de tener tu SUBE física registrada y asociada al beneficio.</li></ul><h3>Cómo acreditar la precarga</h3><ul><li><strong>Terminal Automática SUBE:</strong> apoyá la tarjeta y esperá hasta que el sistema indique que ya podés retirarla.</li><li><strong>App SUBE:</strong> si tu celular tiene NFC, entrá a acreditar o consultar saldo y apoyá la tarjeta detrás del celular hasta completar la acreditación.</li><li><strong>Carga a Bordo:</strong> apoyá la SUBE en la validadora de colectivos habilitados.</li></ul><h3>Si todavía no recibiste la precarga</h3><ul><li>Si ya pasó el plazo, hacé el reclamo en el formulario del Ministerio con la opción <strong>No recibí mi precarga</strong>.</li></ul>',a:[['Reclamo en Ministerio',LINKS.ministerio,'secondary']]},deshabilitado:{k:'Beneficio previo',t:'La persona tiene un beneficio, pero deshabilitado',s:'Puede ocurrir si el boleto quedó asociado a otra facultad, universidad o institución.',b:'<h3>Pasos a seguir</h3><ul><li>Solicitá la <strong>baja del beneficio</strong> en tu otra facultad, universidad o institución.</li><li>Esperá a que te envíen el comprobante o confirmación de la baja.</li><li>La baja no se refleja automáticamente en nuestro sistema: puede demorar algunos días en impactar.</li><li>Después completá el formulario del Ministerio.</li><li>Seleccioná <strong>Cambio de universidad</strong>.</li><li>En <strong>facultad de origen</strong>, cargá tu facultad, universidad o institución anterior.</li><li>Luego contactate con SAE a <strong>asuntos@frh.utn.edu.ar</strong>.</li></ul>',a:[['Formulario Ministerio',LINKS.ministerio,'secondary'],['Enviar mail',LINKS.mailDeshabilitado,'secondary']]},credenciales:{k:'Acceso',t:'Error de credenciales',s:'El sistema no permite validar el acceso o aparece un error al ingresar.',b:'<h3>Qué hacer</h3><ul><li>Enviá un mail a <strong>asuntos@frh.utn.edu.ar</strong>.</li><li>Incluí nombre, apellido, DNI, legajo, carrera y una captura del error.</li></ul>',a:[['Enviar mail',LINKS.mailCred,'secondary']]},noacredita:{k:'Acreditación',t:'Completé el formulario, pero no me acreditaron',s:'Primero revisá tiempos de procesamiento y SUBE física.',b:'<h3>Revisá primero</h3><ul><li>Que haya pasado el plazo correspondiente.</li><li>Que estés usando la SUBE física correcta.</li><li>Que la SUBE Digital no sea la tarjeta predeterminada para acreditar.</li></ul><h3>Si corresponde</h3><ul><li>Completá el formulario del Ministerio con la opción <strong>No recibí mi precarga</strong>.</li></ul>',a:[['Formulario Ministerio',LINKS.ministerio,'secondary']]},digital:{k:'SUBE',t:'SUBE Digital',s:'El boleto universitario/terciario PBA se acredita en SUBE física.',b:'<h3>Qué hacer</h3><ul><li>El beneficio se acredita en la SUBE física.</li><li>Verificá en la app SUBE que la SUBE física sea la tarjeta seleccionada/predeterminada.</li><li>Luego intentá acreditar nuevamente.</li></ul>',a:[]},legajo:{k:'Legajo',t:'Curso dos carreras / tengo más de un legajo',s:'El sistema puede estar mirando otra carrera.',b:'<h3>Qué revisar</h3><ul><li>Asegurate de usar el legajo/carrera donde cumplís los requisitos académicos.</li><li>Si seguís con dudas, consultá a SAE.</li></ul>',a:[['Enviar mail',mail('Boleto Estudiantil - Más de un legajo','Hola, curso dos carreras o tengo más de un legajo y necesito consultar por el Boleto Estudiantil.\n\nDatos:\nNombre y apellido:\nDNI:\nLegajo/s:\nCarrera/s:\n\nGracias.\nSaludos.'),'secondary']]}};
-document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>openCase(b.dataset.case));function openCase(key){const c=cases[key];const actions=(c.a||[]).map(x=>`<a class="btn ${x[2]}" href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a>`).join('');resultado.className='result active';resultado.innerHTML=`<div class="result-head"><b>${c.k}</b><h2>${c.t}</h2><p>${c.s}</p></div><div class="result-body">${c.b}<div class="row">${actions}</div>${c.gate?`<div class="callout info"><strong>Primero completá el formulario de reinicio.</strong><br>Cuando termines, volvé a esta página y tocá el botón de abajo para habilitar el mail.<div class="row"><button class="btn primary" id="doneForm">Ya completé el formulario</button></div></div><div class="mail-card hidden" id="mailCard"><h3>Datos del mail</h3><p><strong>Para:</strong> asuntos@frh.utn.edu.ar<br><strong>Asunto:</strong> Reinicio de Boleto Estudiantil</p><div class="mail-message">Hola, completé el formulario para reinicio de cuenta.\nNecesito que me reinicien el acceso.\nEspero respuesta.\nMuchas gracias.\nSaludos.</div><div class="row"><a class="btn secondary" href="${LINKS.mailReinicio}">Enviar mail</a></div></div>`:''}</div>`;resultado.scrollIntoView({behavior:'smooth'});const d=document.getElementById('doneForm');if(d)d.onclick=()=>document.getElementById('mailCard').classList.remove('hidden')}
+const panels = {
+  tramite: document.getElementById('tramite'),
+  errores: document.getElementById('errores')
+};
+
+function openPanel(name) {
+  Object.values(panels).forEach(p => p.classList.remove('active'));
+  panels[name].classList.add('active');
+  panels[name].scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+document.querySelectorAll('[data-open]').forEach(el => {
+  el.addEventListener('click', () => openPanel(el.dataset.open));
+});
+
+document.querySelectorAll('[data-close]').forEach(el => {
+  el.addEventListener('click', () => {
+    Object.values(panels).forEach(p => p.classList.remove('active'));
+    document.getElementById('inicio').scrollIntoView({behavior: 'smooth'});
+  });
+});
+
+const stepButtons = document.querySelectorAll('[data-step]');
+const wizardSteps = document.querySelectorAll('.wizard-step');
+function setStep(step) {
+  stepButtons.forEach(b => b.classList.toggle('active', b.dataset.step === String(step)));
+  wizardSteps.forEach(s => s.classList.toggle('active', s.id === 'step-' + step));
+}
+stepButtons.forEach(btn => btn.addEventListener('click', () => setStep(btn.dataset.step)));
+document.querySelectorAll('[data-next-step]').forEach(btn => btn.addEventListener('click', () => setStep(btn.dataset.nextStep)));
+
+const checklist = document.getElementById('dataChecklist');
+const progress = document.getElementById('checkProgress');
+const toStep3 = document.getElementById('toStep3');
+function updateChecklist() {
+  const boxes = checklist ? [...checklist.querySelectorAll('input[type="checkbox"]')] : [];
+  const checked = boxes.filter(b => b.checked).length;
+  if (progress) progress.textContent = checked === boxes.length ? 'Listo. Ya podés continuar al acceso.' : `Faltan datos por confirmar (${checked}/${boxes.length}).`;
+  if (toStep3) toStep3.disabled = checked !== boxes.length;
+}
+if (checklist) {
+  checklist.addEventListener('change', updateChecklist);
+  updateChecklist();
+}
+
+const LINKS = {
+  reinicio: "https://docs.google.com/forms/d/e/1FAIpQLScRXGzTNJk7bG64u7e_1dvv3Ur3LDaI3EbfNU_jLOD6_iWAXw/viewform",
+  ministerio: "https://denuncias-bes.transporte.gba.gob.ar/denunciasboleto.php",
+  mail: "https://outlook.office.com/mail/deeplink/compose?to=asuntos%40frh.utn.edu.ar&subject=Consulta%20Boleto%20Estudiantil&body=Buenas%20tardes.%0A%0ANecesito%20realizar%20una%20consulta%20sobre%20el%20Boleto%20Estudiantil.%0A%0ADatos%3A%0ANombre%20y%20apellido%3A%0ADNI%3A%0ALegajo%3A%0ACarrera%3A%0ADetalle%20de%20la%20consulta%3A%0A%0AMuchas%20gracias.",
+  boleto: "https://boletoestudiantil.frh.utn.edu.ar/",
+  outlookReinicio: "https://outlook.office.com/mail/deeplink/compose?to=asuntos%40frh.utn.edu.ar&subject=Boleto%20Estudiantil&body=Hola%2C%20complet%C3%A9%20el%20formulario%20para%20reinicio%20de%20cuenta.%0ANecesito%20que%20me%20reinicien%20el%20acceso.%0AEspero%20respuesta.%0AMuchas%20gracias.%0ASaludos.",
+  mailtoBlanco: "mailto:asuntos%40frh.utn.edu.ar?subject=Boleto%20Estudiantil%20-%20Pantalla%20en%20blanco&body=Hola%2C%20al%20ingresar%20al%20Boleto%20Estudiantil%20me%20aparece%20la%20pantalla%20en%20blanco%20y%20no%20puedo%20continuar.%0A%0ADatos%3A%0ANombre%20y%20apellido%3A%0ADNI%3A%0ALegajo%3A%0ACarrera%3A%0A%0AAdjunto%20captura%20del%20error.%0A%0AMuchas%20gracias.%0ASaludos.",
+  mailtoCredenciales: "mailto:asuntos%40frh.utn.edu.ar?subject=Boleto%20Estudiantil%20-%20Error%20de%20credenciales&body=Hola%2C%20tengo%20un%20error%20de%20credenciales%20al%20ingresar%20al%20Boleto%20Estudiantil.%0A%0ADatos%3A%0ANombre%20y%20apellido%3A%0ADNI%3A%0ALegajo%3A%0ACarrera%3A%0A%0AAdjunto%20captura%20del%20error.%0A%0AMuchas%20gracias.%0ASaludos.",
+  mailtoDeshabilitado: "mailto:asuntos%40frh.utn.edu.ar?subject=Boleto%20Estudiantil%20-%20Beneficio%20deshabilitado&body=Hola%2C%20ya%20solicit%C3%A9%20la%20baja%20del%20beneficio%20en%20mi%20facultad/universidad%20anterior%20y%20complet%C3%A9%20el%20formulario%20de%20reclamo%20del%20Ministerio%20de%20Transporte%20por%20cambio%20de%20universidad.%0A%0ANecesito%20continuar%20el%20tr%C3%A1mite%20en%20UTN%20FRH.%0A%0ADatos%3A%0ANombre%20y%20apellido%3A%0ADNI%3A%0ALegajo%3A%0ACarrera%3A%0A%0AMuchas%20gracias.%0ASaludos.",
+  mailtoReinicio: "mailto:asuntos%40frh.utn.edu.ar?subject=Reinicio%20de%20Boleto%20Estudiantil&body=Hola%2C%20complet%C3%A9%20el%20formulario%20para%20reinicio%20de%20cuenta.%0ANecesito%20que%20me%20reinicien%20el%20acceso.%0AEspero%20respuesta.%0AMuchas%20gracias.%0ASaludos.",
+  gmailReinicio: "https://mail.google.com/mail/?view=cm&fs=1&to=asuntos%40frh.utn.edu.ar&su=Boleto%20Estudiantil&body=Hola%2C%20complet%C3%A9%20el%20formulario%20para%20reinicio%20de%20cuenta.%0ANecesito%20que%20me%20reinicien%20el%20acceso.%0AEspero%20respuesta.%0AMuchas%20gracias.%0ASaludos.",
+  outlookCred: "https://outlook.office.com/mail/deeplink/compose?to=asuntos%40frh.utn.edu.ar&subject=Error%20de%20credenciales%20-%20Boleto%20Estudiantil&body=Buenas%20tardes.%0A%0ATengo%20un%20error%20de%20credenciales%20al%20ingresar%20al%20Boleto%20Estudiantil.%0A%0ADatos%3A%0ANombre%20y%20apellido%3A%0ADNI%3A%0ALegajo%3A%0ACarrera%3A%0ADetalle%20del%20error%3A%0A%0AMuchas%20gracias."
+};
+
+const cases = {
+  caducado: {
+    kicker: "Error de carga",
+    title: "El trámite caducó",
+    subtitle: "A veces ocurre porque se cuelga o demora la web del Ministerio de Transporte.",
+    body: `
+      <h3>Primero probá esto</h3>
+      <ul>
+        <li>Actualizá o refrescá la página.</li>
+        <li>Esperá unos segundos y volvé a intentar.</li>
+        <li>Si vuelve a cargar, continuá el trámite normalmente.</li>
+      </ul>
+      <h3>Si no se soluciona</h3>
+      <ul>
+        <li>Si el trámite queda incompleto o se venció el tiempo, completá el formulario de reinicio de UTN FRH.</li>
+        <li>Después de completar el formulario, volvé a esta página y tocá <strong>Ya completé el formulario</strong>. Recién ahí se habilita el botón para enviar el mail.</li>
+      </ul>`,
+    actions: [["Completar formulario de reinicio", LINKS.reinicio, "warn"]],
+    requiresFormBeforeMail: true,
+    mail: {to: "asuntos@frh.utn.edu.ar", subject: "Reinicio de Boleto Estudiantil", body: 'Hola, completé el formulario para reinicio de cuenta.\nNecesito que me reinicien el acceso.\nEspero respuesta.\nMuchas gracias.\nSaludos.'},
+    copy: "Si aparece 'trámite caducó', primero actualizá o refrescá la página. Si persiste y queda incompleto, completá el formulario de reinicio UTN FRH y tocá Enviar mail para avisar que necesitás el reinicio de cuenta."
+  },
+  incompleto: {
+    kicker: "Reinicio de cuenta",
+    title: "Trámite incompleto / comunicarse con el administrador",
+    subtitle: "Suele pasar cuando se venció el tiempo disponible o el formulario quedó sin finalizar.",
+    body: `
+      <h3>Pasos a seguir</h3>
+      <ul>
+        <li>Completá el formulario de reinicio de cuenta de UTN FRH.</li>
+        <li>Después mandá mail a <strong>asuntos@frh.utn.edu.ar</strong> avisando que solicitaste el reinicio.</li>
+        <li>En el mail, indicá que completaste el formulario y que necesitás que te reinicien la cuenta.</li>
+        <li>Primero completá el formulario. Después volvé a esta página y tocá <strong>Ya completé el formulario</strong> para habilitar el mail.</li>
+      </ul>`,
+    actions: [["Completar formulario de reinicio", LINKS.reinicio, "warn"]],
+    requiresFormBeforeMail: true,
+    mail: {to: "asuntos@frh.utn.edu.ar", subject: "Reinicio de Boleto Estudiantil", body: 'Hola, completé el formulario para reinicio de cuenta.\nNecesito que me reinicien el acceso.\nEspero respuesta.\nMuchas gracias.\nSaludos.'},
+    copy: "Para trámite incompleto, completá el formulario de reinicio de UTN FRH y luego tocá Enviar mail para avisar que lo completaste y que necesitás el reinicio de cuenta."
+  },
+  otorgado: {
+    kicker: "Beneficio otorgado",
+    title: "Trámite finalizado / beneficio otorgado",
+    subtitle: "El beneficio ya está aprobado, pero la precarga no se acredita automáticamente en el momento.",
+    body: `
+      <h3>Qué significa</h3>
+      <ul>
+        <li>El trámite ya está aprobado, pero la precarga no aparece en el momento.</li>
+        <li><strong>Ejemplo:</strong> si completás el formulario antes del 17 de abril, cobrás el beneficio después del 17 de mayo. Si lo completás después del 17 de abril, cobrás el beneficio después del 17 de junio.</li>
+        <li>Las precargas empiezan a acreditarse a partir del 16/17 de cada mes, en días hábiles. No siempre se acreditan el mismo día para todas las personas y pueden demorar algunos días más.</li>
+      </ul>
+      <h3>Importante</h3>
+      <ul>
+        <li>El beneficio se acredita únicamente en la <strong>SUBE física</strong>.</li>
+        <li>Asegurate de tener tu <strong>SUBE física registrada y asociada al beneficio</strong>.</li>
+        <li>Si usás la app SUBE, verificá que tu <strong>SUBE física</strong> sea la tarjeta seleccionada/predeterminada para acreditar.</li>
+      </ul>
+      <h3>Cómo acreditar la precarga</h3>
+      <ul>
+        <li><strong>Terminal Automática SUBE:</strong> apoyá la tarjeta y esperá hasta que el sistema indique que ya podés retirarla.</li>
+        <li><strong>App SUBE:</strong> si tu celular tiene NFC, entrá a la opción para acreditar o consultar saldo y apoyá la tarjeta detrás del celular hasta completar la acreditación.</li>
+        <li><strong>Carga a Bordo:</strong> también podés acreditarla en colectivos donde esté habilitada esa opción, apoyando la SUBE en la validadora.</li>
+      </ul>
+      <h3>Si todavía no recibiste la precarga</h3>
+      <ul>
+        <li>Si ya pasó el plazo que corresponde según la fecha en que hiciste el trámite y todavía no recibiste la precarga, hacé el reclamo en el formulario del Ministerio.</li>
+        <li>En el formulario del Ministerio, elegí la opción <strong>“No recibí la precarga”</strong>.</li>
+      </ul>
+      <h3>Precargas acumuladas</h3>
+      <ul>
+        <li>El monto otorgado por el Ministerio puede ser mayor al límite que la SUBE permite acreditar en una sola vez. Por eso, a veces queda un saldo acumulado de meses anteriores.</li>
+        <li>Ese acumulado puede habilitarse más adelante, incluso en enero o febrero, aunque en esos meses no se pague un nuevo beneficio por no haber clases.</li>
+        <li>Si se acumulan precargas disponibles y no las acreditás, el sistema puede interpretar que no estás utilizando el beneficio y suspender la cuenta momentáneamente.</li>
+        <li>Para reclamar la reactivación, completá el formulario del Ministerio y elegí la opción <strong>“No recibí la precarga”</strong>.</li>
+      </ul>`,
+    actions: [["Reclamo en Ministerio", LINKS.ministerio, "secondary"]],
+    copy: "Si aparece beneficio otorgado, el trámite ya está aprobado pero la precarga no se acredita en el momento. Revisá el mes que corresponde según la fecha en que hiciste el trámite, acreditá la carga en tu SUBE física y, si ya pasó el plazo, hacé el reclamo en el Ministerio con la opción No recibí la precarga."
+  },
+  deshabilitado: {
+    kicker: "Beneficio previo",
+    title: "La persona tiene un beneficio, pero deshabilitado",
+    subtitle: "Puede ocurrir si el boleto quedó asociado a otra facultad, universidad o institución.",
+    body: `
+      <h3>Pasos a seguir</h3>
+      <ul>
+        <li>Solicitá la <strong>baja del beneficio</strong> en tu otra facultad, universidad o institución.</li>
+        <li>Esperá a que te envíen el comprobante o confirmación de que realizaron la baja correspondiente.</li>
+        <li>Tené en cuenta que la baja no se refleja automáticamente en nuestro sistema: puede demorar algunos días en impactar.</li>
+        <li>Después completá el formulario de reclamos del Ministerio de Transporte.</li>
+        <li>En el formulario, seleccioná la opción <strong>“Cambio de universidad”</strong>.</li>
+        <li>En <strong>“facultad de origen”</strong>, cargá tu facultad, universidad o institución anterior.</li>
+        <li>Luego de completar estos pasos, contactate con SAE a <strong>asuntos@frh.utn.edu.ar</strong> para continuar el trámite en UTN FRH.</li>
+      </ul>`,
+    actions: [["Formulario Ministerio", LINKS.ministerio, "secondary"], ["Enviar mail", LINKS.mailtoDeshabilitado, "secondary"]],
+    copy: "Si aparece que la persona tiene un beneficio, pero deshabilitado, solicitá la baja en tu facultad o universidad anterior. Cuando tengas el comprobante, recordá que la baja puede demorar algunos días en impactar. Después completá el formulario del Ministerio con la opción Cambio de universidad e indicá tu facultad de origen. Luego escribí a asuntos@frh.utn.edu.ar para continuar el trámite en UTN FRH."
+  },
+  credenciales: {
+    kicker: "Acceso",
+    title: "Error de credenciales",
+    subtitle: "El sistema no permite validar el acceso o aparece un error al ingresar.",
+    body: `
+      <h3>Qué hacer</h3>
+      <ul>
+        <li>Enviá un mail a <strong>asuntos@frh.utn.edu.ar</strong>.</li>
+        <li>Incluí nombre, apellido, DNI, legajo, carrera y una captura del error.</li>
+      </ul>`,
+    actions: [["Enviar mail", LINKS.mailtoCredenciales, "secondary"]],
+    copy: "Ante error de credenciales, escribí a asuntos@frh.utn.edu.ar con nombre, apellido, DNI, legajo, carrera y captura del error."
+  },
+  blanco: {
+    kicker: "Carga del sistema",
+    title: "Me aparece todo en blanco",
+    subtitle: "La pantalla queda vacía o no carga ningún dato para continuar el trámite.",
+    body: `
+      <h3>Qué hacer</h3>
+      <ul>
+        <li>Enviá un mail a <strong>asuntos@frh.utn.edu.ar</strong>.</li>
+        <li>Indicá que al ingresar al Boleto Estudiantil te aparece la pantalla en blanco.</li>
+        <li>Incluí nombre, apellido, DNI, legajo, carrera y una captura del error si podés.</li>
+      </ul>`,
+    actions: [["Enviar mail", LINKS.mailtoBlanco, "secondary"]],
+    copy: "Si al ingresar al Boleto Estudiantil aparece todo en blanco, escribí a asuntos@frh.utn.edu.ar con nombre, apellido, DNI, legajo, carrera y captura del error."
+  },
+  noacredita: {
+    kicker: "Acreditación",
+    title: "Completé el formulario, pero no me acreditaron",
+    subtitle: "Primero revisá tiempos de procesamiento y que la SUBE física sea la correcta.",
+    body: `
+      <h3>Revisá primero</h3>
+      <ul>
+        <li>Que haya pasado el plazo de procesamiento correspondiente.</li>
+        <li>Que estés usando la SUBE física correcta.</li>
+        <li>Que la SUBE Digital no haya quedado como tarjeta predeterminada.</li>
+        <li>Que hayas acreditado la precarga en Terminal Automática SUBE, app SUBE con NFC o Carga/Atributo a Bordo.</li>
+      </ul>
+      <h3>Si continúa</h3>
+      <p>Corresponde realizar el reclamo ante el Ministerio, usando la opción <strong>“No recibí la precarga”</strong>.</p>
+      <p>También puede pasar que existan montos acumulados de meses anteriores. Si esas precargas quedan disponibles y no las acreditás, el sistema puede suspender la cuenta momentáneamente porque interpreta que no estás usando el beneficio.</p>`,
+    actions: [["Formulario Ministerio", LINKS.ministerio, "secondary"]],
+    copy: "Si completaste el formulario pero no te acreditaron, revisá tiempos, SUBE física, SUBE Digital predeterminada y acreditación. Si persiste, hacé el reclamo ante el Ministerio con la opción No recibí la precarga."
+  },
+  subedigital: {
+    kicker: "SUBE",
+    title: "Tengo SUBE Digital",
+    subtitle: "El beneficio universitario/terciario de Provincia funciona con SUBE física.",
+    body: `
+      <h3>Qué revisar</h3>
+      <ul>
+        <li>Revisá en la app SUBE que tu tarjeta física sea la tarjeta correspondiente.</li>
+        <li>Si la SUBE Digital quedó como predeterminada, puede impedir la acreditación del beneficio.</li>
+        <li>Usá la SUBE física registrada para acreditar la precarga.</li>
+        <li>Si el problema continúa, realizá el reclamo ante el Ministerio.</li>
+      </ul>`,
+    actions: [["Formulario Ministerio", LINKS.ministerio, "secondary"]],
+    copy: "El boleto estudiantil universitario/terciario PBA se acredita en SUBE física. Revisá que la SUBE Digital no haya quedado como predeterminada."
+  },
+  doblelegajo: {
+    kicker: "Legajo / carrera",
+    title: "Curso dos carreras / tengo más de un legajo",
+    subtitle: "Puede pasar que el sistema revise una carrera distinta a aquella donde tenés las materias aprobadas.",
+    body: `
+      <h3>Qué revisar</h3>
+      <ul>
+        <li>Usá el legajo/carrera donde cumplís los requisitos académicos.</li>
+        <li>Revisá que en el formulario no figure otra carrera por error.</li>
+        <li>Si el sistema no reconoce tu situación, enviá mail a SAE con tus datos para revisar el caso.</li>
+      </ul>`,
+    actions: [["Enviar mail", LINKS.mail, "secondary"]],
+    copy: "Si cursás dos carreras o tenés más de un legajo, revisá que el trámite se realice con la carrera donde cumplís los requisitos académicos."
+  }
+};
+
+const caseButtons = document.querySelectorAll('.case-card');
+const resultBox = document.getElementById('resultBox');
+const filterInput = document.getElementById('caseFilter');
+
+function actionButtons(actions) {
+  if (!actions || !actions.length) return '';
+  return `<div class="mini-actions">${actions.map(([label, url, cls]) => `<a class="btn ${cls || 'secondary'}" href="${url}" target="_blank" rel="noopener">${label}</a>`).join('')}</div>`;
+}
+
+function mailGate(c) {
+  if (!c.requiresFormBeforeMail) return '';
+  const mail = c.mail || {to:'asuntos@frh.utn.edu.ar', subject:'Boleto Estudiantil', body:'Hola, completé el formulario y necesito continuar el trámite.'};
+  const mailto = `mailto:${encodeURIComponent(mail.to)}?subject=${encodeURIComponent(mail.subject)}&body=${encodeURIComponent(mail.body)}`;
+  return `
+    <div class="mail-gate">
+      <label>
+        <input type="checkbox" class="gate-check">
+        <span><strong>Ya completé el formulario</strong><br>Marcá esta opción después de enviar el formulario. Recién ahí se habilita el mail.</span>
+      </label>
+      <a class="btn secondary disabled gated-mail" href="${mailto}">Enviar mail</a>
+      <button class="btn secondary copy-mail" type="button" data-mail-body="${encodeURIComponent(mail.body)}">Copiar mensaje para enviar</button>
+    </div>`;
+}
+
+function renderCase(key) {
+  const c = cases[key];
+  if (!c) return;
+  caseButtons.forEach(b => b.classList.toggle('active', b.dataset.case === key));
+  resultBox.innerHTML = `
+    <div class="result-header">
+      <div class="result-kicker">${c.kicker}</div>
+      <div class="result-title">${c.title}</div>
+      <p class="result-subtitle">${c.subtitle}</p>
+    </div>
+    <div class="result-body">
+      ${c.body}
+      ${actionButtons(c.actions)}
+      ${mailGate(c)}
+    </div>`;
+
+  const gate = resultBox.querySelector('.gate-check');
+  const mail = resultBox.querySelector('.gated-mail');
+  if (gate && mail) {
+    gate.addEventListener('change', () => {
+      mail.classList.toggle('disabled', !gate.checked);
+    });
+  }
+  const copyMail = resultBox.querySelector('.copy-mail');
+  if (copyMail) {
+    copyMail.addEventListener('click', async () => {
+      const text = decodeURIComponent(copyMail.dataset.mailBody || '');
+      try {
+        await navigator.clipboard.writeText(text);
+        copyMail.textContent = 'Mensaje copiado';
+        setTimeout(() => copyMail.textContent = 'Copiar mensaje para enviar', 1700);
+      } catch (err) {
+        alert('No se pudo copiar automáticamente. Podés copiar el texto manualmente desde el botón de mail.');
+      }
+    });
+  }
+}
+caseButtons.forEach(btn => btn.addEventListener('click', () => renderCase(btn.dataset.case)));
+
+if (filterInput) {
+  filterInput.addEventListener('input', () => {
+    const q = filterInput.value.toLowerCase().trim();
+    caseButtons.forEach(btn => {
+      btn.style.display = btn.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+}
 </script>
 </body>
 </html>
