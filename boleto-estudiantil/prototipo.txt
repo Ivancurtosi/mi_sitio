@@ -1,1 +1,0 @@
-Prototipo de guía interactiva de Boleto Estudiantil UTN FRH. Este archivo es temporal para probar la rama.
