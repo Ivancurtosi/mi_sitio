@@ -2,14 +2,14 @@ name: Patch Boleto Once
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: ${{ !contains(github.event.head_commit.message, 'Apply boleto content patch') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,6 @@ jobs:
           html = path.read_text(encoding='utf-8')
 
           faq_no_acredito = '''<details class="faq-item" open><summary>¿Qué pasa si no acredito la precarga en mi SUBE?</summary><div class="faq-answer"><p>La precarga <strong>no se aplica sola</strong>: aunque el Ministerio la haya otorgado, queda pendiente hasta que la acreditás en tu <strong>SUBE física</strong>.</p><p>No conviene dejar precargas pendientes. Si se juntan <strong>dos precargas disponibles sin acreditar</strong>, el sistema puede interpretar que no estás usando el beneficio y suspenderlo momentáneamente.</p><p>También puede pasar que se acumulen sobrantes de meses anteriores. Por ejemplo, si el Ministerio otorgó más saldo del que la SUBE te deja acreditar de una sola vez, puede quedar una parte pendiente para más adelante.</p><p>Por eso algunas personas tuvieron saldos acumulados que se habilitaron en <strong>enero o febrero</strong>. Aunque en esos meses no haya una nueva precarga por no haber clases, podían tener saldo anterior pendiente para acreditar. Si no lo acreditaron, el sistema pudo tomarlo como dos precargas sin usar y suspender momentáneamente el beneficio.</p><p>Para resolverlo, entrá directamente al caso <strong>“Trámite finalizado / beneficio otorgado”</strong>, donde vas a encontrar el formulario del Ministerio y una explicación más completa.</p><p><a class="btn secondary" href="#errores-otorgado">Ir al caso “Trámite finalizado / beneficio otorgado”</a></p></div></details>'''
-
           html = re.sub(r'<details class="faq-item" open><summary>¿Qué pasa si se vencen las precargas\?</summary>.*?</details>', faq_no_acredito, html, count=1, flags=re.S)
           html = re.sub(r'<details class="faq-item" open><summary>¿Qué pasa si no acredito la precarga en mi SUBE\?</summary>.*?</details>', faq_no_acredito, html, count=1, flags=re.S)
 
