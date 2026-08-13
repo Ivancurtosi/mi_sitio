@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 385" width="900" height="385">
+  <rect width="900" height="385" fill="#ffffff"/>
+  <g transform="translate(34 38)">
+    <rect x="0" y="0" width="98" height="98" rx="49" fill="#eaf8f9" stroke="#2aa7b0" stroke-width="3"/>
+    <text x="49" y="57" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#2a9aaa">BA</text>
+  </g>
+  <text x="164" y="80" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#1f1f1f">GOBIERNO DE LA PROVINCIA DE</text>
+  <text x="164" y="116" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="800" fill="#2c9fb0">BUENOS AIRES</text>
+  <text x="552" y="70" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="500" fill="#474747">Beneficio Boleto</text>
+  <text x="552" y="122" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="500" fill="#474747">Estudiantil</text>
+  <text x="36" y="207" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111111">Warning:</text>
+  <text x="128" y="207" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111111">Cannot modify header information - headers already sent by (output started at</text>
+  <text x="36" y="237" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111111">/var/www/html/boletoeducativo/boletov3/web/datos_personales.php:54) in</text>
+  <text x="36" y="267" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111111">/var/www/html/boletoeducativo/boletov3/web/includes/expirationCheck.php on line 25</text>
+  <text x="36" y="346" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#111111">El tramite caduco</text>
+</svg>
