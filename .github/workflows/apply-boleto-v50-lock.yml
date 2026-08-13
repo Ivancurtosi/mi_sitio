@@ -17,29 +17,37 @@ jobs:
         run: |
           python <<'PY'
           from pathlib import Path
-          import re
 
           path = Path('boleto-estudiantil-final/index.html')
           html = path.read_text(encoding='utf-8')
 
-          html = html.replace('<button class="btn primary" type="button" data-next-step="2">Leí los requisitos y cumplo</button>', '<button class="btn primary" type="button" id="acceptReqBtn" data-next-step="2">Leí los requisitos y cumplo</button>')
+          html = html.replace(
+              '<button type="button" id="nav2" data-go-step="2">',
+              '<button type="button" id="nav2" class="locked" data-go-step="2">'
+          )
+          html = html.replace(
+              '<button class="btn primary" type="button" data-next-step="2">Leí los requisitos y cumplo</button>',
+              '<button class="btn primary" type="button" id="acceptReqBtn" data-next-step="2">Leí los requisitos y cumplo</button>'
+          )
+          html = html.replace(
+              'let prepared=false;',
+              'let prepared=false,requirementsAccepted=false;'
+          )
 
-          if 'let requirementsAccepted = false;' not in html:
-              html = html.replace('let highestStepUnlocked = 1;', 'let highestStepUnlocked = 1;\nlet requirementsAccepted = false;')
-
-          jump_pat = r"document\.querySelectorAll\('\[data-jump-step\]'\)\.forEach\(item => \{\s*const go = \(\) => \{\s*const n = Number\(item\.getAttribute\('data-jump-step'\)\);\s*if \(n <= highestStepUnlocked\) setWizardStep\(n\);\s*\};\s*item\.addEventListener\('click', go\);\s*item\.addEventListener\('keydown', ev => \{\s*if \(ev\.key === 'Enter' \|\| ev\.key === ' '\) \{\s*ev\.preventDefault\(\);\s*go\(\);\s*\}\s*\}\);\s*\}\);"
-          jump_new = "document.querySelectorAll('[data-jump-step]').forEach(item => {\n  const go = () => {\n    const n = Number(item.getAttribute('data-jump-step'));\n    if ((n === 2 || n === 3) && !requirementsAccepted) return;\n    if (n === 3 && !allPrepared) return;\n    if (n <= highestStepUnlocked) setWizardStep(n);\n  };\n  item.addEventListener('click', go);\n  item.addEventListener('keydown', ev => {\n    if (ev.key === 'Enter' || ev.key === ' ') {\n      ev.preventDefault();\n      go();\n    }\n  });\n});"
-          html = re.sub(jump_pat, jump_new, html, count=1, flags=re.S)
-
-          next_pat = r"document\.querySelectorAll\('\[data-next-step\]'\)\.forEach\(btn => \{\s*btn\.addEventListener\('click', \(\) => \{\s*const n = btn\.getAttribute\('data-next-step'\);\s*setWizardStep\(n\);\s*document\.getElementById\('flujo-tramite'\)\.scrollIntoView\(\{behavior:'smooth', block:'start'\}\);\s*\}\);\s*\}\);"
-          next_new = "document.querySelectorAll('[data-next-step]').forEach(btn => {\n  btn.addEventListener('click', () => {\n    const n = Number(btn.getAttribute('data-next-step'));\n    if (n === 2) {\n      if (btn.id !== 'acceptReqBtn') return;\n      requirementsAccepted = true;\n      highestStepUnlocked = Math.max(highestStepUnlocked, 2);\n      refreshWizardNav();\n    }\n    if ((n === 2 || n === 3) && !requirementsAccepted) return;\n    setWizardStep(n);\n    document.getElementById('flujo-tramite').scrollIntoView({behavior:'smooth', block:'start'});\n  });\n});"
-          html = re.sub(next_pat, next_new, html, count=1, flags=re.S)
+          html = html.replace(
+              "document.querySelectorAll('[data-next-step]').forEach(b=>b.addEventListener('click',()=>step(b.dataset.nextStep)));",
+              "document.querySelectorAll('[data-next-step]').forEach(b=>b.addEventListener('click',()=>{let n=b.dataset.nextStep;if(n==='2'&&b.id==='acceptReqBtn'){requirementsAccepted=true;document.getElementById('nav2').classList.remove('locked');step(2);return;}if(n==='2'&&!requirementsAccepted)return;step(n)}));"
+          )
+          html = html.replace(
+              "document.querySelectorAll('[data-go-step]').forEach(b=>b.addEventListener('click',()=>{let n=b.dataset.goStep;if(n==='3'&&!prepared)return;step(n)}));",
+              "document.querySelectorAll('[data-go-step]').forEach(b=>b.addEventListener('click',()=>{let n=b.dataset.goStep;if(n==='2'&&!requirementsAccepted)return;if(n==='3'&&!prepared)return;step(n)}));"
+          )
 
           if 'Volver a datos y advertencia' in html:
               raise SystemExit('No se sube: reapareció el botón Volver a datos y advertencia')
           if 'data:image/' not in html or 'El trámite caducó' not in html:
               raise SystemExit('No se sube: falta la imagen embebida del trámite caducado')
-          if 'id="acceptReqBtn"' not in html or 'requirementsAccepted = false' not in html or 'if ((n === 2 || n === 3) && !requirementsAccepted) return;' not in html:
+          if 'requirementsAccepted=false' not in html or "if(n==='2'&&!requirementsAccepted)return" not in html:
               raise SystemExit('No se sube: no quedó bloqueado el paso 2')
 
           path.write_text(html, encoding='utf-8')
