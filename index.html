@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Merchandising UTN Haedo</title>
-    <!-- Enlace a la fuente Audiowide de Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <!-- Logo de la Facultad -->
         <div class="logo-container">
             <img src="imagenes/logo_utn.png" alt="Logo UTN Haedo" class="logo">
         </div>
-        
-        <!-- Descripción de compra -->
+
         <p class="description">
             ¿Querés alguno de estos productos? <br>
             Pasá por la fotocopiadora de la facu y pagá con Mercado Pago o en efectivo. <br>
@@ -23,201 +20,110 @@
             Nuestros horarios de atención son de lunes a viernes de 8 a 21 Hs.
         </p>
 
-        <!-- Botón de WhatsApp colocado justo debajo de la descripción -->
         <div class="whatsapp-container">
-            <a href="https://wa.me/5491158449552" target="_blank" class="whatsapp-button">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
+            <a
+                href="https://wa.me/5491158449552?text=Hola%2C%20vi%20la%20p%C3%A1gina%20de%20Merchandising%20UTN%20Haedo%20y%20quer%C3%ADa%20consultar%20por%20un%20producto."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="whatsapp-button"
+            >
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="" class="whatsapp-icon">
                 WhatsApp: 11 5844-9552
             </a>
         </div>
 
-        <!-- Título principal -->
         <h1>Merchandising UTN Haedo</h1>
-        
-        <!-- Cuadrícula de productos -->
-        <div class="product-grid">
-            <!-- Producto 1 -->
-            <div class="product" onclick="openModal('imagenes/producto1.jpeg')">
-                <p class="product-name">Jarro térmico</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto1.jpeg" alt="Producto 1" class="product-image">
-                </div>
-                <p class="price">$5.500</p>
-            </div>
 
-            <!-- Producto 2 -->
-            <div class="product" onclick="openModal('imagenes/producto2.jpeg')">
-                <p class="product-name">Botella Hoppy</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto2.jpeg" alt="Producto 2" class="product-image">
-                </div>
-                <p class="price">$10.000</p>
-                <p style="color: #d32f2f; font-weight: bold; margin-top: 5px;">AGOTADO</p>
-            </div>
-
-            <!-- Producto 3 -->
-            <div class="product" onclick="openModal('imagenes/producto3.png')">
-                <p class="product-name">Libreta Rocket</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto3.png" alt="Producto 3" class="product-image">
-                </div>
-                <p class="price">$7.000</p>
-            </div>
-
-            <!-- Producto 4 -->
-            <div class="product" onclick="openModal('imagenes/producto4.jpeg')">
-                <p class="product-name">Bolígrafo UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto4.jpeg" alt="Producto 4" class="product-image">
-                </div>
-                <p class="price">$1.100</p>
-            </div>
-
-            <!-- Producto 5 -->
-            <div class="product" onclick="openModal('imagenes/producto5.jpeg')">
-                <p class="product-name">Portalápices UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto5.jpeg" alt="Producto 5" class="product-image">
-                </div>
-                <p class="price">$4.500</p>
-            </div>
-
-            <!-- Producto 6 -->
-            <div class="product" onclick="openModal('imagenes/producto6.jpeg')">
-                <p class="product-name">Gorra blanca UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto6.jpeg" alt="Producto 6" class="product-image">
-                </div>
-                <p class="price">$10.000</p>
-            </div>
-
-            <!-- Producto 7 -->
-            <div class="product" onclick="openModal('imagenes/producto7.jpeg')">
-                <p class="product-name">Gorra negra UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto7.jpeg" alt="Producto 7" class="product-image">
-                </div>
-                <p class="price">$10.000</p>
-            </div>
-
-            <!-- Producto 8 -->
-            <div class="product" onclick="openModal('imagenes/producto8.jpeg')">
-                <p class="product-name">Gorra Trucker azul</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto8.jpeg" alt="Producto 8" class="product-image">
-                </div>
-                <p class="price">$8.000</p>
-            </div>
-            
-            <!-- Producto 9 -->
-            <div class="product" onclick="openModal('imagenes/producto9.jpeg')">
-                <p class="product-name">Remera blanca UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto9.jpeg" alt="Producto 9" class="product-image">
-                </div>
-                <p class="price">$16.000</p>
-            </div>
-            
-            <!-- Producto 10 -->
-            <div class="product" onclick="openModal('imagenes/producto10.jpeg')">
-                <p class="product-name">Remera gris UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto10.jpeg" alt="Producto 10" class="product-image">
-                </div>
-                <p class="price">$16.000</p>
-            </div>
-            
-            <!-- Producto 11 -->
-            <div class="product" onclick="openModal('imagenes/producto11.jpeg')">
-                <p class="product-name">Pin UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto11.jpeg" alt="Producto 11" class="product-image">
-                </div>
-                <p class="price">$3.500</p>
-            </div>
-            
-            <!-- Producto 12 -->
-            <div class="product" onclick="openModal('imagenes/producto12.jpeg')">
-                <p class="product-name">Remera UTN al espacio</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto12.jpeg" alt="Producto 12" class="product-image">
-                </div>
-                <p class="price">$20.000</p>
-                <p style="color: #d32f2f; font-weight: bold; margin-top: 5px;">AGOTADO</p>
-            </div>
-            
-            <!-- Producto 13 -->
-            <div class="product" onclick="openModal('imagenes/producto13.jpeg')">
-                <p class="product-name">Llavero UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto13.jpeg" alt="Producto 13" class="product-image">
-                </div>
-                <p class="price">$4.000</p>
-            </div>
-            
-            <!-- Producto 14 -->
-            <div class="product" onclick="openModal('imagenes/producto14.jpeg')">
-                <p class="product-name">Botella Runner</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto14.jpeg" alt="Producto 14" class="product-image">
-                </div>
-                <p class="price">$8.000</p>
-            </div>
-
-            <!-- Producto 15 -->
-            <div class="product" onclick="openModal('imagenes/producto15.jpeg')">
-                <p class="product-name">Remera UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto15.jpeg" alt="Producto 15" class="product-image">
-                </div>
-                <p class="price">$20.000</p>
-                <p style="color: #d32f2f; font-weight: bold; margin-top: 5px;">AGOTADO</p>
-            </div>
-            
-            <!-- Producto 16 -->
-            <div class="product" onclick="openModal('imagenes/producto16.jpeg')">
-                <p class="product-name">Mate UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto16.jpeg" alt="Producto 16" class="product-image">
-                </div>
-                <p class="price">$6.000</p>
-            </div>
-            
-            <!-- Producto 17 -->
-            <div class="product" onclick="openModal('imagenes/producto17.jpeg')">
-                <p class="product-name">Porta Sube UTN</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto17.jpeg" alt="Producto 17" class="product-image">
-                </div>
-                <p class="price">$1.000</p>
-            </div>
-            
-            <!-- Producto 18 -->
-            <div class="product" onclick="openModal('imagenes/producto18.jpeg')">
-                <p class="product-name">Yerbero Despolvillador</p>
-                <div class="product-image-container">
-                    <img src="imagenes/producto18.jpeg" alt="Producto 18" class="product-image">
-                </div>
-                <p class="price">$8.500</p>
-            </div>
-        </div>
+        <div class="product-grid" id="product-grid" aria-live="polite"></div>
     </div>
 
-    <!-- Modal para la imagen grande -->
-    <div id="modal" class="modal">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <img class="modal-content" id="modal-image">
+    <a
+        href="https://wa.me/5491158449552?text=Hola%2C%20vi%20la%20p%C3%A1gina%20de%20Merchandising%20UTN%20Haedo%20y%20quer%C3%ADa%20consultar%20por%20un%20producto."
+        target="_blank"
+        rel="noopener noreferrer"
+        class="whatsapp-floating"
+        aria-label="Consultar por WhatsApp"
+        title="Consultar por WhatsApp"
+    >
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="">
+    </a>
+
+    <div id="modal" class="modal" aria-hidden="true">
+        <button class="close" type="button" aria-label="Cerrar imagen" onclick="closeModal()">&times;</button>
+        <img class="modal-content" id="modal-image" alt="Imagen ampliada del producto">
     </div>
 
     <script>
+        const products = [
+            { name: 'Jarro térmico', price: 5500, image: 'imagenes/producto1.jpeg' },
+            { name: 'Botella Hoppy', price: 10000, image: 'imagenes/producto2.jpeg', soldOut: true },
+            { name: 'Libreta Rocket', price: 7000, image: 'imagenes/producto3.png' },
+            { name: 'Bolígrafo UTN', price: 1100, image: 'imagenes/producto4.jpeg' },
+            { name: 'Portalápices UTN', price: 4500, image: 'imagenes/producto5.jpeg' },
+            { name: 'Gorra blanca UTN', price: 10000, image: 'imagenes/producto6.jpeg' },
+            { name: 'Gorra negra UTN', price: 10000, image: 'imagenes/producto7.jpeg' },
+            { name: 'Gorra Trucker azul', price: 8000, image: 'imagenes/producto8.jpeg' },
+            { name: 'Remera blanca UTN', price: 16000, image: 'imagenes/producto9.jpeg' },
+            { name: 'Remera gris UTN', price: 16000, image: 'imagenes/producto10.jpeg' },
+            { name: 'Pin UTN', price: 3500, image: 'imagenes/producto11.jpeg' },
+            { name: 'Remera UTN al espacio', price: 20000, image: 'imagenes/producto12.jpeg', soldOut: true },
+            { name: 'Llavero UTN', price: 4000, image: 'imagenes/producto13.jpeg' },
+            { name: 'Botella Runner', price: 8000, image: 'imagenes/producto14.jpeg' },
+            { name: 'Remera UTN', price: 20000, image: 'imagenes/producto15.jpeg', soldOut: true },
+            { name: 'Mate UTN', price: 6000, image: 'imagenes/producto16.jpeg' },
+            { name: 'Porta Sube UTN', price: 1000, image: 'imagenes/producto17.jpeg' },
+            { name: 'Yerbero Despolvillador', price: 8500, image: 'imagenes/producto18.jpeg' }
+        ];
+
+        const priceFormatter = new Intl.NumberFormat('es-AR');
+        const productGrid = document.getElementById('product-grid');
+
+        function renderProducts() {
+            productGrid.innerHTML = products.map((product) => `
+                <article class="product${product.soldOut ? ' sold-out' : ''}">
+                    <p class="product-name">${product.name}</p>
+                    <button
+                        class="product-image-button"
+                        type="button"
+                        aria-label="Ver imagen ampliada de ${product.name}"
+                        onclick="openModal('${product.image}')"
+                    >
+                        <span class="product-image-container">
+                            ${product.soldOut ? '<span class="stock-badge">AGOTADO</span>' : ''}
+                            <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
+                        </span>
+                    </button>
+                    <p class="price">$${priceFormatter.format(product.price)}</p>
+                </article>
+            `).join('');
+        }
+
         function openModal(imageSrc) {
-            document.getElementById("modal").style.display = "flex";
-            document.getElementById("modal-image").src = imageSrc;
+            const modal = document.getElementById('modal');
+            document.getElementById('modal-image').src = imageSrc;
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
         }
 
         function closeModal() {
-            document.getElementById("modal").style.display = "none";
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
         }
+
+        document.getElementById('modal').addEventListener('click', (event) => {
+            if (event.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        renderProducts();
     </script>
 </body>
 </html>
