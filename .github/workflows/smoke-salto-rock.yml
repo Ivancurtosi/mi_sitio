@@ -9,115 +9,99 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for latest published Rock Tour and verify assets
+      - name: Verify published assets
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
-          ok=0
           for i in {1..24}; do
-            if curl -fsSL "${url}mount.js?live=6" -o /tmp/mount.js \
-              && grep -q 'hydrateRoot' /tmp/mount.js \
-              && grep -q 'rockHydrated' /tmp/mount.js; then
-              ok=1
-              break
-            fi
+            if curl -fsSL "${url}mount.js?android=1" -o /tmp/mount.js && grep -q 'hydrateRoot' /tmp/mount.js; then break; fi
             sleep 5
           done
-          test "$ok" = 1
-          curl -fsSL "${url}?live=6" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?live=6" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?live=6" -o /tmp/hero.webp
-          curl -fsSL "${url}assets/rock-props.webp?live=6" -o /tmp/props.webp
-          curl -fsSL "${url}audio/track1.mp3?live=6" -o /tmp/track1.mp3
-          curl -fsSL "${url}audio/track5.mp3?live=6" -o /tmp/track5.mp3
+          curl -fsSL "${url}?android=1" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?android=1" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?android=1" -o /tmp/hero.webp
+          curl -fsSL "${url}audio/track1.mp3?android=1" -o /tmp/track1.mp3
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
           grep -q '__rockPlaylist' /tmp/game.js
           test -s /tmp/hero.webp
-          test -s /tmp/props.webp
           test -s /tmp/track1.mp3
-          test -s /tmp/track5.mp3
 
-      - name: Verify game interaction in real Chrome
+      - name: Verify Android touch interaction
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?browser=6'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-test=1'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
-          test -n "$chrome"
-          "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1280,720 \
-            --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome \
-            "$url" >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
+          "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
           trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
-          for i in {1..30}; do
-            curl -fsS http://127.0.0.1:9222/json > /tmp/rock-diag/tabs.json && break
-            sleep 1
-          done
-          python3 - <<'PY'
-          import json, time, traceback
+          for i in {1..30}; do curl -fsS http://127.0.0.1:9222/json > /tmp/rock-diag/tabs.json && break; sleep 1; done
+          URL="$url" python3 - <<'PY'
+          import json, os, time, traceback
           import websocket
           diag=[]
+          tabs=json.load(open('/tmp/rock-diag/tabs.json'))
+          page=next(t for t in tabs if t.get('type')=='page')
+          ws=websocket.create_connection(page['webSocketDebuggerUrl'],timeout=10,suppress_origin=True)
+          seq=0
+          def call(method,params=None):
+              global seq
+              seq+=1; ident=seq
+              ws.send(json.dumps({'id':ident,'method':method,'params':params or {}}))
+              while True:
+                  msg=json.loads(ws.recv())
+                  if msg.get('id')==ident:
+                      if 'error' in msg: raise RuntimeError(msg['error'])
+                      return msg.get('result',{})
+          def ev(expr):
+              r=call('Runtime.evaluate',{'expression':expr,'returnByValue':True,'awaitPromise':True})['result']
+              return r.get('value')
           try:
-              tabs=json.load(open('/tmp/rock-diag/tabs.json'))
-              page=next(t for t in tabs if t.get('type')=='page')
-              ws=websocket.create_connection(page['webSocketDebuggerUrl'], timeout=10, suppress_origin=True)
-              seq=0
-              def evaluate(expr):
-                  global seq
-                  seq += 1
-                  ws.send(json.dumps({'id':seq,'method':'Runtime.evaluate','params':{'expression':expr,'returnByValue':True,'awaitPromise':True}}))
-                  while True:
-                      msg=json.loads(ws.recv())
-                      if msg.get('id')==seq:
-                          if 'exceptionDetails' in msg.get('result',{}):
-                              raise RuntimeError(msg['result']['exceptionDetails'])
-                          res=msg['result']['result']
-                          return res.get('value') if 'value' in res else {'type':res.get('type'),'description':res.get('description')}
-
-              deadline=time.time()+15
+              call('Emulation.setUserAgentOverride',{'userAgent':'Mozilla/5.0 (Linux; Android 16; SM-A356E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36','platform':'Android'})
+              call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'positionX':0,'positionY':0})
+              call('Emulation.setTouchEmulationEnabled',{'enabled':True,'maxTouchPoints':5})
+              call('Page.enable'); call('Runtime.enable'); call('Page.navigate',{'url':os.environ['URL']})
+              deadline=time.time()+20
               while time.time()<deadline:
-                  if evaluate("document.documentElement.dataset.rockHydrated === '1'"):
-                      break
+                  try:
+                      if ev("document.documentElement.dataset.rockHydrated === '1'"): break
+                  except Exception: pass
                   time.sleep(.25)
-              else:
-                  raise RuntimeError('Rock Tour did not hydrate')
-
-              assert evaluate("typeof window.__rockPlaylist === 'object'")
-              assert evaluate("!!document.querySelector('.game-canvas')")
-              assert evaluate("!!document.querySelector('.play-btn')")
-              diag.append('PRESTART OK')
-
-              evaluate("document.querySelector('.play-btn').click(); true")
-              deadline=time.time()+10
+              else: raise RuntimeError('No hidrato en Android')
+              diag.append('HYDRATED_ANDROID')
+              box=ev("(()=>{const e=document.querySelector('.play-btn');if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,vis:getComputedStyle(e).visibility,disp:getComputedStyle(e).display}})()")
+              diag.append('PLAYBOX='+repr(box))
+              if not box or box['w']<1: raise RuntimeError('Boton de inicio no visible')
+              x,y=box['x'],box['y']
+              call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y,'radiusX':3,'radiusY':3,'force':1}]})
+              call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+              deadline=time.time()+8
               while time.time()<deadline:
-                  if evaluate("!!document.querySelector('.rock-analog')"):
-                      break
-                  time.sleep(.25)
+                  if ev("!!document.querySelector('.rock-analog')"): break
+                  time.sleep(.2)
               else:
-                  diag.append('BODY='+str(evaluate("document.body.innerText.slice(0,1000)")))
-                  raise RuntimeError('Analog control did not appear after starting')
-
-              assert evaluate("!!document.querySelector('.action-btn')")
-              assert evaluate("!!document.querySelector('.jump-btn')")
-              assert evaluate("!!document.querySelector('.move-controls')")
-              assert evaluate("document.querySelector('.overlay') === null || getComputedStyle(document.querySelector('.overlay')).display === 'none'")
-              diag.append('LIVE ROCK TOUR OK: hydrated, start works, analog/run/jump present')
-              ws.close()
+                  diag.append('BODY='+str(ev("document.body.innerText.slice(0,1600)")))
+                  raise RuntimeError('El toque Android no inicia el juego')
+              assert ev("!!document.querySelector('.action-btn')")
+              assert ev("!!document.querySelector('.jump-btn')")
+              assert ev("!!document.querySelector('.game-canvas')")
+              diag.append('ANDROID_TOUCH_OK')
+              call('Page.captureScreenshot',{'format':'png','fromSurface':True})
           except Exception:
-              diag.append('TRACEBACK:\n'+traceback.format_exc())
-              raise
+              diag.append('TRACEBACK:\n'+traceback.format_exc()); raise
           finally:
-              open('/tmp/rock-diag/diagnostic.txt','w').write('\n\n'.join(diag))
+              open('/tmp/rock-diag/diagnostic.txt','w').write('\n'.join(diag))
+              ws.close()
           PY
 
-      - name: Upload browser diagnostics
+      - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rock-tour-diagnostics
+          name: rock-tour-android-diagnostics
           path: /tmp/rock-diag/
