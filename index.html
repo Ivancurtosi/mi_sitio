@@ -33,7 +33,20 @@
 
         <h1>Merchandising UTN Haedo</h1>
 
-        <div class="product-grid" id="product-grid" aria-live="polite"></div>
+        <section style="margin-bottom:42px;">
+            <h2 style="text-align:center;font-size:30px;margin:8px 0 22px;">Merchandising UTN</h2>
+            <div class="product-grid" id="merch-grid" aria-live="polite"></div>
+        </section>
+
+        <section style="margin-bottom:42px;">
+            <h2 style="text-align:center;font-size:30px;margin:8px 0 22px;">Calculadoras Casio</h2>
+            <div class="product-grid" id="calculators-grid" aria-live="polite"></div>
+        </section>
+
+        <section style="margin-bottom:20px;">
+            <h2 style="text-align:center;font-size:30px;margin:8px 0 22px;">Smartwatches Mistral</h2>
+            <div class="product-grid" id="watches-grid" aria-live="polite"></div>
+        </section>
     </div>
 
     <a
@@ -53,7 +66,7 @@
     </div>
 
     <script>
-        const products = [
+        const merchProducts = [
             { name: 'Jarro térmico', price: 5500, image: 'imagenes/producto1.jpeg' },
             { name: 'Botella Hoppy', price: 10000, image: 'imagenes/producto2.jpeg', soldOut: true },
             { name: 'Libreta Rocket', price: 7000, image: 'imagenes/producto3.png' },
@@ -74,18 +87,60 @@
             { name: 'Yerbero Despolvillador', price: 8500, image: 'imagenes/producto18.jpeg' }
         ];
 
-        const priceFormatter = new Intl.NumberFormat('es-AR');
-        const productGrid = document.getElementById('product-grid');
+        const calculatorProducts = [
+            {
+                name: 'FX-570LAPLUS-2',
+                price: 50000,
+                image: 'https://www.casio.com/content/dam/casio/product-info/locales/latin/es-ar/calc/product/scientific/F/FX/FX5/fx-570LAPLUS-2/assets/fx-570LAPLUS-2_Seq1.jpg.transform/main-visual-sp/image.jpg',
+                description: 'Esta calculadora es la mejor relación costo beneficio ya que además de las funciones clásicas incluye: Integrales // Derivadas // Matrices // Complejos // Cambio de Base.'
+            },
+            {
+                name: 'FX-991LAPLUS-2',
+                price: 56000,
+                image: 'https://www.laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg',
+                description: 'Es una reversión de la 570. Cuenta con una carcaza más compacta, alimentación alternativa por panel solar y una mayor vida útil de la batería.'
+            },
+            {
+                name: 'FX-7400GIII',
+                price: 140000,
+                image: 'https://www.casio.com/content/dam/casio/product-info/locales/mx/es-ar/calc/product/scientific/F/FX/FX7/fx-7400GIII/assets/fx-7400GIII_Seq1.jpg.transform/main-visual-sp/image.jpg',
+                description: 'Este modelo cuenta con capacidades gráficas además de las funciones de los otros modelos disponibles. También se puede programar para la resolución de funciones en CASIO Basic. A tener en cuenta que este tipo de calculadoras (graficadoras) no se admiten en exámenes.'
+            }
+        ];
 
-        function renderProducts() {
-            productGrid.innerHTML = products.map((product) => `
+        const watchProducts = [
+            {
+                name: 'Smartwatch Mistral SMT-W69MN-01',
+                price: 77000,
+                image: 'data:image/jpeg;base64,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',
+                description: 'Reloj inteligente con pantalla táctil HD de 1.95″, resistente al agua (IP68), GPS integrado y sensores de salud (frecuencia cardíaca, presión arterial, SpO2 y ECG). Permite hacer y recibir llamadas por Bluetooth, controlar música y viene con correas intercambiables + funda protectora. Ideal para el día a día o entrenamientos.'
+            },
+            {
+                name: 'Smartwatch Mistral SMT-XY46-09',
+                price: 70000,
+                image: 'data:image/jpeg;base64,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',
+                description: 'Pantalla táctil de 1.86″, resistencia IP67 y batería de larga duración. Mide frecuencia cardíaca, presión, oxígeno en sangre y sueño. Recibe notificaciones, atiende llamadas por Bluetooth y tiene modo deportivo. Ideal para el día a día y entrenamientos.'
+            },
+            {
+                name: 'Smartwatch Mistral SMT-X052-02',
+                price: 54000,
+                image: 'data:image/jpeg;base64,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',
+                description: 'Pantalla táctil de 1.47″ (172×320 px), caja de acero inoxidable con correa de silicona/resina y flash de 64 MB; se conecta por Bluetooth (2.0 + BLE 5.0) y tiene GPS integrado; sensores de ritmo cardíaco, presión arterial, SpO₂, temperatura, podómetro y monitoreo de sueño, además de modos multideporte, cronómetro, alarmas, recordatorio de hidratación/sedentarismo, control de música y cámara; viene con resistencia al agua y polvo (IP67) y garantía oficial.'
+            }
+        ];
+
+        const priceFormatter = new Intl.NumberFormat('es-AR');
+
+        function renderProducts(gridId, products) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = products.map((product) => `
                 <article class="product${product.soldOut ? ' sold-out' : ''}">
                     <p class="product-name">${product.name}</p>
                     <button
                         class="product-image-button"
                         type="button"
                         aria-label="Ver imagen ampliada de ${product.name}"
-                        onclick="openModal('${product.image}')"
+                        onclick="openModal(this.querySelector('img').src)"
                     >
                         <span class="product-image-container">
                             ${product.soldOut ? '<span class="stock-badge">AGOTADO</span>' : ''}
@@ -93,6 +148,7 @@
                         </span>
                     </button>
                     <p class="price">$${priceFormatter.format(product.price)}</p>
+                    ${product.description ? `<p style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;margin:10px 0 2px;text-align:left;color:#444;">${product.description}</p>` : ''}
                 </article>
             `).join('');
         }
@@ -122,7 +178,9 @@
             }
         });
 
-        renderProducts();
+        renderProducts('merch-grid', merchProducts);
+        renderProducts('calculators-grid', calculatorProducts);
+        renderProducts('watches-grid', watchProducts);
     </script>
 </body>
 </html>
