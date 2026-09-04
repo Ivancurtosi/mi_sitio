@@ -20,6 +20,10 @@ body.modal-open {
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 /* Contenedor principal */
 .container {
     max-width: 1200px;
@@ -47,6 +51,12 @@ body.modal-open {
     text-align: center;
     margin-bottom: 20px;
     line-height: 1.55;
+}
+
+.cash-only-inline {
+    display: inline-block;
+    margin-top: 4px;
+    color: #8a4b08;
 }
 
 /* Botón de WhatsApp principal */
@@ -190,6 +200,23 @@ h1 {
     font-size: 14px;
     font-weight: 700;
     box-shadow: 0 2px 7px rgba(0, 0, 0, 0.04);
+}
+
+.benefit-chip-cash {
+    border-color: #f2c58d;
+    background: #fff8ee;
+    color: #8a4b08;
+}
+
+.cash-only-note {
+    max-width: 650px;
+    margin: 11px auto 0 !important;
+    padding: 9px 12px;
+    border: 1px solid #f0c58f;
+    border-radius: 10px;
+    background: #fff8ee;
+    color: #8a4b08;
+    font-weight: 800;
 }
 
 /* Consulta por otros modelos */
@@ -343,6 +370,18 @@ h1 {
     color: #1f2937;
 }
 
+.product-cash-note {
+    display: inline-block;
+    margin: 6px 0 2px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #fff8ee;
+    color: #8a4b08;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+}
+
 .product-description {
     font-family: Arial, sans-serif;
     font-size: 15px;
@@ -490,8 +529,7 @@ h1 {
     align-items: center;
     justify-content: center;
     padding: 34px;
-    background:
-        radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.95), rgba(245, 247, 250, 0.96) 60%, rgba(234, 238, 244, 0.98));
+    background: #fff;
 }
 
 .modal-media img {
@@ -501,8 +539,8 @@ h1 {
     width: auto;
     height: auto;
     object-fit: contain;
-    border-radius: 12px;
-    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.13));
+    border-radius: 0;
+    filter: none;
 }
 
 .modal-stock {
@@ -529,6 +567,7 @@ h1 {
     padding: 42px 38px 36px;
     overflow-y: auto;
     background: #fff;
+    border-left: 1px solid #eef1f5;
 }
 
 .modal-category {
@@ -559,7 +598,7 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
 .modal-badges span {
@@ -572,6 +611,18 @@ h1 {
     color: #344054;
     font-family: Arial, sans-serif;
     font-size: 12px;
+    font-weight: 800;
+}
+
+.modal-payment {
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border: 1px solid #f0c58f;
+    border-radius: 10px;
+    background: #fff8ee;
+    color: #8a4b08;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
     font-weight: 800;
 }
 
@@ -642,7 +693,7 @@ h1 {
     justify-content: center;
     border: 1px solid rgba(17, 24, 39, 0.08);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.96);
     color: #111827;
     font-family: Arial, sans-serif;
     font-size: 29px;
@@ -723,6 +774,8 @@ button:focus-visible {
     .modal-details {
         padding: 28px 24px 26px;
         overflow: visible;
+        border-left: 0;
+        border-top: 1px solid #eef1f5;
     }
 
     .modal-prev {
@@ -751,6 +804,10 @@ button:focus-visible {
 
     .description {
         font-size: 18px;
+    }
+
+    .cash-only-inline {
+        font-size: 17px;
     }
 
     .whatsapp-button {
@@ -798,6 +855,10 @@ button:focus-visible {
         min-height: 31px;
         padding: 6px 9px;
         font-size: 12px;
+    }
+
+    .cash-only-note {
+        padding: 8px 10px;
     }
 
     .model-request-box {
@@ -903,6 +964,11 @@ button:focus-visible {
     .modal-price {
         margin: 12px 0;
         font-size: 29px;
+    }
+
+    .modal-payment {
+        margin-bottom: 14px;
+        font-size: 13px;
     }
 
     .modal-description {
