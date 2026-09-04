@@ -177,6 +177,30 @@ h1 {
     filter: grayscale(20%);
 }
 
+/* Fotos locales definitivas */
+#calculators-grid .product:nth-child(2) .product-image,
+#watches-grid .product:nth-child(1) .product-image,
+#watches-grid .product:nth-child(2) .product-image,
+#watches-grid .product:nth-child(3) .product-image {
+    display: none;
+}
+
+#calculators-grid .product:nth-child(2) .product-image-container {
+    background: #fff url("imagenes/fx991_user.jpg") center / contain no-repeat;
+}
+
+#watches-grid .product:nth-child(1) .product-image-container {
+    background: #fff url("imagenes/mistral_w69_user.jpg") center / contain no-repeat;
+}
+
+#watches-grid .product:nth-child(2) .product-image-container {
+    background: #fff url("imagenes/mistral_xy46_user.jpg") center / contain no-repeat;
+}
+
+#watches-grid .product:nth-child(3) .product-image-container {
+    background: #fff url("imagenes/mistral_x052_user.jpg") center / contain no-repeat;
+}
+
 /* WhatsApp flotante */
 .whatsapp-floating {
     position: fixed;
@@ -237,11 +261,6 @@ h1 {
 
 .close:hover {
     color: #bbb;
-}
-
-/* Corrección de imagen FX-991LAPLUS-2 */
-img[alt="FX-991LAPLUS-2"] {
-    content: url("https://http2.mlstatic.com/D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp");
 }
 
 /* Responsividad */
