@@ -93,6 +93,88 @@ h1 {
     margin: 8px 0 22px;
 }
 
+/* Bloques informativos */
+.info-card {
+    max-width: 930px;
+    margin: -4px auto 24px;
+    padding: 16px 20px;
+    border: 1px solid #dfe5ec;
+    border-radius: 14px;
+    background: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: #374151;
+}
+
+.info-card p {
+    margin: 0;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.info-card-title {
+    font-family: 'Audiowide', sans-serif;
+    font-size: 17px !important;
+    color: #1f2937;
+    margin-bottom: 8px !important;
+}
+
+.info-card-tip {
+    margin-top: 8px !important;
+    color: #5f6b78;
+}
+
+/* Consulta por otros modelos */
+.model-request-box {
+    max-width: 930px;
+    margin: 26px auto 4px;
+    padding: 17px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border: 1px solid #d9e7dc;
+    border-radius: 14px;
+    background: #f7fbf8;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.model-request-title {
+    margin: 0 0 5px;
+    font-size: 18px;
+}
+
+.model-request-text {
+    margin: 0;
+    max-width: 650px;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: #4b5563;
+}
+
+.model-request-button {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    background: #25D366;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.model-request-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.17);
+}
+
 /* Cuadrícula de productos */
 .product-grid {
     display: grid;
@@ -290,6 +372,40 @@ h1 {
 
     .catalog-section h2 {
         font-size: 26px;
+    }
+
+    .info-card {
+        margin-bottom: 18px;
+        padding: 14px 15px;
+    }
+
+    .info-card p {
+        font-size: 14px;
+    }
+
+    .info-card-title {
+        font-size: 16px !important;
+    }
+
+    .model-request-box {
+        margin-top: 20px;
+        padding: 15px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .model-request-title {
+        font-size: 17px;
+    }
+
+    .model-request-text {
+        font-size: 14px;
+    }
+
+    .model-request-button {
+        width: 100%;
     }
 
     .product-grid {
