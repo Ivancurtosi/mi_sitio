@@ -4,6 +4,7 @@
   const keyDown = key => { if (!syntheticHeld.has(key)) { syntheticHeld.add(key); dispatchKey('keydown', key); } };
   const keyUp = key => { if (syntheticHeld.delete(key)) dispatchKey('keyup', key); };
 
+  window.__rockRunHeld = false;
   const controlHeld = new Set();
   const sendControl = (name, on) => {
     const token = `touch:${name}`;
@@ -13,12 +14,15 @@
       else if (!on && controlHeld.delete(name)) bridge(name, false, token);
       return true;
     }
-    // Fallback only while an old cached game bundle is still loading.
     const key = name === 'left' ? 'ArrowLeft' : name === 'right' ? 'ArrowRight' : name === 'down' ? 'ArrowDown' : name === 'jump' ? ' ' : name === 'action' ? 'Shift' : null;
     if (key) on ? keyDown(key) : keyUp(key);
     return false;
   };
   const releaseMove = () => ['left','right','down'].forEach(name => sendControl(name, false));
+  const setRun = on => {
+    window.__rockRunHeld = !!on;
+    sendControl('action', !!on);
+  };
 
   function installAnalog() {
     const move = document.querySelector('.move-controls');
@@ -33,7 +37,6 @@
 
     const knob = analog.querySelector('.rock-analog-knob');
     let activeId = null;
-
     const update = ev => {
       const r = analog.getBoundingClientRect();
       const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -46,7 +49,7 @@
       sendControl('left', nx < -0.22);
       sendControl('right', nx > 0.22);
       sendControl('down', ny > 0.42);
-      window.__rockAnalogDebug = { nx, ny, bridge: typeof window.__rockControl === 'function', held: [...controlHeld] };
+      window.__rockAnalogDebug = { nx, ny, bridge: typeof window.__rockControl === 'function', held: [...controlHeld], run: window.__rockRunHeld };
     };
     const finish = ev => {
       if (activeId !== null && ev.pointerId !== activeId) return;
@@ -79,7 +82,7 @@
     run.addEventListener('pointerdown', ev => {
       runPointer = ev.pointerId;
       slideJump = false;
-      sendControl('action', true);
+      setRun(true);
     }, { capture: true, passive: false });
 
     document.addEventListener('pointermove', ev => {
@@ -96,7 +99,7 @@
     const end = ev => {
       if (ev.pointerId !== runPointer) return;
       runPointer = null;
-      sendControl('action', false);
+      setRun(false);
       if (slideJump) sendControl('jump', false);
       slideJump = false;
       jump.classList.remove('slide-jump-active');
@@ -105,9 +108,14 @@
     document.addEventListener('pointercancel', end, { capture: true });
   }
 
+  const releaseAll = () => {
+    releaseMove();
+    setRun(false);
+    sendControl('jump', false);
+  };
   const install = () => { installAnalog(); installRunSlide(); };
   new MutationObserver(install).observe(document.documentElement, { childList: true, subtree: true });
   install();
-  window.addEventListener('blur', () => { releaseMove(); sendControl('action', false); sendControl('jump', false); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseMove(); sendControl('action', false); sendControl('jump', false); } });
+  window.addEventListener('blur', releaseAll);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 })();
