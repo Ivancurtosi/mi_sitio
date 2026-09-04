@@ -5,21 +5,23 @@ on:
     paths:
       - '.github/workflows/smoke-salto-rock.yml'
       - 'salto-cosmico-rock/rock-tour-updates.css'
+      - 'salto-cosmico-rock/rock-tour-controls.js'
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify published assets and viewport fix
+      - name: Verify published assets and mobile fixes
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           ok=0
           for i in {1..30}; do
-            if curl -fsSL "${url}rock-tour-updates.css?android=3" -o /tmp/updates.css \
+            if curl -fsSL "${url}rock-tour-updates.css?analog=1" -o /tmp/updates.css \
               && grep -q 'position: fixed !important' /tmp/updates.css \
-              && curl -fsSL "${url}mount.js?android=3" -o /tmp/mount.js \
+              && grep -q 'pointer-events: auto !important' /tmp/updates.css \
+              && curl -fsSL "${url}mount.js?analog=1" -o /tmp/mount.js \
               && grep -q 'hydrateRoot' /tmp/mount.js; then
               ok=1
               break
@@ -27,10 +29,10 @@ jobs:
             sleep 4
           done
           test "$ok" = 1
-          curl -fsSL "${url}?android=3" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?android=3" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?android=3" -o /tmp/hero.webp
-          curl -fsSL "${url}audio/track1.mp3?android=3" -o /tmp/track1.mp3
+          curl -fsSL "${url}?analog=1" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?analog=1" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?analog=1" -o /tmp/hero.webp
+          curl -fsSL "${url}audio/track1.mp3?analog=1" -o /tmp/track1.mp3
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
@@ -38,13 +40,13 @@ jobs:
           test -s /tmp/hero.webp
           test -s /tmp/track1.mp3
 
-      - name: Verify Android landscape touch interaction
+      - name: Verify Android landscape start and analog input
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-landscape=3'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-analog=1'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
@@ -82,24 +84,33 @@ jobs:
                   except Exception: pass
                   time.sleep(.25)
               else: raise RuntimeError('No hidrato en Android landscape')
-              dims=ev("({iw:innerWidth,ih:innerHeight,root:document.getElementById('root').getBoundingClientRect().height,shell:document.querySelector('.game-shell').getBoundingClientRect().height,ori:screen.orientation&&screen.orientation.type})")
-              diag.append('DIMS='+repr(dims))
+              dims=ev("({iw:innerWidth,ih:innerHeight,shell:document.querySelector('.game-shell').getBoundingClientRect().height})")
               if abs(dims['shell']-dims['ih'])>2: raise RuntimeError('Game shell no coincide con viewport')
-              box=ev("(()=>{const e=document.querySelector('.play-btn');if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,top:r.top,bottom:r.bottom}})()")
-              diag.append('PLAYBOX='+repr(box))
-              if not box or box['y']<0 or box['y']>dims['ih']: raise RuntimeError('Boton fuera del viewport landscape')
-              x,y=box['x'],box['y']
-              call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y,'radiusX':3,'radiusY':3,'force':1}]})
+              box=ev("(()=>{const e=document.querySelector('.play-btn');const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()")
+              call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':box['x'],'y':box['y'],'radiusX':3,'radiusY':3,'force':1}]})
               call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
               deadline=time.time()+8
               while time.time()<deadline:
                   if ev("!!document.querySelector('.rock-analog')"): break
                   time.sleep(.2)
-              else: raise RuntimeError('El toque Android landscape no inicia el juego')
-              assert ev("!!document.querySelector('.action-btn')")
-              assert ev("!!document.querySelector('.jump-btn')")
-              assert ev("!!document.querySelector('.game-canvas')")
-              diag.append('ANDROID_LANDSCAPE_TOUCH_OK')
+              else: raise RuntimeError('No inicio el juego')
+
+              ev("window.__analogKeys=[]; window.addEventListener('keydown', e=>window.__analogKeys.push(e.key)); true")
+              abox=ev("(()=>{const e=document.querySelector('.rock-analog');const r=e.getBoundingClientRect();return {left:r.left,top:r.top,w:r.width,h:r.height,pe:getComputedStyle(e).pointerEvents}})()")
+              diag.append('ANALOG='+repr(abox))
+              if abox['pe']!='auto': raise RuntimeError('Analog sigue sin recibir pointer events')
+              ax=abox['left']+abox['w']*.82; ay=abox['top']+abox['h']*.50
+              hit=ev(f"document.elementFromPoint({ax},{ay})?.closest('.rock-analog')?.className || ''")
+              if 'rock-analog' not in hit: raise RuntimeError('El analogico no es target tactil')
+              call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':ax,'y':ay,'radiusX':4,'radiusY':4,'force':1}]})
+              time.sleep(.35)
+              transform=ev("document.querySelector('.rock-analog-knob').style.transform")
+              keys=ev("window.__analogKeys.slice()")
+              diag.append('TRANSFORM='+repr(transform)+' KEYS='+repr(keys))
+              if not transform or '0px, 0px' in transform: raise RuntimeError('La palanca no se mueve')
+              if 'ArrowRight' not in keys: raise RuntimeError('El analogico no envia movimiento a la derecha')
+              call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+              diag.append('ANDROID_ANALOG_OK')
           except Exception:
               diag.append('TRACEBACK:\n'+traceback.format_exc()); raise
           finally:
