@@ -201,6 +201,24 @@ h1 {
     background: #fff url("imagenes/mistral_x052_user.jpg") center / contain no-repeat;
 }
 
+/* El zoom también usa las fotos locales de buena calidad */
+#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"],
+#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"] {
+    content: url("imagenes/fx991_user.jpg");
+}
+
+#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"] {
+    content: url("imagenes/mistral_w69_user.jpg");
+}
+
+#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"] {
+    content: url("imagenes/mistral_xy46_user.jpg");
+}
+
+#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"] {
+    content: url("imagenes/mistral_x052_user.jpg");
+}
+
 /* WhatsApp flotante */
 .whatsapp-floating {
     position: fixed;
