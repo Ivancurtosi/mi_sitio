@@ -1,0 +1,290 @@
+name: Build Salto Cosmico Rock
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-salto-rock.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-rock-tour:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore original Rock Tour files
+        shell: bash
+        run: |
+          set -euo pipefail
+          out='salto-cosmico-rock'
+          assets="$out/assets"
+          rm -rf "$out"
+          mkdir -p "$assets" "$out/audio"
+          base='https://salto-cosmico.ivancurtosi.chatgpt.site/assets'
+
+          curl -fL --retry 3 "$base/index-BKMDMKjr.css" -o "$assets/index-BKMDMKjr.css"
+          curl -fL --retry 3 "$base/rolldown-runtime-S-ySWqyJ.js" -o "$assets/rolldown-runtime-S-ySWqyJ.js"
+          curl -fL --retry 3 "$base/framework-CXnKph_e.js" -o "$assets/framework-CXnKph_e.js"
+          curl -fL --retry 3 "$base/cosmic-jump-DkePWGqE.js" -o "$assets/cosmic-jump-DkePWGqE.js"
+
+          for f in \
+            rock-concert.webp metal-wasteland.webp metal-forge.webp prism-cavern.png \
+            metal-storm.webp dawn-isles.png lumi-atlas.webp lumi-atlas.png \
+            rock-hero.webp rock-props.webp; do
+            curl -fL --retry 3 "$base/$f" -o "$assets/$f"
+          done
+
+          cp salto-cosmico/audio/track1.mp3 "$out/audio/track1.mp3"
+          cp salto-cosmico/audio/track2.mp3 "$out/audio/track2.mp3"
+          cp salto-cosmico/audio/track3.mp3 "$out/audio/track3.mp3"
+          cp salto-cosmico/audio/track4.mp3 "$out/audio/track4.mp3"
+          cp salto-cosmico/audio/track5.mp3 "$out/audio/track5.mp3"
+
+      - name: Apply only requested gameplay changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = p.read_text(encoding='utf-8')
+
+          # 1) Better clearance for the grown character under the original low blocks.
+          assert 'crouched:40' in s
+          s = s.replace('crouched:40', 'crouched:34', 1)
+
+          # 2) Slightly higher jump when moving at full running speed.
+          assert 'fastJumpVelocity:-850' in s
+          s = s.replace('fastJumpVelocity:-850', 'fastJumpVelocity:-890', 1)
+
+          # 3) Keep every original visual asset, only make paths work inside GitHub Pages.
+          s = s.replace('`/assets/', '`./assets/')
+          old_link = 'b=`https://salto-cosmico.ivancurtosi.chatgpt.site`'
+          assert old_link in s
+          s = s.replace(old_link, 'b=window.location.href.split(`#`)[0]', 1)
+
+          # 4) Replace only the procedural background-music engine with the 5-song playlist.
+          old_music = 'startMusic(e,t=!1){this.ensure();let n=t?`rush`:e;this.currentTheme!==n&&(this.stopMusic(),!(this.muted||!this.ctx)&&(this.currentTheme=n,this.band??=new s(this.ctx),this.band.start(n)))}stopMusic(){this.band?.stop(),this.currentTheme=null}setMuted(e){this.muted=e,e&&this.stopMusic()}'
+          new_music = 'startMusic(e,t=!1){this.ensure(),this.currentTheme=t?`rush`:e,this.muted||window.__rockPlaylist?.play()}stopMusic(){window.__rockPlaylist?.pause(),this.band?.stop(),this.currentTheme=null}setMuted(e){this.muted=e,window.__rockPlaylist?.setMuted(e),e&&this.stopMusic()}'
+          assert old_music in s
+          s = s.replace(old_music, new_music, 1)
+
+          p.write_text(s, encoding='utf-8')
+
+          css = Path('salto-cosmico-rock/assets/index-BKMDMKjr.css')
+          c = css.read_text(encoding='utf-8').replace('url(/assets/', 'url(./')
+          css.write_text(c, encoding='utf-8')
+          PY
+
+      - name: Add standalone launcher and touch enhancements
+        shell: bash
+        run: |
+          cat > salto-cosmico-rock/index.html <<'EOF'
+          <!doctype html>
+          <html lang="es">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+            <meta name="theme-color" content="#050506">
+            <title>Salto Cósmico: Rock Tour</title>
+            <link rel="stylesheet" href="./assets/index-BKMDMKjr.css">
+            <link rel="stylesheet" href="./rock-tour-updates.css">
+          </head>
+          <body>
+            <div id="root"></div>
+            <script type="module" src="./mount.js"></script>
+          </body>
+          </html>
+          EOF
+
+          cat > salto-cosmico-rock/mount.js <<'EOF'
+          import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
+          import RockTour from './assets/cosmic-jump-DkePWGqE.js';
+
+          const tracks = [1,2,3,4,5].map(n => new URL(`./audio/track${n}.mp3`, window.location.href).href);
+          const audio = new Audio();
+          audio.preload = 'auto';
+          audio.volume = 0.48;
+          let index = 0;
+          let muted = false;
+
+          function loadTrack() {
+            const wasPlaying = !audio.paused;
+            audio.src = tracks[index];
+            audio.load();
+            if (wasPlaying && !muted) audio.play().catch(() => {});
+          }
+          audio.addEventListener('ended', () => {
+            index = (index + 1) % tracks.length;
+            audio.src = tracks[index];
+            audio.play().catch(() => {});
+          });
+          audio.addEventListener('error', () => {
+            index = (index + 1) % tracks.length;
+            setTimeout(() => {
+              audio.src = tracks[index];
+              if (!muted) audio.play().catch(() => {});
+            }, 250);
+          });
+          audio.src = tracks[index];
+
+          window.__rockPlaylist = {
+            play() {
+              if (muted) return;
+              if (!audio.src) loadTrack();
+              audio.play().catch(() => {});
+            },
+            pause() { audio.pause(); },
+            setMuted(value) {
+              muted = !!value;
+              audio.muted = muted;
+              if (muted) audio.pause();
+            }
+          };
+
+          const React = reactFactory();
+          const ReactDOM = reactDomFactory();
+          ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(RockTour));
+          await import('./rock-tour-controls.js');
+          EOF
+
+          cat > salto-cosmico-rock/rock-tour-controls.js <<'EOF'
+          (() => {
+            const syntheticHeld = new Set();
+            const dispatchKey = (type, key) => window.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true, cancelable: true }));
+            const down = key => { if (!syntheticHeld.has(key)) { syntheticHeld.add(key); dispatchKey('keydown', key); } };
+            const up = key => { if (syntheticHeld.delete(key)) dispatchKey('keyup', key); };
+            const setKey = (key, on) => on ? down(key) : up(key);
+            const releaseMove = () => ['ArrowLeft','ArrowRight','ArrowDown'].forEach(up);
+
+            function installAnalog() {
+              const move = document.querySelector('.move-controls');
+              if (!move || move.dataset.analogReady) return;
+              move.dataset.analogReady = '1';
+
+              const analog = document.createElement('div');
+              analog.className = 'rock-analog';
+              analog.setAttribute('aria-label', 'Control analógico');
+              analog.innerHTML = '<div class="rock-analog-ring"><span class="rock-analog-down">▼</span></div><div class="rock-analog-knob"></div>';
+              move.appendChild(analog);
+
+              const knob = analog.querySelector('.rock-analog-knob');
+              let activeId = null;
+
+              const update = ev => {
+                const r = analog.getBoundingClientRect();
+                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                let dx = ev.clientX - cx, dy = ev.clientY - cy;
+                const max = r.width * 0.31;
+                const len = Math.hypot(dx, dy) || 1;
+                if (len > max) { dx *= max / len; dy *= max / len; }
+                knob.style.transform = `translate(${dx}px, ${dy}px)`;
+                const nx = dx / max, ny = dy / max;
+                setKey('ArrowLeft', nx < -0.28);
+                setKey('ArrowRight', nx > 0.28);
+                setKey('ArrowDown', ny > 0.44);
+              };
+              const finish = ev => {
+                if (activeId !== null && ev.pointerId !== activeId) return;
+                activeId = null;
+                knob.style.transform = 'translate(0px, 0px)';
+                releaseMove();
+              };
+              analog.addEventListener('pointerdown', ev => {
+                ev.preventDefault();
+                activeId = ev.pointerId;
+                analog.setPointerCapture(ev.pointerId);
+                update(ev);
+              });
+              analog.addEventListener('pointermove', ev => { if (ev.pointerId === activeId) update(ev); });
+              analog.addEventListener('pointerup', finish);
+              analog.addEventListener('pointercancel', finish);
+              analog.addEventListener('lostpointercapture', finish);
+            }
+
+            let runPointer = null;
+            let slideJump = false;
+            function installRunSlide() {
+              const run = document.querySelector('.action-btn');
+              const jump = document.querySelector('.jump-btn');
+              if (!run || !jump || run.dataset.slideReady) return;
+              run.dataset.slideReady = '1';
+
+              run.addEventListener('pointerdown', ev => {
+                runPointer = ev.pointerId;
+                slideJump = false;
+              }, { capture: true });
+
+              document.addEventListener('pointermove', ev => {
+                if (ev.pointerId !== runPointer || slideJump) return;
+                const r = jump.getBoundingClientRect();
+                if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) {
+                  slideJump = true;
+                  down(' ');
+                  jump.classList.add('slide-jump-active');
+                  if (navigator.vibrate) navigator.vibrate(18);
+                }
+              }, { capture: true, passive: true });
+
+              const end = ev => {
+                if (ev.pointerId !== runPointer) return;
+                runPointer = null;
+                if (slideJump) up(' ');
+                slideJump = false;
+                jump.classList.remove('slide-jump-active');
+              };
+              document.addEventListener('pointerup', end, { capture: true });
+              document.addEventListener('pointercancel', end, { capture: true });
+            }
+
+            const install = () => { installAnalog(); installRunSlide(); };
+            new MutationObserver(install).observe(document.documentElement, { childList: true, subtree: true });
+            install();
+            window.addEventListener('blur', () => { releaseMove(); up(' '); });
+            document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseMove(); up(' '); } });
+          })();
+          EOF
+
+          cat > salto-cosmico-rock/rock-tour-updates.css <<'EOF'
+          .move-controls { position: relative !important; width: 150px !important; height: 150px !important; display: block !important; }
+          .move-controls > .control-btn { display: none !important; }
+          .rock-analog { position: absolute; left: 0; bottom: 0; width: 150px; height: 150px; border-radius: 50%; touch-action: none; user-select: none; -webkit-user-select: none; }
+          .rock-analog-ring { position: absolute; inset: 15px; border-radius: 50%; border: 2px solid rgba(255,255,255,.38); background: radial-gradient(circle, rgba(31,25,28,.5) 0 48%, rgba(9,7,9,.78) 76%); box-shadow: inset 0 0 22px rgba(255,80,36,.18), 0 8px 28px rgba(0,0,0,.35); }
+          .rock-analog-knob { position: absolute; width: 58px; height: 58px; left: 46px; top: 46px; border-radius: 50%; border: 2px solid rgba(255,232,205,.75); background: radial-gradient(circle at 35% 28%, #a44a35, #4c2425 62%, #1b1518 100%); box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 0 0 3px rgba(255,117,55,.16); pointer-events: none; transition: transform .045s linear; }
+          .rock-analog-down { position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); font: 800 13px/1 ui-monospace, monospace; color: rgba(255,225,190,.68); }
+          .jump-btn.slide-jump-active { transform: scale(.94); filter: brightness(1.22); }
+          @media (max-height: 560px) {
+            .move-controls, .rock-analog { width: 132px !important; height: 132px !important; }
+            .rock-analog-ring { inset: 13px; }
+            .rock-analog-knob { width: 52px; height: 52px; left: 40px; top: 40px; }
+          }
+          EOF
+
+      - name: Validate static game
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s salto-cosmico-rock/assets/rock-hero.webp
+          test -s salto-cosmico-rock/assets/rock-props.webp
+          test -s salto-cosmico-rock/audio/track1.mp3
+          test -s salto-cosmico-rock/audio/track5.mp3
+          grep -q 'crouched:34' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'fastJumpVelocity:-890' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q '__rockPlaylist' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'rock-analog' salto-cosmico-rock/rock-tour-controls.js
+          node --check salto-cosmico-rock/mount.js
+          node --check salto-cosmico-rock/rock-tour-controls.js
+
+      - name: Commit playable Rock Tour
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish original Rock Tour with music and touch updates [skip ci]'
+            git push
+          fi
