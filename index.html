@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Merchandising UTN Haedo: productos institucionales, calculadoras Casio y smartwatches Mistral con precios especiales para estudiantes.">
+    <meta name="theme-color" content="#111827">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Merchandising UTN Haedo">
+    <meta property="og:description" content="Productos UTN, calculadoras Casio y smartwatches Mistral con precios especiales para estudiantes.">
+    <meta property="og:url" content="https://merchandisingutnfrh.netlify.app/">
+    <meta property="og:image" content="https://merchandisingutnfrh.netlify.app/imagenes/logo_utn.png">
+    <meta property="og:image:alt" content="Merchandising UTN Haedo">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Merchandising UTN Haedo">
+    <meta name="twitter:description" content="Productos UTN, calculadoras Casio y smartwatches Mistral con precios especiales para estudiantes.">
+    <meta name="twitter:image" content="https://merchandisingutnfrh.netlify.app/imagenes/logo_utn.png">
+
     <title>Merchandising UTN Haedo</title>
+    <link rel="icon" type="image/png" href="imagenes/logo_utn.png">
+    <link rel="apple-touch-icon" href="imagenes/logo_utn.png">
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -33,42 +50,52 @@
 
         <h1>Merchandising UTN Haedo</h1>
 
-        <section class="catalog-section">
+        <nav class="section-nav" aria-label="Secciones del catálogo">
+            <a href="#merchandising">Merchandising</a>
+            <a href="#calculadoras">Calculadoras</a>
+            <a href="#smartwatches">Smartwatches</a>
+        </nav>
+
+        <section class="catalog-section" id="merchandising">
             <h2>Merchandising UTN</h2>
             <div class="product-grid" id="merch-grid" aria-live="polite"></div>
         </section>
 
-        <section class="catalog-section">
+        <section class="catalog-section" id="calculadoras">
             <h2>Calculadoras Casio</h2>
 
             <div class="info-card">
-                <p class="info-card-title">Beneficio para estudiantes</p>
-                <p>
-                    La UTN Facultad Regional Haedo cuenta con un convenio con Casio que nos permite ofrecer
-                    <strong>precios diferenciales para estudiantes</strong>. Las calculadoras publicadas son
-                    productos oficiales distribuidos por Casio y cuentan con <strong>6 meses de garantía</strong>.
+                <p class="info-card-title">Beneficios del convenio</p>
+                <div class="benefit-chips" aria-label="Beneficios de las calculadoras">
+                    <span class="benefit-chip">✓ 6 meses de garantía</span>
+                    <span class="benefit-chip">★ Precio especial estudiantes</span>
+                    <span class="benefit-chip">🤝 Convenio UTN Haedo + Casio</span>
+                </div>
+                <p class="info-card-text">
+                    Las calculadoras publicadas son productos oficiales distribuidos por Casio. Gracias al convenio,
+                    podemos ofrecer un precio diferenciado para estudiantes.
                 </p>
                 <p class="info-card-tip">
-                    Antes de elegir un modelo, recomendamos mirar una review en video para conocer mejor sus
-                    funciones y elegir la calculadora que más se adapte a lo que necesitás.
+                    ▶ Recomendamos mirar una review en video antes de elegir para conocer mejor las funciones de cada modelo.
                 </p>
             </div>
 
             <div class="product-grid" id="calculators-grid" aria-live="polite"></div>
         </section>
 
-        <section class="catalog-section catalog-section-last">
+        <section class="catalog-section catalog-section-last" id="smartwatches">
             <h2>Smartwatches Mistral</h2>
 
             <div class="info-card">
                 <p class="info-card-title">Información importante</p>
-                <p>
-                    Los smartwatches publicados cuentan con <strong>6 meses de garantía</strong> y tienen
-                    <strong>precio especial para estudiantes</strong>.
-                </p>
-                <p class="info-card-tip">
-                    Antes de comprar, recomendamos mirar una review en video del modelo que te interese para
-                    conocer con más detalle sus funciones, compatibilidad, autonomía y características.
+                <div class="benefit-chips" aria-label="Beneficios de los smartwatches">
+                    <span class="benefit-chip">✓ 6 meses de garantía</span>
+                    <span class="benefit-chip">★ Precio especial estudiantes</span>
+                    <span class="benefit-chip">▶ Reviews recomendadas</span>
+                </div>
+                <p class="info-card-text">
+                    Antes de comprar, recomendamos mirar una review del modelo que te interese para conocer con más detalle
+                    sus funciones, compatibilidad, autonomía y características.
                 </p>
             </div>
 
@@ -105,12 +132,42 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="">
     </a>
 
-    <div id="modal" class="modal" aria-hidden="true">
-        <button class="close" type="button" aria-label="Cerrar imagen" onclick="closeModal()">&times;</button>
-        <img class="modal-content" id="modal-image" alt="Imagen ampliada del producto">
+    <div id="product-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-panel" role="document">
+            <button class="modal-close" id="modal-close" type="button" aria-label="Cerrar ficha">&times;</button>
+
+            <button class="modal-nav modal-prev" id="modal-prev" type="button" aria-label="Producto anterior">‹</button>
+            <button class="modal-nav modal-next" id="modal-next" type="button" aria-label="Producto siguiente">›</button>
+
+            <div class="modal-media">
+                <span class="modal-stock" id="modal-stock" hidden>AGOTADO</span>
+                <img id="modal-image" alt="Imagen ampliada del producto">
+            </div>
+
+            <div class="modal-details">
+                <p class="modal-category" id="modal-category"></p>
+                <h2 id="modal-title"></h2>
+                <p class="modal-price" id="modal-price"></p>
+                <div class="modal-badges" id="modal-badges"></div>
+                <p class="modal-description" id="modal-description"></p>
+
+                <div class="modal-actions">
+                    <a id="modal-whatsapp" class="modal-whatsapp" target="_blank" rel="noopener noreferrer">
+                        Consultar por WhatsApp
+                    </a>
+                    <a id="modal-review" class="modal-review" target="_blank" rel="noopener noreferrer" hidden>
+                        ▶ Ver reviews
+                    </a>
+                </div>
+
+                <p class="modal-keyboard-hint">Podés usar ← y → para recorrer los productos.</p>
+            </div>
+        </div>
     </div>
 
     <script>
+        const WHATSAPP_NUMBER = '5491158449552';
+
         const merchProducts = [
             { name: 'Jarro térmico', price: 5500, image: 'imagenes/producto1.jpeg' },
             { name: 'Botella Hoppy', price: 10000, image: 'imagenes/producto2.jpeg', soldOut: true },
@@ -137,18 +194,21 @@
                 name: 'FX-570LAPLUS-2',
                 price: 50000,
                 image: 'https://www.casio.com/content/dam/casio/product-info/locales/latin/es-ar/calc/product/scientific/F/FX/FX5/fx-570LAPLUS-2/assets/fx-570LAPLUS-2_Seq1.jpg.transform/main-visual-sp/image.jpg',
+                reviewUrl: 'https://www.youtube.com/results?search_query=Casio+FX-570LA+PLUS-2+review',
                 description: 'Esta calculadora es la mejor relación costo beneficio ya que además de las funciones clásicas incluye: Integrales // Derivadas // Matrices // Complejos // Cambio de Base.'
             },
             {
                 name: 'FX-991LAPLUS-2',
                 price: 56000,
                 image: 'https://www.casio.com/content/dam/casio/product-info/locales/latin/es-ar/calc/product/scientific/F/FX/FX9/fx-991LAPLUS-2/assets/fx-991LAPLUS-2_Seq1.jpg.transform/main-visual-sp/image.jpg',
+                reviewUrl: 'https://www.youtube.com/results?search_query=Casio+FX-991LA+PLUS-2+review',
                 description: 'Es una reversión de la 570. Cuenta con una carcaza más compacta, alimentación alternativa por panel solar y una mayor vida útil de la batería.'
             },
             {
                 name: 'FX-7400GIII',
                 price: 140000,
                 image: 'https://www.casio.com/content/dam/casio/product-info/locales/mx/es-ar/calc/product/scientific/F/FX/FX7/fx-7400GIII/assets/fx-7400GIII_Seq1.jpg.transform/main-visual-sp/image.jpg',
+                reviewUrl: 'https://www.youtube.com/watch?v=-qad012zU7c',
                 description: 'Este modelo cuenta con capacidades gráficas además de las funciones de los otros modelos disponibles. También se puede programar para la resolución de funciones en CASIO Basic. A tener en cuenta que este tipo de calculadoras (graficadoras) no se admiten en exámenes.'
             }
         ];
@@ -158,79 +218,225 @@
                 name: 'Smartwatch Mistral SMT-W69MN-01',
                 price: 77000,
                 image: 'https://acdn-us.mitiendanube.com/stores/917/694/products/smt-w69mn-01-b384dd804326a47e6c17384379887798-1024-1024.webp',
+                reviewUrl: 'https://www.youtube.com/results?search_query=Mistral+SMT-W69MN-01+review',
                 description: 'Reloj inteligente con pantalla táctil HD de 1.95″, resistente al agua (IP68), GPS integrado y sensores de salud (frecuencia cardíaca, presión arterial, SpO2 y ECG). Permite hacer y recibir llamadas por Bluetooth, controlar música y viene con correas intercambiables + funda protectora. Ideal para el día a día o entrenamientos.'
             },
             {
                 name: 'Smartwatch Mistral SMT-XY46-09',
                 price: 70000,
                 image: 'imagenes/mistral_xy46_user.jpg',
+                reviewUrl: 'https://www.youtube.com/results?search_query=Mistral+SMT-XY46-09+review',
                 description: 'Pantalla táctil de 1.86″, resistencia IP67 y batería de larga duración. Mide frecuencia cardíaca, presión, oxígeno en sangre y sueño. Recibe notificaciones, atiende llamadas por Bluetooth y tiene modo deportivo. Ideal para el día a día y entrenamientos.'
             },
             {
                 name: 'Smartwatch Mistral SMT-X052-02',
                 price: 54000,
                 image: 'imagenes/mistral_x052_user.jpg',
+                reviewUrl: 'https://www.youtube.com/results?search_query=Mistral+SMT-X052-02+review',
                 description: 'Pantalla táctil de 1.47″ (172×320 px), caja de acero inoxidable con correa de silicona/resina y flash de 64 MB; se conecta por Bluetooth (2.0 + BLE 5.0) y tiene GPS integrado; sensores de ritmo cardíaco, presión arterial, SpO₂, temperatura, podómetro y monitoreo de sueño, además de modos multideporte, cronómetro, alarmas, recordatorio de hidratación/sedentarismo, control de música y cámara; viene con resistencia al agua y polvo (IP67) y garantía oficial.'
             }
         ];
 
+        const productGroups = {
+            merch: {
+                label: 'Merchandising UTN',
+                products: merchProducts,
+                benefits: []
+            },
+            calculators: {
+                label: 'Calculadoras Casio',
+                products: calculatorProducts,
+                benefits: ['6 meses de garantía', 'Precio especial estudiantes', 'Convenio UTN + Casio']
+            },
+            watches: {
+                label: 'Smartwatches Mistral',
+                products: watchProducts,
+                benefits: ['6 meses de garantía', 'Precio especial estudiantes']
+            }
+        };
+
         const priceFormatter = new Intl.NumberFormat('es-AR');
 
-        function renderProducts(gridId, products) {
+        function renderProducts(gridId, products, groupKey) {
             const grid = document.getElementById(gridId);
 
-            grid.innerHTML = products.map((product) => `
+            grid.innerHTML = products.map((product, index) => `
                 <article class="product${product.soldOut ? ' sold-out' : ''}">
                     <p class="product-name">${product.name}</p>
                     <button
-                        class="product-image-button"
+                        class="product-image-button js-open-product"
                         type="button"
-                        aria-label="Ver imagen ampliada de ${product.name}"
-                        onclick="openModal('${product.image}', '${product.name}')"
+                        aria-label="Ver ficha de ${product.name}"
+                        data-group="${groupKey}"
+                        data-index="${index}"
                     >
                         <span class="product-image-container">
                             ${product.soldOut ? '<span class="stock-badge">AGOTADO</span>' : ''}
                             <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
+                            <span class="zoom-hint" aria-hidden="true">Ampliar</span>
                         </span>
                     </button>
                     <p class="price">$${priceFormatter.format(product.price)}</p>
                     ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
+                    ${product.reviewUrl ? `
+                        <a class="review-button" href="${product.reviewUrl}" target="_blank" rel="noopener noreferrer">
+                            ▶ Ver reviews
+                        </a>
+                    ` : ''}
                 </article>
             `).join('');
         }
 
-        function openModal(imageSrc, productName = 'Producto') {
-            const modal = document.getElementById('modal');
-            const modalImage = document.getElementById('modal-image');
-            modalImage.src = imageSrc;
-            modalImage.alt = productName;
-            modal.style.display = 'flex';
+        const modal = document.getElementById('product-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalCategory = document.getElementById('modal-category');
+        const modalTitle = document.getElementById('modal-title');
+        const modalPrice = document.getElementById('modal-price');
+        const modalBadges = document.getElementById('modal-badges');
+        const modalDescription = document.getElementById('modal-description');
+        const modalStock = document.getElementById('modal-stock');
+        const modalWhatsapp = document.getElementById('modal-whatsapp');
+        const modalReview = document.getElementById('modal-review');
+        const modalClose = document.getElementById('modal-close');
+        const modalPrev = document.getElementById('modal-prev');
+        const modalNext = document.getElementById('modal-next');
+
+        let activeGroupKey = null;
+        let activeProductIndex = -1;
+        let lastFocusedElement = null;
+
+        function buildWhatsappUrl(product) {
+            const message = product.soldOut
+                ? `Hola, vi ${product.name} en la página de Merchandising UTN Haedo. Figura agotado y quería consultar si va a volver a ingresar.`
+                : `Hola, vi ${product.name} en la página de Merchandising UTN Haedo y quería consultar por este producto.`;
+
+            return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+        }
+
+        function showProduct(groupKey, index) {
+            const group = productGroups[groupKey];
+            if (!group) return;
+
+            const total = group.products.length;
+            const safeIndex = (index + total) % total;
+            const product = group.products[safeIndex];
+
+            activeGroupKey = groupKey;
+            activeProductIndex = safeIndex;
+
+            modalImage.src = product.image;
+            modalImage.alt = product.name;
+            modalCategory.textContent = group.label;
+            modalTitle.textContent = product.name;
+            modalPrice.textContent = `$${priceFormatter.format(product.price)}`;
+            modalDescription.textContent = product.description || (product.soldOut
+                ? 'Actualmente figura agotado. Podés consultarnos por WhatsApp para saber si vuelve a ingresar.'
+                : 'Disponible para consultar y retirar en la fotocopiadora de la facultad.');
+
+            modalBadges.innerHTML = group.benefits
+                .map((benefit) => `<span>${benefit}</span>`)
+                .join('');
+
+            modalStock.hidden = !product.soldOut;
+            modalWhatsapp.href = buildWhatsappUrl(product);
+
+            if (product.reviewUrl) {
+                modalReview.href = product.reviewUrl;
+                modalReview.hidden = false;
+            } else {
+                modalReview.hidden = true;
+                modalReview.removeAttribute('href');
+            }
+
+            const hasMultiple = total > 1;
+            modalPrev.hidden = !hasMultiple;
+            modalNext.hidden = !hasMultiple;
+        }
+
+        function openProductModal(groupKey, index) {
+            lastFocusedElement = document.activeElement;
+            showProduct(groupKey, index);
+            modal.classList.add('is-open');
             modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+            requestAnimationFrame(() => modalClose.focus());
         }
 
-        function closeModal() {
-            const modal = document.getElementById('modal');
-            const modalImage = document.getElementById('modal-image');
-            modal.style.display = 'none';
+        function closeProductModal() {
+            if (!modal.classList.contains('is-open')) return;
+
+            modal.classList.remove('is-open');
             modal.setAttribute('aria-hidden', 'true');
-            modalImage.removeAttribute('src');
+            document.body.classList.remove('modal-open');
+
+            setTimeout(() => {
+                if (!modal.classList.contains('is-open')) {
+                    modalImage.removeAttribute('src');
+                }
+            }, 220);
+
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
         }
 
-        document.getElementById('modal').addEventListener('click', (event) => {
-            if (event.target.id === 'modal') {
-                closeModal();
+        function navigateModal(direction) {
+            if (!activeGroupKey) return;
+            showProduct(activeGroupKey, activeProductIndex + direction);
+        }
+
+        document.addEventListener('click', (event) => {
+            const opener = event.target.closest('.js-open-product');
+            if (!opener) return;
+
+            openProductModal(opener.dataset.group, Number(opener.dataset.index));
+        });
+
+        modalClose.addEventListener('click', closeProductModal);
+        modalPrev.addEventListener('click', () => navigateModal(-1));
+        modalNext.addEventListener('click', () => navigateModal(1));
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeProductModal();
             }
         });
 
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
+            if (!modal.classList.contains('is-open')) return;
+
+            if (event.key === 'Escape') closeProductModal();
+            if (event.key === 'ArrowLeft') navigateModal(-1);
+            if (event.key === 'ArrowRight') navigateModal(1);
         });
 
-        renderProducts('merch-grid', merchProducts);
-        renderProducts('calculators-grid', calculatorProducts);
-        renderProducts('watches-grid', watchProducts);
+        function setupScrollReveal() {
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const targets = document.querySelectorAll('.catalog-section, .info-card, .model-request-box, .product');
+
+            if (reduceMotion || !('IntersectionObserver' in window)) {
+                targets.forEach((target) => target.classList.add('is-visible'));
+                return;
+            }
+
+            targets.forEach((target) => target.classList.add('reveal'));
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -30px' });
+
+            targets.forEach((target) => observer.observe(target));
+        }
+
+        renderProducts('merch-grid', merchProducts, 'merch');
+        renderProducts('calculators-grid', calculatorProducts, 'calculators');
+        renderProducts('watches-grid', watchProducts, 'watches');
+        setupScrollReveal();
     </script>
 </body>
 </html>
