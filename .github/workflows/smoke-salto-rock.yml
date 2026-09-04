@@ -9,34 +9,42 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for published page and verify assets
+      - name: Wait for latest published Rock Tour and verify assets
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
-          for i in {1..12}; do
-            if curl -fsSL "$url" -o /tmp/game.html && grep -q 'Salto Cósmico: Rock Tour' /tmp/game.html; then
+          ok=0
+          for i in {1..18}; do
+            if curl -fsSL "${url}mount.js?live=2" -o /tmp/mount.js \
+              && grep -q 'hydrateRoot' /tmp/mount.js \
+              && grep -q 'rockHydrated' /tmp/mount.js; then
+              ok=1
               break
             fi
             sleep 5
           done
-          grep -q 'Salto Cósmico: Rock Tour' /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp" -o /tmp/hero.webp
-          curl -fsSL "${url}audio/track1.mp3" -o /tmp/track1.mp3
+          test "$ok" = 1
+          curl -fsSL "${url}?live=2" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?live=2" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?live=2" -o /tmp/hero.webp
+          curl -fsSL "${url}audio/track1.mp3?live=2" -o /tmp/track1.mp3
+          grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
+          grep -q '__rockPlaylist' /tmp/game.js
           test -s /tmp/hero.webp
           test -s /tmp/track1.mp3
 
-      - name: Verify Rock Tour actually renders in Chrome
+      - name: Verify React hydration in a real browser
         shell: bash
         run: |
           set -euo pipefail
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?browser=2'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           test -n "$chrome"
-          "$chrome" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=7000 --dump-dom "$url" > /tmp/rendered.html 2>/tmp/chrome.log
+          "$chrome" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=3500 --dump-dom "$url" > /tmp/rendered.html 2>/tmp/chrome.log
+          grep -q 'data-rock-hydrated="1"' /tmp/rendered.html
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/rendered.html
           grep -q 'Arrancar la gira' /tmp/rendered.html
           grep -q 'game-canvas' /tmp/rendered.html
