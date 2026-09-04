@@ -17,11 +17,14 @@
 }
 
 body {
-    background:
-        radial-gradient(circle at 12% 0%, rgba(0, 210, 242, 0.16), transparent 32%),
-        radial-gradient(circle at 88% 12%, rgba(141, 204, 61, 0.09), transparent 24%),
-        linear-gradient(180deg, #06131a 0%, #083141 48%, #06131a 100%);
-    background-attachment: fixed;
+    background-image:
+        linear-gradient(rgba(6, 19, 26, 0.48), rgba(6, 19, 26, 0.68)),
+        radial-gradient(circle at 12% 0%, rgba(0, 210, 242, 0.12), transparent 32%),
+        url("imagenes/STARWARS.jfif");
+    background-position: center, center, center;
+    background-size: auto, auto, cover;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-attachment: fixed, fixed, fixed;
     color: var(--text-light);
 }
 
@@ -252,9 +255,13 @@ h1 {
 
 @media (max-width: 600px) {
     body {
-        background:
-            radial-gradient(circle at 18% 0%, rgba(0, 210, 242, 0.13), transparent 30%),
-            linear-gradient(180deg, #06131a 0%, #082b39 55%, #06131a 100%);
+        background-image:
+            linear-gradient(rgba(6, 19, 26, 0.48), rgba(6, 19, 26, 0.72)),
+            url("imagenes/STARWARS.jfif");
+        background-position: center, center;
+        background-size: auto, cover;
+        background-repeat: no-repeat, no-repeat;
+        background-attachment: scroll, scroll;
     }
 
     .container {
