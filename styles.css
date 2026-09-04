@@ -239,6 +239,11 @@ h1 {
     color: #bbb;
 }
 
+/* Corrección de imagen FX-991LAPLUS-2 */
+img[alt="FX-991LAPLUS-2"] {
+    content: url("https://http2.mlstatic.com/D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp");
+}
+
 /* Responsividad */
 @media (max-width: 600px) {
     .container {
