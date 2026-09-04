@@ -201,22 +201,46 @@ h1 {
     background: #fff url("imagenes/mistral_x052_user.jpg") center / contain no-repeat;
 }
 
-/* El zoom también usa las fotos locales de buena calidad */
-#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"],
-#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"] {
-    content: url("imagenes/fx991_user.jpg");
+/* Zoom de las fotos locales: oculta la imagen vieja del modal y muestra la versión nítida */
+#modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"]) #modal-image,
+#modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"]) #modal-image,
+#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"]) #modal-image,
+#modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"]) #modal-image,
+#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"]) #modal-image {
+    display: none;
 }
 
-#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"] {
-    content: url("imagenes/mistral_w69_user.jpg");
+#modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"])::before,
+#modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"])::before,
+#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"])::before,
+#modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"])::before,
+#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"])::before {
+    content: "";
+    width: min(90vw, 1000px);
+    height: 82vh;
+    display: block;
+    background-color: #fff;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    border-radius: 12px;
 }
 
-#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"] {
-    content: url("imagenes/mistral_xy46_user.jpg");
+#modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"])::before,
+#modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"])::before {
+    background-image: url("imagenes/fx991_user.jpg");
 }
 
-#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"] {
-    content: url("imagenes/mistral_x052_user.jpg");
+#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"])::before {
+    background-image: url("imagenes/mistral_w69_user.jpg");
+}
+
+#modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"])::before {
+    background-image: url("imagenes/mistral_xy46_user.jpg");
+}
+
+#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"])::before {
+    background-image: url("imagenes/mistral_x052_user.jpg");
 }
 
 /* WhatsApp flotante */
@@ -339,5 +363,14 @@ h1 {
     .whatsapp-floating img {
         width: 25px;
         height: 25px;
+    }
+
+    #modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"])::before,
+    #modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"])::before,
+    #modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"])::before,
+    #modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"])::before,
+    #modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"])::before {
+        width: 94vw;
+        height: 76vh;
     }
 }
