@@ -1,5 +1,5 @@
 import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
-import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=analog-direct-3';
+import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=run-held-6';
 
 const tracks = [1,2,3,4,5].map(n => new URL(`./audio/track${n}.mp3`, window.location.href).href);
 const audio = new Audio();
@@ -40,4 +40,4 @@ ReactDOM.hydrateRoot(document.getElementById('root'), React.createElement(RockTo
   onRecoverableError(error) { console.warn('Rock Tour hydration:', error); }
 });
 document.documentElement.dataset.rockHydrated = '1';
-await import('./rock-tour-controls.js?v=analog-direct-3');
+await import('./rock-tour-controls.js?v=run-held-6');
