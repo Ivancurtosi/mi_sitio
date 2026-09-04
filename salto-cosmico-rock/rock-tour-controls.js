@@ -14,7 +14,7 @@
       return true;
     }
     // Fallback only while an old cached game bundle is still loading.
-    const key = name === 'left' ? 'ArrowLeft' : name === 'right' ? 'ArrowRight' : name === 'down' ? 'ArrowDown' : name === 'jump' ? ' ' : name === 'run' ? 'Shift' : null;
+    const key = name === 'left' ? 'ArrowLeft' : name === 'right' ? 'ArrowRight' : name === 'down' ? 'ArrowDown' : name === 'jump' ? ' ' : name === 'action' ? 'Shift' : null;
     if (key) on ? keyDown(key) : keyUp(key);
     return false;
   };
@@ -79,7 +79,7 @@
     run.addEventListener('pointerdown', ev => {
       runPointer = ev.pointerId;
       slideJump = false;
-      sendControl('run', true);
+      sendControl('action', true);
     }, { capture: true, passive: false });
 
     document.addEventListener('pointermove', ev => {
@@ -96,7 +96,7 @@
     const end = ev => {
       if (ev.pointerId !== runPointer) return;
       runPointer = null;
-      sendControl('run', false);
+      sendControl('action', false);
       if (slideJump) sendControl('jump', false);
       slideJump = false;
       jump.classList.remove('slide-jump-active');
@@ -108,6 +108,6 @@
   const install = () => { installAnalog(); installRunSlide(); };
   new MutationObserver(install).observe(document.documentElement, { childList: true, subtree: true });
   install();
-  window.addEventListener('blur', () => { releaseMove(); sendControl('run', false); sendControl('jump', false); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseMove(); sendControl('run', false); sendControl('jump', false); } });
+  window.addEventListener('blur', () => { releaseMove(); sendControl('action', false); sendControl('jump', false); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseMove(); sendControl('action', false); sendControl('jump', false); } });
 })();
