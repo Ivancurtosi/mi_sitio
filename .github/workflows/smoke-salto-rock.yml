@@ -1,0 +1,42 @@
+name: Smoke test Salto Cosmico Rock
+
+on:
+  push:
+    paths:
+      - '.github/workflows/smoke-salto-rock.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for published page and verify assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
+          for i in {1..12}; do
+            if curl -fsSL "$url" -o /tmp/game.html && grep -q 'Salto Cósmico: Rock Tour' /tmp/game.html; then
+              break
+            fi
+            sleep 5
+          done
+          grep -q 'Salto Cósmico: Rock Tour' /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp" -o /tmp/hero.webp
+          curl -fsSL "${url}audio/track1.mp3" -o /tmp/track1.mp3
+          grep -q 'crouched:34' /tmp/game.js
+          grep -q 'fastJumpVelocity:-890' /tmp/game.js
+          test -s /tmp/hero.webp
+          test -s /tmp/track1.mp3
+
+      - name: Verify Rock Tour actually renders in Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$chrome"
+          "$chrome" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=7000 --dump-dom "$url" > /tmp/rendered.html 2>/tmp/chrome.log
+          grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/rendered.html
+          grep -q 'Arrancar la gira' /tmp/rendered.html
+          grep -q 'game-canvas' /tmp/rendered.html
