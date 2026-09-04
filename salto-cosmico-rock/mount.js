@@ -39,4 +39,5 @@ const ReactDOM = reactDomFactory();
 ReactDOM.hydrateRoot(document.getElementById('root'), React.createElement(RockTour), {
   onRecoverableError(error) { console.warn('Rock Tour hydration:', error); }
 });
+document.documentElement.dataset.rockHydrated = '1';
 await import('./rock-tour-controls.js');
