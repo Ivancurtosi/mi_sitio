@@ -72,11 +72,25 @@ body {
     margin-right: 10px;
 }
 
-/* Título principal */
+/* Títulos */
 h1 {
     text-align: center;
     font-size: 36px;
     margin-bottom: 24px;
+}
+
+.catalog-section {
+    margin-bottom: 42px;
+}
+
+.catalog-section-last {
+    margin-bottom: 20px;
+}
+
+.catalog-section h2 {
+    text-align: center;
+    font-size: 30px;
+    margin: 8px 0 22px;
 }
 
 /* Cuadrícula de productos */
@@ -134,8 +148,11 @@ h1 {
 }
 
 .product-image {
+    display: block;
     max-width: 100%;
     max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
     border-radius: 10px;
     transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
@@ -150,6 +167,15 @@ h1 {
     font-weight: bold;
     margin: 15px 0 2px;
     color: #1f2937;
+}
+
+.product-description {
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 10px 0 2px;
+    text-align: left;
+    color: #444;
 }
 
 /* Estado de stock */
@@ -175,72 +201,6 @@ h1 {
 .product.sold-out .product-image {
     opacity: 0.58;
     filter: grayscale(20%);
-}
-
-/* Fotos locales definitivas */
-#calculators-grid .product:nth-child(2) .product-image,
-#watches-grid .product:nth-child(1) .product-image,
-#watches-grid .product:nth-child(2) .product-image,
-#watches-grid .product:nth-child(3) .product-image {
-    display: none;
-}
-
-#calculators-grid .product:nth-child(2) .product-image-container {
-    background: #fff url("imagenes/fx991_user.jpg") center / contain no-repeat;
-}
-
-#watches-grid .product:nth-child(1) .product-image-container {
-    background: #fff url("imagenes/mistral_w69_user.jpg") center / contain no-repeat;
-}
-
-#watches-grid .product:nth-child(2) .product-image-container {
-    background: #fff url("imagenes/mistral_xy46_user.jpg") center / contain no-repeat;
-}
-
-#watches-grid .product:nth-child(3) .product-image-container {
-    background: #fff url("imagenes/mistral_x052_user.jpg") center / contain no-repeat;
-}
-
-/* Zoom de las fotos locales: oculta la imagen vieja del modal y muestra la versión nítida */
-#modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"]) #modal-image,
-#modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"]) #modal-image,
-#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"]) #modal-image,
-#modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"]) #modal-image,
-#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"]) #modal-image {
-    display: none;
-}
-
-#modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"])::before,
-#modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"])::before,
-#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"])::before,
-#modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"])::before,
-#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"])::before {
-    content: "";
-    width: min(90vw, 1000px);
-    height: 82vh;
-    display: block;
-    background-color: #fff;
-    background-position: center;
-    background-size: contain;
-    background-repeat: no-repeat;
-    border-radius: 12px;
-}
-
-#modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"])::before,
-#modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"])::before {
-    background-image: url("imagenes/fx991_user.jpg");
-}
-
-#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"])::before {
-    background-image: url("imagenes/mistral_w69_user.jpg");
-}
-
-#modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"])::before {
-    background-image: url("imagenes/mistral_xy46_user.jpg");
-}
-
-#modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"])::before {
-    background-image: url("imagenes/mistral_x052_user.jpg");
 }
 
 /* WhatsApp flotante */
@@ -283,9 +243,13 @@ h1 {
 }
 
 .modal-content {
-    max-width: 90%;
-    max-height: 90%;
+    display: block;
+    max-width: 90vw;
+    max-height: 88vh;
+    width: auto;
+    height: auto;
     object-fit: contain;
+    border-radius: 10px;
 }
 
 .close {
@@ -322,6 +286,10 @@ h1 {
     .whatsapp-button {
         font-size: 18px;
         padding: 10px 18px;
+    }
+
+    .catalog-section h2 {
+        font-size: 26px;
     }
 
     .product-grid {
@@ -365,12 +333,12 @@ h1 {
         height: 25px;
     }
 
-    #modal:has(#modal-image[src*="laeditorial.com.ar/44368-large_default/calculadora-casio-fx-991la-plus-2.jpg"])::before,
-    #modal:has(#modal-image[src*="D_NQ_NP_2X_921278-MLA85755936447_062025-F.webp"])::before,
-    #modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAwUGAQf/"])::before,
-    #modal:has(#modal-image[src*="/8QAGgABAQADAQEAAAAAAAAAAAAAAAIBBAUDBv/"])::before,
-    #modal:has(#modal-image[src*="/8QAGwABAAIDAQEAAAAAAAAAAAAAAAIEAQUGAwf/"])::before {
-        width: 94vw;
-        height: 76vh;
+    .modal {
+        padding: 50px 10px 10px;
+    }
+
+    .modal-content {
+        max-width: 95vw;
+        max-height: 84vh;
     }
 }
