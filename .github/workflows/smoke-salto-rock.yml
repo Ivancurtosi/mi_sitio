@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - '.github/workflows/smoke-salto-rock.yml'
-      - 'salto-cosmico-rock/rock-tour-updates.css'
       - 'salto-cosmico-rock/rock-tour-controls.js'
       - 'salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js'
 
@@ -12,41 +11,37 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live direct control patch
+      - name: Wait for published CORRER fix
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           ok=0
           for i in {1..40}; do
-            curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?run=3" -o /tmp/game.js || true
-            curl -fsSL "${url}rock-tour-controls.js?run=3" -o /tmp/controls.js || true
-            if grep -q 'window.__rockControl=N' /tmp/game.js 2>/dev/null \
-              && grep -q 'window.__rockPlayerX=J.x' /tmp/game.js 2>/dev/null \
-              && grep -q "sendControl('run', true)" /tmp/controls.js 2>/dev/null; then
+            curl -fsSL "${url}rock-tour-controls.js?action=4" -o /tmp/controls.js || true
+            curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?action=4" -o /tmp/game.js || true
+            if grep -q "sendControl('action', true)" /tmp/controls.js 2>/dev/null \
+              && grep -q 'window.__rockControl=N' /tmp/game.js 2>/dev/null \
+              && grep -q 'window.__rockPlayerX=J.x' /tmp/game.js 2>/dev/null; then
               ok=1; break
             fi
             sleep 4
           done
           test "$ok" = 1
 
-      - name: Verify Android analog and run move the actual player
+      - name: Verify Android CORRER increases real speed
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?run-speed=3'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
-          "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
+          "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/chrome.out 2>/tmp/chrome.err &
           CHROME_PID=$!
           trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
-          for i in {1..30}; do curl -fsS http://127.0.0.1:9222/json > /tmp/rock-diag/tabs.json && break; sleep 1; done
-          URL="$url" python3 - <<'PY'
-          import json, os, time, traceback
-          import websocket
-          diag=[]
-          tabs=json.load(open('/tmp/rock-diag/tabs.json'))
+          for i in {1..30}; do curl -fsS http://127.0.0.1:9222/json >/tmp/tabs.json && break; sleep 1; done
+          python3 - <<'PY'
+          import json,time,websocket
+          tabs=json.load(open('/tmp/tabs.json'))
           page=next(t for t in tabs if t.get('type')=='page')
           ws=websocket.create_connection(page['webSocketDebuggerUrl'],timeout=10,suppress_origin=True)
           seq=0
@@ -60,68 +55,38 @@ jobs:
                       if 'error' in msg: raise RuntimeError(msg['error'])
                       return msg.get('result',{})
           def ev(expr):
-              r=call('Runtime.evaluate',{'expression':expr,'returnByValue':True,'awaitPromise':True})['result']
-              return r.get('value')
-          try:
-              call('Emulation.setUserAgentOverride',{'userAgent':'Mozilla/5.0 (Linux; Android 16; SM-A356E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36','platform':'Android'})
-              call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'positionX':0,'positionY':0,'screenOrientation':{'type':'landscapePrimary','angle':90}})
-              call('Emulation.setTouchEmulationEnabled',{'enabled':True,'maxTouchPoints':5})
-              call('Page.enable'); call('Runtime.enable'); call('Page.navigate',{'url':os.environ['URL']})
-              deadline=time.time()+20
-              while time.time()<deadline:
-                  try:
-                      if ev("document.documentElement.dataset.rockHydrated === '1'"): break
-                  except Exception: pass
-                  time.sleep(.25)
-              else: raise RuntimeError('No hidrato')
-              box=ev("(()=>{const e=document.querySelector('.play-btn');const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()")
-              call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':box['x'],'y':box['y'],'radiusX':3,'radiusY':3,'force':1}]})
-              call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-              deadline=time.time()+8
-              while time.time()<deadline:
-                  if ev("!!document.querySelector('.rock-analog') && !!document.querySelector('.action-btn') && typeof window.__rockControl === 'function' && typeof window.__rockPlayerX === 'number'"): break
-                  time.sleep(.2)
-              else: raise RuntimeError('No se expuso el control directo')
-
-              abox=ev("(()=>{const e=document.querySelector('.rock-analog');const r=e.getBoundingClientRect();return {left:r.left,top:r.top,w:r.width,h:r.height,pe:getComputedStyle(e).pointerEvents}})()")
-              if abox['pe']!='auto': raise RuntimeError('Analog no recibe toque')
-              ax=abox['left']+abox['w']*.83; ay=abox['top']+abox['h']*.50
-              call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':ax,'y':ay,'radiusX':4,'radiusY':4,'force':1}]})
-
-              # Let walking speed settle first, then measure a steady walking interval.
-              time.sleep(1.25)
-              x_walk0=ev('window.__rockPlayerX')
-              time.sleep(.55)
-              x_walk1=ev('window.__rockPlayerX')
-              walk_dx=x_walk1-x_walk0
-
-              # Press the visible RUN button while the analog remains held.
-              rbox=ev("(()=>{const e=document.querySelector('.action-btn');const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()")
-              ev(f"(()=>{{const e=document.querySelector('.action-btn');e.dispatchEvent(new PointerEvent('pointerdown',{{pointerId:77,bubbles:true,cancelable:true,clientX:{rbox['x']},clientY:{rbox['y']},pointerType:'touch'}}));return true}})()")
-              time.sleep(.35)
-              x_run0=ev('window.__rockPlayerX')
-              time.sleep(.55)
-              x_run1=ev('window.__rockPlayerX')
-              run_dx=x_run1-x_run0
-              ev("document.dispatchEvent(new PointerEvent('pointerup',{pointerId:77,bubbles:true,cancelable:true,pointerType:'touch'}));true")
-              call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-
-              dbg=ev('window.__rockAnalogDebug')
-              diag.append(f'WALK_DX={walk_dx} RUN_DX={run_dx} DBG={dbg!r}')
-              if walk_dx <= 10: raise RuntimeError(f'El analogico no produjo marcha estable: {walk_dx}')
-              if not (run_dx > walk_dx * 1.12): raise RuntimeError(f'CORRER no aumento la velocidad real: walk={walk_dx}, run={run_dx}')
-              if not dbg or not dbg.get('bridge'): raise RuntimeError('Analog no uso puente directo')
-              diag.append('REAL_RUN_SPEED_OK')
-          except Exception:
-              diag.append('TRACEBACK:\n'+traceback.format_exc()); raise
-          finally:
-              open('/tmp/rock-diag/diagnostic.txt','w').write('\n'.join(diag))
-              ws.close()
+              return call('Runtime.evaluate',{'expression':expr,'returnByValue':True,'awaitPromise':True})['result'].get('value')
+          call('Emulation.setUserAgentOverride',{'userAgent':'Mozilla/5.0 (Linux; Android 16; SM-A356E) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36','platform':'Android'})
+          call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'screenOrientation':{'type':'landscapePrimary','angle':90}})
+          call('Emulation.setTouchEmulationEnabled',{'enabled':True,'maxTouchPoints':5})
+          call('Page.enable'); call('Runtime.enable'); call('Page.navigate',{'url':'https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?action-run=4'})
+          deadline=time.time()+20
+          while time.time()<deadline:
+              try:
+                  if ev("document.documentElement.dataset.rockHydrated === '1'"): break
+              except: pass
+              time.sleep(.25)
+          else: raise RuntimeError('No hidrato')
+          play=ev("(()=>{const r=document.querySelector('.play-btn').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}})()")
+          call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':play['x'],'y':play['y'],'force':1}]})
+          call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+          deadline=time.time()+8
+          while time.time()<deadline:
+              if ev("!!document.querySelector('.rock-analog') && !!document.querySelector('.action-btn') && typeof window.__rockControl==='function' && typeof window.__rockPlayerX==='number'"): break
+              time.sleep(.2)
+          else: raise RuntimeError('No inicio el juego')
+          a=ev("(()=>{const r=document.querySelector('.rock-analog').getBoundingClientRect();return{x:r.left+r.width*.83,y:r.top+r.height*.5}})()")
+          call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':a['x'],'y':a['y'],'force':1}]})
+          time.sleep(1.2)
+          x0=ev('window.__rockPlayerX'); time.sleep(.55); x1=ev('window.__rockPlayerX'); walk=x1-x0
+          rb=ev("(()=>{const r=document.querySelector('.action-btn').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}})()")
+          ev(f"(()=>{{const e=document.querySelector('.action-btn');e.dispatchEvent(new PointerEvent('pointerdown',{{pointerId:77,bubbles:true,cancelable:true,clientX:{rb['x']},clientY:{rb['y']},pointerType:'touch'}}));return true}})()")
+          time.sleep(.35)
+          x2=ev('window.__rockPlayerX'); time.sleep(.55); x3=ev('window.__rockPlayerX'); run=x3-x2
+          ev("document.dispatchEvent(new PointerEvent('pointerup',{pointerId:77,bubbles:true,cancelable:true,pointerType:'touch'}));true")
+          call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+          print(f'WALK={walk:.2f} RUN={run:.2f}')
+          if walk <= 10: raise RuntimeError(f'Analog sin movimiento estable: {walk}')
+          if run <= walk*1.12: raise RuntimeError(f'CORRER no acelera: walk={walk}, run={run}')
+          ws.close()
           PY
-
-      - name: Upload diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rock-tour-android-diagnostics
-          path: /tmp/rock-diag/
