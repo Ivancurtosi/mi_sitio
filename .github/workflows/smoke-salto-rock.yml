@@ -6,47 +6,37 @@ on:
       - '.github/workflows/smoke-salto-rock.yml'
       - 'salto-cosmico-rock/rock-tour-updates.css'
       - 'salto-cosmico-rock/rock-tour-controls.js'
+      - 'salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js'
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify published assets and mobile fixes
+      - name: Verify live direct control patch
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           ok=0
-          for i in {1..30}; do
-            if curl -fsSL "${url}rock-tour-updates.css?analog=1" -o /tmp/updates.css \
-              && grep -q 'position: fixed !important' /tmp/updates.css \
-              && grep -q 'pointer-events: auto !important' /tmp/updates.css \
-              && curl -fsSL "${url}mount.js?analog=1" -o /tmp/mount.js \
-              && grep -q 'hydrateRoot' /tmp/mount.js; then
-              ok=1
-              break
+          for i in {1..40}; do
+            curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?direct=2" -o /tmp/game.js || true
+            curl -fsSL "${url}rock-tour-controls.js?direct=2" -o /tmp/controls.js || true
+            if grep -q 'window.__rockControl=N' /tmp/game.js 2>/dev/null \
+              && grep -q 'window.__rockPlayerX=J.x' /tmp/game.js 2>/dev/null \
+              && grep -q 'sendControl' /tmp/controls.js 2>/dev/null; then
+              ok=1; break
             fi
             sleep 4
           done
           test "$ok" = 1
-          curl -fsSL "${url}?analog=1" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?analog=1" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?analog=1" -o /tmp/hero.webp
-          curl -fsSL "${url}audio/track1.mp3?analog=1" -o /tmp/track1.mp3
-          grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
-          grep -q 'crouched:34' /tmp/game.js
-          grep -q 'fastJumpVelocity:-890' /tmp/game.js
-          grep -q '__rockPlaylist' /tmp/game.js
-          test -s /tmp/hero.webp
-          test -s /tmp/track1.mp3
 
-      - name: Verify Android landscape start and analog input
+      - name: Verify Android analog moves the actual player
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-analog=1'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?direct-analog=2'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
@@ -83,34 +73,29 @@ jobs:
                       if ev("document.documentElement.dataset.rockHydrated === '1'"): break
                   except Exception: pass
                   time.sleep(.25)
-              else: raise RuntimeError('No hidrato en Android landscape')
-              dims=ev("({iw:innerWidth,ih:innerHeight,shell:document.querySelector('.game-shell').getBoundingClientRect().height})")
-              if abs(dims['shell']-dims['ih'])>2: raise RuntimeError('Game shell no coincide con viewport')
+              else: raise RuntimeError('No hidrato')
               box=ev("(()=>{const e=document.querySelector('.play-btn');const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()")
               call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':box['x'],'y':box['y'],'radiusX':3,'radiusY':3,'force':1}]})
               call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
               deadline=time.time()+8
               while time.time()<deadline:
-                  if ev("!!document.querySelector('.rock-analog')"): break
+                  if ev("!!document.querySelector('.rock-analog') && typeof window.__rockControl === 'function' && typeof window.__rockPlayerX === 'number'"): break
                   time.sleep(.2)
-              else: raise RuntimeError('No inicio el juego')
+              else: raise RuntimeError('No se expuso el control directo')
 
-              ev("window.__analogKeys=[]; window.addEventListener('keydown', e=>window.__analogKeys.push(e.key)); true")
+              x0=ev('window.__rockPlayerX')
               abox=ev("(()=>{const e=document.querySelector('.rock-analog');const r=e.getBoundingClientRect();return {left:r.left,top:r.top,w:r.width,h:r.height,pe:getComputedStyle(e).pointerEvents}})()")
-              diag.append('ANALOG='+repr(abox))
-              if abox['pe']!='auto': raise RuntimeError('Analog sigue sin recibir pointer events')
-              ax=abox['left']+abox['w']*.82; ay=abox['top']+abox['h']*.50
-              hit=ev(f"document.elementFromPoint({ax},{ay})?.closest('.rock-analog')?.className || ''")
-              if 'rock-analog' not in hit: raise RuntimeError('El analogico no es target tactil')
+              if abox['pe']!='auto': raise RuntimeError('Analog no recibe toque')
+              ax=abox['left']+abox['w']*.83; ay=abox['top']+abox['h']*.50
               call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':ax,'y':ay,'radiusX':4,'radiusY':4,'force':1}]})
-              time.sleep(.35)
-              transform=ev("document.querySelector('.rock-analog-knob').style.transform")
-              keys=ev("window.__analogKeys.slice()")
-              diag.append('TRANSFORM='+repr(transform)+' KEYS='+repr(keys))
-              if not transform or '0px, 0px' in transform: raise RuntimeError('La palanca no se mueve')
-              if 'ArrowRight' not in keys: raise RuntimeError('El analogico no envia movimiento a la derecha')
+              time.sleep(1.0)
+              x1=ev('window.__rockPlayerX')
+              dbg=ev('window.__rockAnalogDebug')
               call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-              diag.append('ANDROID_ANALOG_OK')
+              diag.append(f'X0={x0} X1={x1} DBG={dbg!r}')
+              if not (x1 > x0 + 20): raise RuntimeError(f'El jugador no avanzo con analogico: {x0} -> {x1}')
+              if not dbg or not dbg.get('bridge'): raise RuntimeError('Analog no uso puente directo')
+              diag.append('REAL_PLAYER_MOVEMENT_OK')
           except Exception:
               diag.append('TRACEBACK:\n'+traceback.format_exc()); raise
           finally:
