@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Carga simple de asistencias deportivas UTN FRH desde celular, con control de foto y revisión antes de guardar.">
+  <title>Asistencias Deportes UTN FRH</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="brand-row">
+        <span class="brand-mark">UTN</span>
+        <span class="pill">Deportes FRH</span>
+      </div>
+      <h1>Asistencias</h1>
+      <p>Elegí la disciplina, sacá una foto clara de la planilla y revisá antes de enviar.</p>
+    </header>
+
+    <section id="startCard" class="card active">
+      <label class="field-label" for="disciplineSelect">Disciplina</label>
+      <select id="disciplineSelect" class="big-select" aria-label="Elegir disciplina"></select>
+
+      <label class="field-label" for="classDate">Fecha</label>
+      <input id="classDate" class="big-input" type="date">
+
+      <button id="cameraButton" class="primary-button" type="button">Sacar foto a la planilla</button>
+      <button id="galleryButton" class="secondary-button" type="button">Subir foto desde galería</button>
+      <input id="photoInput" class="sr-only" type="file" accept="image/*" capture="environment">
+      <input id="galleryInput" class="sr-only" type="file" accept="image/*">
+
+      <p class="helper">La app intenta avisar si la foto sale borrosa, oscura o cortada. Igual permite usarla si no queda otra.</p>
+    </section>
+
+    <section id="qualityCard" class="card">
+      <h2>Revisión de foto</h2>
+      <img id="previewImage" class="preview" alt="Vista previa de la planilla">
+      <div id="qualityStatus" class="status-box"></div>
+      <div class="button-grid">
+        <button id="retakeButton" class="secondary-button" type="button">Volver a sacar</button>
+        <button id="usePhotoButton" class="primary-button" type="button">Usar esta foto</button>
+      </div>
+    </section>
+
+    <section id="processingCard" class="card">
+      <h2>Analizando planilla</h2>
+      <div class="loader" aria-hidden="true"></div>
+      <p id="progressText">Preparando imagen...</p>
+      <p class="helper">Puede tardar un poco si el celular es viejo o la conexión está lenta.</p>
+    </section>
+
+    <section id="reviewCard" class="card">
+      <h2>Revisar asistencia</h2>
+      <div class="summary-grid">
+        <div><strong id="presentCount">0</strong><span>Presentes</span></div>
+        <div><strong id="reviewCount">0</strong><span>Revisar</span></div>
+        <div><strong id="absentCount">0</strong><span>Ausentes</span></div>
+      </div>
+
+      <div id="confidenceNotice" class="notice"></div>
+
+      <div class="review-actions">
+        <button id="addStudentButton" class="secondary-button" type="button">Agregar alumno</button>
+        <button id="sendButton" class="primary-button" type="button">Enviar asistencia</button>
+      </div>
+
+      <h3>Presentes detectados</h3>
+      <div id="presentList" class="student-list"></div>
+
+      <details class="details-box" open>
+        <summary>Casos para revisar</summary>
+        <div id="reviewList" class="student-list"></div>
+      </details>
+
+      <details class="details-box">
+        <summary>Texto leído de la foto</summary>
+        <pre id="rawText" class="raw-text"></pre>
+      </details>
+    </section>
+
+    <section id="doneCard" class="card success-card">
+      <h2>Asistencia enviada</h2>
+      <p id="doneText">La carga quedó registrada.</p>
+      <button id="newAttendanceButton" class="primary-button" type="button">Cargar otra asistencia</button>
+    </section>
+
+    <dialog id="manualDialog" class="dialog">
+      <form method="dialog" class="dialog-card">
+        <h2>Agregar alumno</h2>
+        <label class="field-label" for="manualName">Nombre y apellido</label>
+        <input id="manualName" class="big-input" autocomplete="off" placeholder="Ej: Juan Pérez">
+        <label class="field-label" for="manualDni">DNI o legajo</label>
+        <input id="manualDni" class="big-input" inputmode="numeric" placeholder="Opcional">
+        <div class="button-grid">
+          <button value="cancel" class="secondary-button" type="submit">Cancelar</button>
+          <button id="confirmManualButton" value="ok" class="primary-button" type="button">Agregar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <details id="adminPanel" class="admin-panel">
+      <summary>Configuración</summary>
+      <label class="field-label" for="backendUrl">URL del backend / Apps Script</label>
+      <input id="backendUrl" class="big-input" placeholder="https://script.google.com/macros/s/.../exec">
+      <button id="saveConfigButton" class="secondary-button" type="button">Guardar configuración</button>
+      <p class="helper">Esto queda guardado solo en este celular. Para la versión final conviene dejarlo fijo en el código.</p>
+    </details>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
