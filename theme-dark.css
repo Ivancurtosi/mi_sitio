@@ -1,0 +1,291 @@
+/* Tema oscuro UTN Haedo — paleta institucional
+   Azul petróleo #00455C | Celeste #00D2F2 | Verde #8DCC3D
+   Naranja #FFAB00 | Rojo #FF2644
+*/
+
+:root {
+    --utn-petroleo: #00455C;
+    --utn-celeste: #00D2F2;
+    --utn-verde: #8DCC3D;
+    --utn-naranja: #FFAB00;
+    --utn-rojo: #FF2644;
+    --dark-950: #06131a;
+    --dark-900: #081d27;
+    --dark-850: #0b2632;
+    --text-light: #f6fbfd;
+    --text-muted: #c4d6dc;
+}
+
+body {
+    background:
+        radial-gradient(circle at 12% 0%, rgba(0, 210, 242, 0.16), transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(141, 204, 61, 0.09), transparent 24%),
+        linear-gradient(180deg, #06131a 0%, #083141 48%, #06131a 100%);
+    background-attachment: fixed;
+    color: var(--text-light);
+}
+
+.container {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding-top: 24px;
+    padding-bottom: 36px;
+}
+
+.logo-container {
+    max-width: 760px;
+    margin: 0 auto 18px;
+    padding: 18px 24px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+.description {
+    max-width: 760px;
+    margin: 0 auto 20px;
+    padding: 16px 18px;
+    border: 1px solid rgba(0, 210, 242, 0.34);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(0, 69, 92, 0.88), rgba(8, 29, 39, 0.92));
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+h1,
+.catalog-section h2 {
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+}
+
+h1 {
+    margin-top: 30px;
+}
+
+.catalog-section h2::after {
+    content: "";
+    display: block;
+    width: 74px;
+    height: 4px;
+    margin: 11px auto 0;
+    border-radius: 999px;
+    background: var(--utn-celeste);
+    box-shadow: 0 0 16px rgba(0, 210, 242, 0.35);
+}
+
+#calculadoras h2::after {
+    background: var(--utn-celeste);
+}
+
+#smartwatches h2::after {
+    background: var(--utn-verde);
+    box-shadow: 0 0 16px rgba(141, 204, 61, 0.28);
+}
+
+.section-nav a {
+    border-color: rgba(0, 210, 242, 0.34);
+    background: rgba(6, 19, 26, 0.72);
+    color: #fff;
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.section-nav a:hover,
+.section-nav a:focus-visible {
+    border-color: var(--utn-celeste);
+    background: rgba(0, 69, 92, 0.92);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(0, 210, 242, 0.16);
+}
+
+.info-card {
+    border-color: rgba(0, 210, 242, 0.28);
+    background: linear-gradient(145deg, rgba(0, 69, 92, 0.92), rgba(8, 29, 39, 0.96));
+    color: #edf8fb;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+}
+
+#smartwatches .info-card {
+    border-color: rgba(141, 204, 61, 0.34);
+}
+
+.info-card-title {
+    color: #fff;
+}
+
+.info-card-text,
+.info-card-tip {
+    color: #d9e9ee;
+}
+
+.benefit-chip {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.96);
+    color: #17303a;
+}
+
+.benefit-chip-cash {
+    border-color: var(--utn-naranja);
+    background: #fff4d7;
+    color: #734800;
+}
+
+.cash-only-note {
+    border-color: var(--utn-naranja);
+    background: rgba(255, 171, 0, 0.14);
+    color: #ffd27a;
+    box-shadow: inset 0 0 0 1px rgba(255, 171, 0, 0.06);
+}
+
+.product {
+    background: #fff;
+    border-color: #dce6ea;
+    color: #17242c;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+#merchandising .product {
+    border-top: 4px solid var(--utn-petroleo);
+}
+
+#calculadoras .product {
+    border-top: 4px solid var(--utn-celeste);
+}
+
+#smartwatches .product {
+    border-top: 4px solid var(--utn-verde);
+}
+
+.product:hover {
+    border-color: #b8ccd3;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3);
+}
+
+.product-name,
+.price {
+    color: #14242d;
+}
+
+.product-description {
+    color: #46555d;
+}
+
+.product-image-container,
+.product-image {
+    background: #fff;
+}
+
+.zoom-hint {
+    background: rgba(0, 69, 92, 0.9);
+}
+
+.review-button {
+    border-color: #b9dce5;
+    background: #f5fcfe;
+    color: var(--utn-petroleo);
+}
+
+.review-button:hover {
+    border-color: var(--utn-celeste);
+    box-shadow: 0 5px 14px rgba(0, 210, 242, 0.14);
+}
+
+.stock-badge,
+.modal-stock {
+    background: var(--utn-rojo);
+}
+
+.product-cash-note {
+    border: 1px solid #f0b22d;
+    background: #fff5d9;
+    color: #744900;
+}
+
+.model-request-box {
+    border-color: rgba(141, 204, 61, 0.38);
+    background: linear-gradient(145deg, rgba(0, 69, 92, 0.9), rgba(7, 38, 45, 0.96));
+    box-shadow: 0 15px 34px rgba(0, 0, 0, 0.22);
+}
+
+.model-request-title {
+    color: #fff;
+}
+
+.model-request-text {
+    color: #d7e8e5;
+}
+
+.modal {
+    background: rgba(2, 10, 14, 0.88);
+}
+
+.modal-panel {
+    border-color: rgba(0, 210, 242, 0.34);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.58), 0 0 0 1px rgba(0, 210, 242, 0.08);
+}
+
+.modal-media {
+    background: #fff;
+}
+
+.modal-category {
+    color: var(--utn-petroleo);
+}
+
+.modal-price {
+    color: #14242d;
+}
+
+.modal-payment {
+    border-color: var(--utn-naranja);
+    background: #fff5d9;
+    color: #714700;
+}
+
+.whatsapp-button,
+.model-request-button,
+.whatsapp-floating {
+    box-shadow: 0 8px 22px rgba(37, 211, 102, 0.2);
+}
+
+@media (max-width: 600px) {
+    body {
+        background:
+            radial-gradient(circle at 18% 0%, rgba(0, 210, 242, 0.13), transparent 30%),
+            linear-gradient(180deg, #06131a 0%, #082b39 55%, #06131a 100%);
+    }
+
+    .container {
+        padding-top: 12px;
+    }
+
+    .logo-container {
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border-radius: 16px;
+    }
+
+    .description {
+        margin-bottom: 16px;
+        padding: 14px 12px;
+        border-radius: 14px;
+    }
+
+    h1 {
+        margin-top: 24px;
+    }
+
+    .section-nav {
+        margin-bottom: 28px;
+    }
+
+    .section-nav a {
+        background: rgba(6, 19, 26, 0.84);
+    }
+
+    .product {
+        box-shadow: 0 9px 24px rgba(0, 0, 0, 0.24);
+    }
+}
