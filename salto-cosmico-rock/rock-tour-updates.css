@@ -1,3 +1,38 @@
+/* Android / mobile viewport compatibility: keep the original Rock Tour visuals,
+   but pin the game to the real visible browser viewport so touch coordinates match. */
+html, body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+#root,
+.game-shell {
+  position: fixed !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.game-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.overlay,
+.portrait-warning {
+  position: absolute !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+.panel {
+  max-height: calc(100dvh - 20px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
 .move-controls { position: relative !important; width: 150px !important; height: 150px !important; display: block !important; }
 .move-controls > .control-btn { display: none !important; }
 .rock-analog { position: absolute; left: 0; bottom: 0; width: 150px; height: 150px; border-radius: 50%; touch-action: none; user-select: none; -webkit-user-select: none; }
