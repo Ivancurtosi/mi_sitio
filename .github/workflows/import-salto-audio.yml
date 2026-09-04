@@ -1,0 +1,43 @@
+name: Import Salto Cosmico audio
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-salto-audio.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  import-audio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download soundtrack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p salto-cosmico/audio
+          curl -fL --retry 3 'https://pikaso.cdnpk.net/private/production/5357862272/a2aab518-fb41-4a49-a502-bc3e474edbf5.mp3?token=exp=1788739200~hmac=88be19f6070485a7d427eb47ea353e6cf18f2ca778b4c55f5be2094660134cad' -o salto-cosmico/audio/track1.mp3
+          curl -fL --retry 3 'https://pikaso.cdnpk.net/private/production/5357874559/a2aab5ed-b053-467a-bcc2-057ba6725453.mp3?token=exp=1788739200~hmac=d8f04e0aaccafade1b20acd8554c3fab5e02cda2293c124382ca19ed3e0a0cf4' -o salto-cosmico/audio/track2.mp3
+          curl -fL --retry 3 'https://pikaso.cdnpk.net/private/production/5357864801/a2aab534-271b-4147-8071-419f48b8385d.mp3?token=exp=1788739200~hmac=e9695894c30ea6962dfeaac0ce31071affa1e9848a5ffe47e6c82c30d5aacf12' -o salto-cosmico/audio/track3.mp3
+          curl -fL --retry 3 'https://pikaso.cdnpk.net/private/production/5357865493/a2aab53f-844a-4638-8468-47871f544717.mp3?token=exp=1788739200~hmac=465a06bc73c217f93f4b6509abbae57d9368f68bd20f84212f1b917533e40194' -o salto-cosmico/audio/track4.mp3
+          curl -fL --retry 3 'https://pikaso.cdnpk.net/private/production/5357866196/a2aab54b-ce0d-4ffe-a3a6-e9e6d44f9329.mp3?token=exp=1788739200~hmac=696916caa8f98fa73305b153482f1f0781326a23d98cfd2bbf0b9e8eb54b5c2a' -o salto-cosmico/audio/track5.mp3
+          test -s salto-cosmico/audio/track1.mp3
+          test -s salto-cosmico/audio/track2.mp3
+          test -s salto-cosmico/audio/track3.mp3
+          test -s salto-cosmico/audio/track4.mp3
+          test -s salto-cosmico/audio/track5.mp3
+
+      - name: Commit soundtrack
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico/audio/*.mp3
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add Salto Cosmico soundtrack [skip ci]'
+            git push
+          fi
