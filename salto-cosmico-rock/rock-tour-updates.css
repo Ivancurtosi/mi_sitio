@@ -52,9 +52,37 @@ html, body {
 .rock-analog-ring { position: absolute; inset: 15px; border-radius: 50%; border: 2px solid rgba(255,255,255,.38); background: radial-gradient(circle, rgba(31,25,28,.5) 0 48%, rgba(9,7,9,.78) 76%); box-shadow: inset 0 0 22px rgba(255,80,36,.18), 0 8px 28px rgba(0,0,0,.35); pointer-events: none; }
 .rock-analog-knob { position: absolute; width: 58px; height: 58px; left: 46px; top: 46px; border-radius: 50%; border: 2px solid rgba(255,232,205,.75); background: radial-gradient(circle at 35% 28%, #a44a35, #4c2425 62%, #1b1518 100%); box-shadow: 0 6px 16px rgba(0,0,0,.45), inset 0 0 0 3px rgba(255,117,55,.16); pointer-events: none; transition: transform .045s linear; }
 .rock-analog-down { position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); font: 800 13px/1 ui-monospace, monospace; color: rgba(255,225,190,.68); pointer-events: none; }
+
+/* Bigger RUN / JUMP targets for easier mobile play. */
+.action-controls { gap: 18px !important; }
+.action-controls .action-btn,
+.action-controls .jump-btn {
+  width: 118px !important;
+  height: 118px !important;
+  min-width: 118px !important;
+  min-height: 118px !important;
+  touch-action: none !important;
+}
+.action-controls .action-btn b,
+.action-controls .jump-btn b {
+  font-size: 32px !important;
+}
+.action-controls .action-btn small,
+.action-controls .jump-btn small {
+  font-size: 13px !important;
+}
+
 .jump-btn.slide-jump-active { transform: scale(.94); filter: brightness(1.22); }
 @media (max-height: 560px) {
   .move-controls, .rock-analog { width: 132px !important; height: 132px !important; }
   .rock-analog-ring { inset: 13px; }
   .rock-analog-knob { width: 52px; height: 52px; left: 40px; top: 40px; }
+  .action-controls { gap: 14px !important; }
+  .action-controls .action-btn,
+  .action-controls .jump-btn {
+    width: 104px !important;
+    height: 104px !important;
+    min-width: 104px !important;
+    min-height: 104px !important;
+  }
 }
