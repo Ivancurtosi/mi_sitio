@@ -16,7 +16,7 @@ jobs:
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           ok=0
           for i in {1..24}; do
-            if curl -fsSL "${url}mount.js?live=3" -o /tmp/mount.js \
+            if curl -fsSL "${url}mount.js?live=4" -o /tmp/mount.js \
               && grep -q 'hydrateRoot' /tmp/mount.js \
               && grep -q 'rockHydrated' /tmp/mount.js; then
               ok=1
@@ -25,12 +25,12 @@ jobs:
             sleep 5
           done
           test "$ok" = 1
-          curl -fsSL "${url}?live=3" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?live=3" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?live=3" -o /tmp/hero.webp
-          curl -fsSL "${url}assets/rock-props.webp?live=3" -o /tmp/props.webp
-          curl -fsSL "${url}audio/track1.mp3?live=3" -o /tmp/track1.mp3
-          curl -fsSL "${url}audio/track5.mp3?live=3" -o /tmp/track5.mp3
+          curl -fsSL "${url}?live=4" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?live=4" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?live=4" -o /tmp/hero.webp
+          curl -fsSL "${url}assets/rock-props.webp?live=4" -o /tmp/props.webp
+          curl -fsSL "${url}audio/track1.mp3?live=4" -o /tmp/track1.mp3
+          curl -fsSL "${url}audio/track5.mp3?live=4" -o /tmp/track5.mp3
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
@@ -44,64 +44,92 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?browser=3'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?browser=4'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           test -n "$chrome"
           "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
             --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome \
-            "$url" >/tmp/chrome.out 2>/tmp/chrome.err &
+            "$url" >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
           trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
           for i in {1..30}; do
-            curl -fsS http://127.0.0.1:9222/json > /tmp/tabs.json && break
+            curl -fsS http://127.0.0.1:9222/json > /tmp/rock-diag/tabs.json && break
             sleep 1
           done
           python3 - <<'PY'
-          import json, time, urllib.request
+          import json, time, traceback
           import websocket
+          diag=[]
+          try:
+              tabs=json.load(open('/tmp/rock-diag/tabs.json'))
+              diag.append('TABS='+repr([(t.get('type'),t.get('url'),t.get('title')) for t in tabs]))
+              page=next(t for t in tabs if t.get('type')=='page')
+              ws=websocket.create_connection(page['webSocketDebuggerUrl'], timeout=10, suppress_origin=True)
+              seq=0
+              def evaluate(expr):
+                  global seq
+                  seq += 1
+                  ws.send(json.dumps({'id':seq,'method':'Runtime.evaluate','params':{'expression':expr,'returnByValue':True,'awaitPromise':True}}))
+                  while True:
+                      msg=json.loads(ws.recv())
+                      if msg.get('id')==seq:
+                          if 'exceptionDetails' in msg.get('result',{}):
+                              raise RuntimeError(msg['result']['exceptionDetails'])
+                          res=msg['result']['result']
+                          return res.get('value') if 'value' in res else {'type':res.get('type'),'description':res.get('description')}
 
-          tabs=json.load(open('/tmp/tabs.json'))
-          page=next(t for t in tabs if t.get('type')=='page')
-          ws=websocket.create_connection(page['webSocketDebuggerUrl'], timeout=10, suppress_origin=True)
-          seq=0
-          def evaluate(expr):
-              global seq
-              seq += 1
-              ws.send(json.dumps({'id':seq,'method':'Runtime.evaluate','params':{'expression':expr,'returnByValue':True,'awaitPromise':True}}))
-              while True:
-                  msg=json.loads(ws.recv())
-                  if msg.get('id')==seq:
-                      if 'exceptionDetails' in msg.get('result',{}):
-                          raise RuntimeError(msg['result']['exceptionDetails'])
-                      return msg['result']['result'].get('value')
+              time.sleep(2)
+              diag.append('READY='+str(evaluate('document.readyState')))
+              diag.append('URL='+str(evaluate('location.href')))
+              diag.append('HYDRATED='+str(evaluate("document.documentElement.dataset.rockHydrated || ''")))
+              diag.append('BODY='+str(evaluate("document.body.innerText.slice(0,1000)")))
+              diag.append('PLAYLIST='+str(evaluate("typeof window.__rockPlaylist")))
+              diag.append('RESOURCES='+str(evaluate("performance.getEntriesByType('resource').map(r=>({name:r.name,initiatorType:r.initiatorType})).slice(-20)")))
+              diag.append('ROOTHTML='+str(evaluate("document.getElementById('root')?.innerHTML.slice(0,1500)")))
 
-          deadline=time.time()+15
-          while time.time()<deadline:
-              if evaluate("document.documentElement.dataset.rockHydrated === '1'"):
-                  break
-              time.sleep(.25)
-          else:
-              raise SystemExit('Rock Tour did not hydrate')
+              deadline=time.time()+12
+              while time.time()<deadline:
+                  if evaluate("document.documentElement.dataset.rockHydrated === '1'"):
+                      break
+                  time.sleep(.25)
+              else:
+                  raise RuntimeError('Rock Tour did not hydrate')
 
-          assert evaluate("document.body.innerText.includes('SALTO CÓSMICO // ROCK TOUR')")
-          assert evaluate("document.body.innerText.includes('Arrancar la gira')")
-          assert evaluate("typeof window.__rockPlaylist === 'object'")
-          assert evaluate("!!document.querySelector('.game-canvas')")
+              assert evaluate("document.body.innerText.includes('SALTO CÓSMICO // ROCK TOUR')")
+              assert evaluate("document.body.innerText.includes('Arrancar la gira')")
+              assert evaluate("typeof window.__rockPlaylist === 'object'")
+              assert evaluate("!!document.querySelector('.game-canvas')")
+              diag.append('PRESTART=OK')
 
-          evaluate("document.querySelector('.play-btn').click(); true")
-          deadline=time.time()+10
-          while time.time()<deadline:
-              if evaluate("!!document.querySelector('.rock-analog')"):
-                  break
-              time.sleep(.25)
-          else:
-              raise SystemExit('Analog control did not appear after starting')
+              evaluate("document.querySelector('.play-btn').click(); true")
+              deadline=time.time()+10
+              while time.time()<deadline:
+                  if evaluate("!!document.querySelector('.rock-analog')"):
+                      break
+                  time.sleep(.25)
+              else:
+                  diag.append('AFTERCLICK_BODY='+str(evaluate("document.body.innerText.slice(0,1200)")))
+                  diag.append('AFTERCLICK_HTML='+str(evaluate("document.querySelector('.game-shell')?.innerHTML.slice(0,2000)")))
+                  raise RuntimeError('Analog control did not appear after starting')
 
-          assert evaluate("!!document.querySelector('.action-btn')")
-          assert evaluate("!!document.querySelector('.jump-btn')")
-          assert evaluate("!!document.querySelector('.move-controls')")
-          assert evaluate("document.querySelector('.overlay') === null || getComputedStyle(document.querySelector('.overlay')).display === 'none'")
-          print('LIVE ROCK TOUR OK: hydrated, start button works, analog/run/jump controls present')
-          ws.close()
+              assert evaluate("!!document.querySelector('.action-btn')")
+              assert evaluate("!!document.querySelector('.jump-btn')")
+              assert evaluate("!!document.querySelector('.move-controls')")
+              assert evaluate("document.querySelector('.overlay') === null || getComputedStyle(document.querySelector('.overlay')).display === 'none'")
+              diag.append('LIVE ROCK TOUR OK: hydrated, start works, analog/run/jump present')
+              ws.close()
+          except Exception:
+              diag.append('TRACEBACK:\n'+traceback.format_exc())
+              raise
+          finally:
+              open('/tmp/rock-diag/diagnostic.txt','w').write('\n\n'.join(diag))
           PY
+
+      - name: Upload browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rock-tour-diagnostics
+          path: /tmp/rock-diag/
