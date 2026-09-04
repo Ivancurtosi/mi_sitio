@@ -15,13 +15,13 @@ jobs:
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           for i in {1..24}; do
-            if curl -fsSL "${url}mount.js?android=1" -o /tmp/mount.js && grep -q 'hydrateRoot' /tmp/mount.js; then break; fi
+            if curl -fsSL "${url}mount.js?android=2" -o /tmp/mount.js && grep -q 'hydrateRoot' /tmp/mount.js; then break; fi
             sleep 5
           done
-          curl -fsSL "${url}?android=1" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?android=1" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?android=1" -o /tmp/hero.webp
-          curl -fsSL "${url}audio/track1.mp3?android=1" -o /tmp/track1.mp3
+          curl -fsSL "${url}?android=2" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?android=2" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?android=2" -o /tmp/hero.webp
+          curl -fsSL "${url}audio/track1.mp3?android=2" -o /tmp/track1.mp3
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
@@ -29,13 +29,13 @@ jobs:
           test -s /tmp/hero.webp
           test -s /tmp/track1.mp3
 
-      - name: Verify Android touch interaction
+      - name: Verify Android landscape touch interaction
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-test=1'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-landscape=2'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
@@ -63,7 +63,7 @@ jobs:
               return r.get('value')
           try:
               call('Emulation.setUserAgentOverride',{'userAgent':'Mozilla/5.0 (Linux; Android 16; SM-A356E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36','platform':'Android'})
-              call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'positionX':0,'positionY':0})
+              call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'positionX':0,'positionY':0,'screenOrientation':{'type':'landscapePrimary','angle':90}})
               call('Emulation.setTouchEmulationEnabled',{'enabled':True,'maxTouchPoints':5})
               call('Page.enable'); call('Runtime.enable'); call('Page.navigate',{'url':os.environ['URL']})
               deadline=time.time()+20
@@ -72,11 +72,12 @@ jobs:
                       if ev("document.documentElement.dataset.rockHydrated === '1'"): break
                   except Exception: pass
                   time.sleep(.25)
-              else: raise RuntimeError('No hidrato en Android')
-              diag.append('HYDRATED_ANDROID')
-              box=ev("(()=>{const e=document.querySelector('.play-btn');if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,vis:getComputedStyle(e).visibility,disp:getComputedStyle(e).display}})()")
+              else: raise RuntimeError('No hidrato en Android landscape')
+              dims=ev("({iw:innerWidth,ih:innerHeight,sw:screen.width,sh:screen.height,ori:screen.orientation&&screen.orientation.type})")
+              diag.append('DIMS='+repr(dims))
+              box=ev("(()=>{const e=document.querySelector('.play-btn');if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,top:r.top,bottom:r.bottom}})()")
               diag.append('PLAYBOX='+repr(box))
-              if not box or box['w']<1: raise RuntimeError('Boton de inicio no visible')
+              if not box or box['y']<0 or box['y']>dims['ih']: raise RuntimeError('Boton fuera del viewport landscape')
               x,y=box['x'],box['y']
               call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y,'radiusX':3,'radiusY':3,'force':1}]})
               call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
@@ -85,13 +86,12 @@ jobs:
                   if ev("!!document.querySelector('.rock-analog')"): break
                   time.sleep(.2)
               else:
-                  diag.append('BODY='+str(ev("document.body.innerText.slice(0,1600)")))
-                  raise RuntimeError('El toque Android no inicia el juego')
+                  diag.append('BODY='+str(ev("document.body.innerText.slice(0,1200)")))
+                  raise RuntimeError('El toque Android landscape no inicia el juego')
               assert ev("!!document.querySelector('.action-btn')")
               assert ev("!!document.querySelector('.jump-btn')")
               assert ev("!!document.querySelector('.game-canvas')")
-              diag.append('ANDROID_TOUCH_OK')
-              call('Page.captureScreenshot',{'format':'png','fromSurface':True})
+              diag.append('ANDROID_LANDSCAPE_TOUCH_OK')
           except Exception:
               diag.append('TRACEBACK:\n'+traceback.format_exc()); raise
           finally:
