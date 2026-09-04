@@ -35,7 +35,7 @@ jobs:
           done
           test "$ok" = 1
 
-      - name: Verify real Android CORRER touch increases speed
+      - name: Verify real Android CORRER touch speed with browser clock
         shell: bash
         run: |
           set -euo pipefail
@@ -62,6 +62,10 @@ jobs:
                       return msg.get('result',{})
           def ev(expr):
               return call('Runtime.evaluate',{'expression':expr,'returnByValue':True,'awaitPromise':True})['result'].get('value')
+          def sample():
+              return ev("({x:window.__rockPlayerX,t:performance.now(),run:window.__rockRunHeld})")
+          def speed(a,b):
+              return (b['x']-a['x'])/max(.001,(b['t']-a['t'])/1000)
           call('Emulation.setUserAgentOverride',{'userAgent':'Mozilla/5.0 (Linux; Android 16; SM-A356E) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36','platform':'Android'})
           call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'screenOrientation':{'type':'landscapePrimary','angle':90}})
           call('Emulation.setTouchEmulationEnabled',{'enabled':True,'maxTouchPoints':5})
@@ -82,26 +86,23 @@ jobs:
               time.sleep(.2)
           else: raise RuntimeError('No inicio el juego')
 
-          # Hold movement directly so the only physical touch under test is CORRER.
           ev("window.__rockControl('right',true,'test:right-ui'); true")
-          time.sleep(.7)
-          x0=ev('window.__rockPlayerX'); time.sleep(.35); x1=ev('window.__rockPlayerX'); walk=x1-x0
+          time.sleep(.4)
+          a=sample(); time.sleep(.30); b=sample(); walk=speed(a,b)
 
           rb=ev("(()=>{const e=document.querySelector('.action-btn');const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,pe:getComputedStyle(e).pointerEvents}})()")
           if rb['pe']!='auto': raise RuntimeError('El boton CORRER no recibe pointer events')
           call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':11,'x':rb['x'],'y':rb['y'],'radiusX':4,'radiusY':4,'force':1}]})
-          time.sleep(.12)
-          held=ev('window.__rockRunHeld')
-          if held is not True: raise RuntimeError('El toque sobre CORRER no activa __rockRunHeld')
-          time.sleep(.25)
-          x2=ev('window.__rockPlayerX'); time.sleep(.35); x3=ev('window.__rockPlayerX'); run=x3-x2
+          time.sleep(.15)
+          if ev('window.__rockRunHeld') is not True: raise RuntimeError('CORRER no activa el estado de carrera')
+          c=sample(); time.sleep(.30); d=sample(); run=speed(c,d)
           call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
           time.sleep(.08)
           released=ev('window.__rockRunHeld')
           ev("window.__rockControl('right',false,'test:right-ui'); true")
-          print(f'WALK={walk:.2f} RUN={run:.2f} HELD={held} RELEASED={released}')
-          if walk <= 20: raise RuntimeError(f'Marcha invalida: {walk}')
-          if run <= walk*1.25: raise RuntimeError(f'CORRER no acelera lo suficiente: walk={walk}, run={run}')
+          print(f'WALK_SPEED={walk:.1f} RUN_SPEED={run:.1f} RELEASED={released}')
+          if not (170 <= walk <= 285): raise RuntimeError(f'Velocidad de caminata inesperada: {walk}')
+          if run <= max(300,walk*1.25): raise RuntimeError(f'CORRER no acelera: walk={walk}, run={run}')
           if released is not False: raise RuntimeError('CORRER quedo trabado al soltar')
           print('REAL_CORRER_TOUCH_OK')
           ws.close()
