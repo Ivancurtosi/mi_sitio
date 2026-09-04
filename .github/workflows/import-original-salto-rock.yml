@@ -1,0 +1,38 @@
+name: Import original Salto Cosmico Rock assets
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-original-salto-rock.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original published assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p salto-cosmico-original-assets
+          base='https://salto-cosmico.ivancurtosi.chatgpt.site/assets'
+          curl -fL --retry 3 "$base/index-BKMDMKjr.css" -o salto-cosmico-original-assets/index.css
+          curl -fL --retry 3 "$base/layout-segment-context-camrGV8A.js" -o salto-cosmico-original-assets/layout-segment-context.js
+          curl -fL --retry 3 "$base/rolldown-runtime-S-ySWqyJ.js" -o salto-cosmico-original-assets/rolldown-runtime.js
+          curl -fL --retry 3 "$base/index-BtHC8AgF.js" -o salto-cosmico-original-assets/index.js
+          curl -fL --retry 3 "$base/framework-CXnKph_e.js" -o salto-cosmico-original-assets/framework.js
+          curl -fL --retry 3 "$base/cosmic-jump-DkePWGqE.js" -o salto-cosmico-original-assets/cosmic-jump.js
+          wc -c salto-cosmico-original-assets/*
+      - name: Commit assets
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-original-assets
+          if ! git diff --cached --quiet; then
+            git commit -m 'Import original Salto Cosmico Rock published assets [skip ci]'
+            git push
+          fi
