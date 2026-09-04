@@ -4,24 +4,33 @@ on:
   push:
     paths:
       - '.github/workflows/smoke-salto-rock.yml'
+      - 'salto-cosmico-rock/rock-tour-updates.css'
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify published assets
+      - name: Verify published assets and viewport fix
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
-          for i in {1..24}; do
-            if curl -fsSL "${url}mount.js?android=2" -o /tmp/mount.js && grep -q 'hydrateRoot' /tmp/mount.js; then break; fi
-            sleep 5
+          ok=0
+          for i in {1..30}; do
+            if curl -fsSL "${url}rock-tour-updates.css?android=3" -o /tmp/updates.css \
+              && grep -q 'position: fixed !important' /tmp/updates.css \
+              && curl -fsSL "${url}mount.js?android=3" -o /tmp/mount.js \
+              && grep -q 'hydrateRoot' /tmp/mount.js; then
+              ok=1
+              break
+            fi
+            sleep 4
           done
-          curl -fsSL "${url}?android=2" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?android=2" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?android=2" -o /tmp/hero.webp
-          curl -fsSL "${url}audio/track1.mp3?android=2" -o /tmp/track1.mp3
+          test "$ok" = 1
+          curl -fsSL "${url}?android=3" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?android=3" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?android=3" -o /tmp/hero.webp
+          curl -fsSL "${url}audio/track1.mp3?android=3" -o /tmp/track1.mp3
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
@@ -35,7 +44,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-landscape=2'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?android-landscape=3'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome about:blank >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
@@ -73,8 +82,9 @@ jobs:
                   except Exception: pass
                   time.sleep(.25)
               else: raise RuntimeError('No hidrato en Android landscape')
-              dims=ev("({iw:innerWidth,ih:innerHeight,sw:screen.width,sh:screen.height,ori:screen.orientation&&screen.orientation.type})")
+              dims=ev("({iw:innerWidth,ih:innerHeight,root:document.getElementById('root').getBoundingClientRect().height,shell:document.querySelector('.game-shell').getBoundingClientRect().height,ori:screen.orientation&&screen.orientation.type})")
               diag.append('DIMS='+repr(dims))
+              if abs(dims['shell']-dims['ih'])>2: raise RuntimeError('Game shell no coincide con viewport')
               box=ev("(()=>{const e=document.querySelector('.play-btn');if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,top:r.top,bottom:r.bottom}})()")
               diag.append('PLAYBOX='+repr(box))
               if not box or box['y']<0 or box['y']>dims['ih']: raise RuntimeError('Boton fuera del viewport landscape')
@@ -85,9 +95,7 @@ jobs:
               while time.time()<deadline:
                   if ev("!!document.querySelector('.rock-analog')"): break
                   time.sleep(.2)
-              else:
-                  diag.append('BODY='+str(ev("document.body.innerText.slice(0,1200)")))
-                  raise RuntimeError('El toque Android landscape no inicia el juego')
+              else: raise RuntimeError('El toque Android landscape no inicia el juego')
               assert ev("!!document.querySelector('.action-btn')")
               assert ev("!!document.querySelector('.jump-btn')")
               assert ev("!!document.querySelector('.game-canvas')")
