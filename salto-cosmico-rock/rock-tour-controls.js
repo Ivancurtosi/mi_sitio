@@ -6,7 +6,7 @@
 
   const controlHeld = new Set();
   const sendControl = (name, on) => {
-    const token = `analog:${name}`;
+    const token = `touch:${name}`;
     const bridge = window.__rockControl;
     if (typeof bridge === 'function') {
       if (on && !controlHeld.has(name)) { controlHeld.add(name); bridge(name, true, token); }
@@ -14,7 +14,7 @@
       return true;
     }
     // Fallback only while an old cached game bundle is still loading.
-    const key = name === 'left' ? 'ArrowLeft' : name === 'right' ? 'ArrowRight' : name === 'down' ? 'ArrowDown' : null;
+    const key = name === 'left' ? 'ArrowLeft' : name === 'right' ? 'ArrowRight' : name === 'down' ? 'ArrowDown' : name === 'jump' ? ' ' : name === 'run' ? 'Shift' : null;
     if (key) on ? keyDown(key) : keyUp(key);
     return false;
   };
@@ -75,25 +75,29 @@
     const jump = document.querySelector('.jump-btn');
     if (!run || !jump || run.dataset.slideReady) return;
     run.dataset.slideReady = '1';
-    run.addEventListener('pointerdown', ev => { runPointer = ev.pointerId; slideJump = false; }, { capture: true });
+
+    run.addEventListener('pointerdown', ev => {
+      runPointer = ev.pointerId;
+      slideJump = false;
+      sendControl('run', true);
+    }, { capture: true, passive: false });
+
     document.addEventListener('pointermove', ev => {
       if (ev.pointerId !== runPointer || slideJump) return;
       const r = jump.getBoundingClientRect();
       if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) {
         slideJump = true;
-        if (typeof window.__rockControl === 'function') window.__rockControl('jump', true, 'slide:jump');
-        else keyDown(' ');
+        sendControl('jump', true);
         jump.classList.add('slide-jump-active');
         navigator.vibrate?.(18);
       }
     }, { capture: true, passive: true });
+
     const end = ev => {
       if (ev.pointerId !== runPointer) return;
       runPointer = null;
-      if (slideJump) {
-        if (typeof window.__rockControl === 'function') window.__rockControl('jump', false, 'slide:jump');
-        else keyUp(' ');
-      }
+      sendControl('run', false);
+      if (slideJump) sendControl('jump', false);
       slideJump = false;
       jump.classList.remove('slide-jump-active');
     };
@@ -104,6 +108,6 @@
   const install = () => { installAnalog(); installRunSlide(); };
   new MutationObserver(install).observe(document.documentElement, { childList: true, subtree: true });
   install();
-  window.addEventListener('blur', () => { releaseMove(); keyUp(' '); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseMove(); keyUp(' '); } });
+  window.addEventListener('blur', () => { releaseMove(); sendControl('run', false); sendControl('jump', false); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseMove(); sendControl('run', false); sendControl('jump', false); } });
 })();
