@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '.github/workflows/smoke-salto-rock.yml'
+      - 'salto-cosmico-rock/index.html'
+      - 'salto-cosmico-rock/mount.js'
       - 'salto-cosmico-rock/rock-tour-controls.js'
       - 'salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js'
 
@@ -11,25 +13,29 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for published CORRER fix
+      - name: Wait for fresh published CORRER build
         shell: bash
         run: |
           set -euo pipefail
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           ok=0
-          for i in {1..40}; do
-            curl -fsSL "${url}rock-tour-controls.js?action=5" -o /tmp/controls.js || true
-            curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?action=5" -o /tmp/game.js || true
-            if grep -q "sendControl('action', true)" /tmp/controls.js 2>/dev/null \
-              && grep -q 'window.__rockControl=N' /tmp/game.js 2>/dev/null \
-              && grep -q 'window.__rockPlayerX=J.x' /tmp/game.js 2>/dev/null; then
+          for i in {1..45}; do
+            curl -fsSL "${url}?run-held=6" -o /tmp/index.html || true
+            curl -fsSL "${url}mount.js?run-held=6" -o /tmp/mount.js || true
+            curl -fsSL "${url}rock-tour-controls.js?run-held=6" -o /tmp/controls.js || true
+            curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?run-held=6" -o /tmp/game.js || true
+            if grep -q 'mount.js?v=run-held-6' /tmp/index.html 2>/dev/null \
+              && grep -q 'cosmic-jump-DkePWGqE.js?v=run-held-6' /tmp/mount.js 2>/dev/null \
+              && grep -q 'rock-tour-controls.js?v=run-held-6' /tmp/mount.js 2>/dev/null \
+              && grep -q '__rockRunHeld = false' /tmp/controls.js 2>/dev/null \
+              && grep -q 'window.__rockRunHeld' /tmp/game.js 2>/dev/null; then
               ok=1; break
             fi
             sleep 4
           done
           test "$ok" = 1
 
-      - name: Verify engine action and real Android CORRER touch
+      - name: Verify real Android CORRER touch increases speed
         shell: bash
         run: |
           set -euo pipefail
@@ -59,7 +65,7 @@ jobs:
           call('Emulation.setUserAgentOverride',{'userAgent':'Mozilla/5.0 (Linux; Android 16; SM-A356E) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36','platform':'Android'})
           call('Emulation.setDeviceMetricsOverride',{'width':915,'height':412,'deviceScaleFactor':2.625,'mobile':True,'screenWidth':915,'screenHeight':412,'screenOrientation':{'type':'landscapePrimary','angle':90}})
           call('Emulation.setTouchEmulationEnabled',{'enabled':True,'maxTouchPoints':5})
-          call('Page.enable'); call('Runtime.enable'); call('Page.navigate',{'url':'https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?action-run=5'})
+          call('Page.enable'); call('Runtime.enable'); call('Page.navigate',{'url':'https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?v=run-held-6'})
           deadline=time.time()+20
           while time.time()<deadline:
               try:
@@ -68,40 +74,35 @@ jobs:
               time.sleep(.25)
           else: raise RuntimeError('No hidrato')
           play=ev("(()=>{const r=document.querySelector('.play-btn').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}})()")
-          call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':play['x'],'y':play['y'],'force':1}]})
+          call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':play['x'],'y':play['y'],'force':1}]})
           call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
           deadline=time.time()+8
           while time.time()<deadline:
-              if ev("!!document.querySelector('.action-btn') && typeof window.__rockControl==='function' && typeof window.__rockPlayerX==='number'"): break
+              if ev("!!document.querySelector('.action-btn') && typeof window.__rockControl==='function' && typeof window.__rockPlayerX==='number' && typeof window.__rockRunHeld==='boolean'"): break
               time.sleep(.2)
           else: raise RuntimeError('No inicio el juego')
 
-          # A) Prove the engine's real action control changes speed.
-          ev("window.__rockControl('right',true,'test:right'); true")
-          time.sleep(1.2)
-          x0=ev('window.__rockPlayerX'); time.sleep(.55); x1=ev('window.__rockPlayerX'); walk_engine=x1-x0
-          ev("window.__rockControl('action',true,'test:action'); true")
-          time.sleep(.35)
-          x2=ev('window.__rockPlayerX'); time.sleep(.55); x3=ev('window.__rockPlayerX'); run_engine=x3-x2
-          ev("window.__rockControl('action',false,'test:action'); window.__rockControl('right',false,'test:right'); true")
-          print(f'ENGINE WALK={walk_engine:.2f} RUN={run_engine:.2f}')
-          if walk_engine <= 10 or run_engine <= walk_engine*1.20:
-              raise RuntimeError(f'El action interno no acelera: walk={walk_engine}, run={run_engine}')
-
-          # B) Keep right held directly, but press the visible CORRER button with a real Android touch.
+          # Hold movement directly so the only physical touch under test is CORRER.
           ev("window.__rockControl('right',true,'test:right-ui'); true")
-          time.sleep(.8)
-          x4=ev('window.__rockPlayerX'); time.sleep(.45); x5=ev('window.__rockPlayerX'); walk_ui=x5-x4
+          time.sleep(.7)
+          x0=ev('window.__rockPlayerX'); time.sleep(.35); x1=ev('window.__rockPlayerX'); walk=x1-x0
+
           rb=ev("(()=>{const e=document.querySelector('.action-btn');const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,pe:getComputedStyle(e).pointerEvents}})()")
           if rb['pe']!='auto': raise RuntimeError('El boton CORRER no recibe pointer events')
           call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':11,'x':rb['x'],'y':rb['y'],'radiusX':4,'radiusY':4,'force':1}]})
-          time.sleep(.35)
-          x6=ev('window.__rockPlayerX'); time.sleep(.55); x7=ev('window.__rockPlayerX'); run_ui=x7-x6
+          time.sleep(.12)
+          held=ev('window.__rockRunHeld')
+          if held is not True: raise RuntimeError('El toque sobre CORRER no activa __rockRunHeld')
+          time.sleep(.25)
+          x2=ev('window.__rockPlayerX'); time.sleep(.35); x3=ev('window.__rockPlayerX'); run=x3-x2
           call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+          time.sleep(.08)
+          released=ev('window.__rockRunHeld')
           ev("window.__rockControl('right',false,'test:right-ui'); true")
-          print(f'UI WALK={walk_ui:.2f} RUN={run_ui:.2f}')
-          if walk_ui <= 10 or run_ui <= walk_ui*1.20:
-              raise RuntimeError(f'El toque real sobre CORRER no acelera: walk={walk_ui}, run={run_ui}')
+          print(f'WALK={walk:.2f} RUN={run:.2f} HELD={held} RELEASED={released}')
+          if walk <= 20: raise RuntimeError(f'Marcha invalida: {walk}')
+          if run <= walk*1.25: raise RuntimeError(f'CORRER no acelera lo suficiente: walk={walk}, run={run}')
+          if released is not False: raise RuntimeError('CORRER quedo trabado al soltar')
           print('REAL_CORRER_TOUCH_OK')
           ws.close()
           PY
