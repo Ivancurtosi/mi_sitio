@@ -1,0 +1,49 @@
+name: Patch Rock Tour CORRER engine
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-rock-run-engine.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make CORRER use explicit touch state
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=p.read_text()
+          replacements = [
+            ('r=J.crouching?d.crouchSpeed:t.action?d.runSpeed:d.walkSpeed',
+             'r=J.crouching?d.crouchSpeed:(t.action||window.__rockRunHeld)?d.runSpeed:d.walkSpeed'),
+            ('J.grounded?t.action?d.runAcceleration:d.groundAcceleration',
+             'J.grounded?(t.action||window.__rockRunHeld)?d.runAcceleration:d.groundAcceleration'),
+          ]
+          changed=False
+          for old,new in replacements:
+              if old in s:
+                  s=s.replace(old,new,1); changed=True
+              elif new not in s:
+                  raise SystemExit(f'Run engine pattern not found: {old}')
+          p.write_text(s)
+          print('patched' if changed else 'already patched')
+          PY
+
+      - name: Commit CORRER engine fix
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Make Rock Tour CORRER use explicit touch state'
+            git push
+          fi
