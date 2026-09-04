@@ -16,7 +16,7 @@ jobs:
           url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/'
           ok=0
           for i in {1..24}; do
-            if curl -fsSL "${url}mount.js?live=5" -o /tmp/mount.js \
+            if curl -fsSL "${url}mount.js?live=6" -o /tmp/mount.js \
               && grep -q 'hydrateRoot' /tmp/mount.js \
               && grep -q 'rockHydrated' /tmp/mount.js; then
               ok=1
@@ -25,12 +25,12 @@ jobs:
             sleep 5
           done
           test "$ok" = 1
-          curl -fsSL "${url}?live=5" -o /tmp/game.html
-          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?live=5" -o /tmp/game.js
-          curl -fsSL "${url}assets/rock-hero.webp?live=5" -o /tmp/hero.webp
-          curl -fsSL "${url}assets/rock-props.webp?live=5" -o /tmp/props.webp
-          curl -fsSL "${url}audio/track1.mp3?live=5" -o /tmp/track1.mp3
-          curl -fsSL "${url}audio/track5.mp3?live=5" -o /tmp/track5.mp3
+          curl -fsSL "${url}?live=6" -o /tmp/game.html
+          curl -fsSL "${url}assets/cosmic-jump-DkePWGqE.js?live=6" -o /tmp/game.js
+          curl -fsSL "${url}assets/rock-hero.webp?live=6" -o /tmp/hero.webp
+          curl -fsSL "${url}assets/rock-props.webp?live=6" -o /tmp/props.webp
+          curl -fsSL "${url}audio/track1.mp3?live=6" -o /tmp/track1.mp3
+          curl -fsSL "${url}audio/track5.mp3?live=6" -o /tmp/track5.mp3
           grep -q 'SALTO CÓSMICO // ROCK TOUR' /tmp/game.html
           grep -q 'crouched:34' /tmp/game.js
           grep -q 'fastJumpVelocity:-890' /tmp/game.js
@@ -46,10 +46,10 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/rock-diag
           python3 -m pip install --quiet websocket-client
-          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?browser=5'
+          url='https://ivancurtosi.github.io/mi_sitio/salto-cosmico-rock/?browser=6'
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           test -n "$chrome"
-          "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+          "$chrome" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1280,720 \
             --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir=/tmp/rock-chrome \
             "$url" >/tmp/rock-diag/chrome.out 2>/tmp/rock-diag/chrome.err &
           CHROME_PID=$!
@@ -87,11 +87,9 @@ jobs:
               else:
                   raise RuntimeError('Rock Tour did not hydrate')
 
-              body=evaluate("document.body.innerText.toLowerCase()")
-              assert 'salto cósmico // rock tour' in body
-              assert 'arrancar la gira' in body
               assert evaluate("typeof window.__rockPlaylist === 'object'")
               assert evaluate("!!document.querySelector('.game-canvas')")
+              assert evaluate("!!document.querySelector('.play-btn')")
               diag.append('PRESTART OK')
 
               evaluate("document.querySelector('.play-btn').click(); true")
@@ -101,6 +99,7 @@ jobs:
                       break
                   time.sleep(.25)
               else:
+                  diag.append('BODY='+str(evaluate("document.body.innerText.slice(0,1000)")))
                   raise RuntimeError('Analog control did not appear after starting')
 
               assert evaluate("!!document.querySelector('.action-btn')")
