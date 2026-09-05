@@ -72,6 +72,10 @@ html, body {
   font-size: 13px !important;
 }
 
+/* Android/Chrome shows an unavoidable native overlay whenever the Fullscreen API is used.
+   Hide the trigger so gameplay is never blocked by that browser message. */
+.fullscreen-btn { display: none !important; }
+
 .jump-btn.slide-jump-active { transform: scale(.94); filter: brightness(1.22); }
 @media (max-height: 560px) {
   .move-controls, .rock-analog { width: 132px !important; height: 132px !important; }
