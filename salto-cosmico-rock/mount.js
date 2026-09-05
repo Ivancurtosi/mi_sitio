@@ -1,19 +1,18 @@
 import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
-import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=boss-arena-fix-1';
+import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=stage-music-1';
 
 const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/track${n}.mp3`, window.location.href).href]));
-const PLAYLIST = [1, 2, 3, 4, 5];
 const BASE_VOLUME = 0.48;
-const CROSSFADE_MS = 1200;
+const CROSSFADE_MS = 900;
 
-// Always play the five original songs at their original speed and duration.
-// Stage progression must never shorten, restart or remove a song.
-const THEMES = {
-  grove:   { rate: 1.00 },
-  cavern:  { rate: 1.00 },
-  sky:     { rate: 1.00 },
-  citadel: { rate: 1.00 },
-  rush:    { rate: 1.00 }
+// Musical progression: melodic -> dark -> fast -> heavy -> most aggressive boss track.
+// The five songs are kept at their original speed and duration.
+const THEME_TRACKS = {
+  grove: 4,    // Ruta 1 · heavy melódico / épico
+  cavern: 3,   // Ruta 2 · nu metal oscuro
+  sky: 1,      // Ruta 3 · thrash rápido
+  citadel: 2,  // Ruta 4 · groove pesado
+  boss: 5      // Guardián final · metal moderno agresivo
 };
 
 const decks = [new Audio(), new Audio()];
@@ -21,6 +20,7 @@ decks.forEach(deck => {
   deck.preload = 'auto';
   deck.volume = BASE_VOLUME;
   deck.playbackRate = 1;
+  deck.loop = true;
   deck.preservesPitch = true;
   deck.mozPreservesPitch = true;
   deck.webkitPreservesPitch = true;
@@ -28,11 +28,12 @@ decks.forEach(deck => {
 
 let activeDeck = 0;
 let theme = 'grove';
-let orderPos = 0;
 let muted = false;
 let playing = false;
 let transitioning = false;
 let fadeToken = 0;
+
+const safePlay = deck => deck.play().catch(() => {});
 
 const setTrack = (deck, trackNumber, reset = true) => {
   const src = tracks[trackNumber];
@@ -40,18 +41,14 @@ const setTrack = (deck, trackNumber, reset = true) => {
     deck.src = src;
     deck.dataset.track = String(trackNumber);
     if (reset) deck.currentTime = 0;
+  } else if (reset) {
+    deck.currentTime = 0;
   }
   deck.playbackRate = 1;
+  deck.loop = true;
 };
 
-const safePlay = deck => deck.play().catch(() => {});
-
 function crossfadeTo(trackNumber) {
-  if (!playing || muted) {
-    setTrack(decks[activeDeck], trackNumber);
-    return;
-  }
-
   const fromIndex = activeDeck;
   const toIndex = 1 - activeDeck;
   const from = decks[fromIndex];
@@ -59,12 +56,11 @@ function crossfadeTo(trackNumber) {
   const token = ++fadeToken;
   transitioning = true;
 
-  setTrack(to, trackNumber);
-  to.currentTime = 0;
+  setTrack(to, trackNumber, true);
   to.volume = 0;
   to.muted = muted;
   from.muted = muted;
-  safePlay(to);
+  if (!muted) safePlay(to);
 
   const started = performance.now();
   const step = now => {
@@ -85,50 +81,57 @@ function crossfadeTo(trackNumber) {
   requestAnimationFrame(step);
 }
 
-function advanceTrack() {
-  if (transitioning) return;
-  orderPos = (orderPos + 1) % PLAYLIST.length;
-  crossfadeTo(PLAYLIST[orderPos]);
+function normalizeTheme(nextTheme) {
+  // Power-ups previously requested a temporary "rush" theme. Keep the song of
+  // the current level instead, so every route has a clear musical identity.
+  if (nextTheme === 'rush') return theme;
+  // Once the final boss song starts, don't let a power-up ending switch it back.
+  if (theme === 'boss' && nextTheme === 'citadel') return 'boss';
+  return THEME_TRACKS[nextTheme] ? nextTheme : theme;
 }
-
-function setTheme(nextTheme) {
-  // Keep stage identity for future musical arrangement work, but do not alter
-  // speed or restart the song that is currently playing.
-  theme = THEMES[nextTheme] ? nextTheme : 'grove';
-  decks.forEach(deck => { deck.playbackRate = 1; });
-}
-
-// Crossfade only at the natural end of each full song.
-setInterval(() => {
-  if (!playing || muted || transitioning) return;
-  const deck = decks[activeDeck];
-  if (!Number.isFinite(deck.duration) || deck.duration <= 0) return;
-  if (deck.duration - deck.currentTime <= CROSSFADE_MS / 1000 + 0.18) advanceTrack();
-}, 140);
-
-decks.forEach((deck, deckIndex) => {
-  deck.addEventListener('ended', () => {
-    if (deckIndex === activeDeck && playing && !transitioning) advanceTrack();
-  });
-  deck.addEventListener('error', () => {
-    if (deckIndex === activeDeck && playing && !transitioning) setTimeout(advanceTrack, 180);
-  });
-});
 
 window.__rockPlaylist = {
   play(nextTheme) {
+    const wasPlaying = playing;
+    const next = normalizeTheme(nextTheme || theme || 'grove');
+    const trackNumber = THEME_TRACKS[next] || THEME_TRACKS.grove;
+    const current = decks[activeDeck];
+    const sameTrack = current.dataset.track === String(trackNumber);
+    const changed = next !== theme || !sameTrack;
+
+    theme = next;
     playing = true;
-    setTheme(nextTheme || theme || 'grove');
-    const deck = decks[activeDeck];
-    if (!deck.dataset.track) setTrack(deck, PLAYLIST[orderPos]);
-    deck.playbackRate = 1;
-    deck.muted = muted;
-    deck.volume = BASE_VOLUME;
-    if (!muted && !transitioning) safePlay(deck);
+
+    if (changed) {
+      if (wasPlaying && current.dataset.track && !current.paused && !muted) {
+        crossfadeTo(trackNumber);
+      } else {
+        ++fadeToken;
+        transitioning = false;
+        decks.forEach((deck, index) => {
+          if (index !== activeDeck) deck.pause();
+          deck.volume = BASE_VOLUME;
+        });
+        setTrack(current, trackNumber, true);
+        current.muted = muted;
+        if (!muted) safePlay(current);
+      }
+      return;
+    }
+
+    current.muted = muted;
+    current.volume = BASE_VOLUME;
+    current.playbackRate = 1;
+    if (!muted && !transitioning) safePlay(current);
   },
   pause() {
     playing = false;
-    decks.forEach(deck => deck.pause());
+    ++fadeToken;
+    transitioning = false;
+    decks.forEach(deck => {
+      deck.pause();
+      deck.volume = BASE_VOLUME;
+    });
   },
   setMuted(value) {
     muted = !!value;
