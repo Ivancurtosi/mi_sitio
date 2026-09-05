@@ -1,5 +1,5 @@
 import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
-import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=stage-music-2';
+import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=final-arena-visual-1';
 
 const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/track${n}.mp3`, window.location.href).href]));
 const BASE_VOLUME = 0.48;
