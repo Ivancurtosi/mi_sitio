@@ -1,5 +1,5 @@
 import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
-import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=stage-music-1';
+import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=stage-music-2';
 
 const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/track${n}.mp3`, window.location.href).href]));
 const BASE_VOLUME = 0.48;
@@ -94,6 +94,14 @@ window.__rockPlaylist = {
   play(nextTheme) {
     const wasPlaying = playing;
     const next = normalizeTheme(nextTheme || theme || 'grove');
+
+    // The boss cue is requested every frame while the warning is on screen.
+    // Ignore duplicate requests until the current crossfade finishes.
+    if (transitioning && next === theme) {
+      playing = true;
+      return;
+    }
+
     const trackNumber = THEME_TRACKS[next] || THEME_TRACKS.grove;
     const current = decks[activeDeck];
     const sameTrack = current.dataset.track === String(trackNumber);
