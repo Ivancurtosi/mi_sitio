@@ -1,5 +1,5 @@
 import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
-import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=rock-polish-2';
+import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=boss-arena-fix-1';
 
 const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/track${n}.mp3`, window.location.href).href]));
 const PLAYLIST = [1, 2, 3, 4, 5];
