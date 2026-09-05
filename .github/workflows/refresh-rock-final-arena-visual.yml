@@ -1,0 +1,37 @@
+name: Refresh Rock Tour final arena visual build
+
+on:
+  push:
+    paths:
+      - '.github/workflows/refresh-rock-final-arena-visual.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Bump browser cache versions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          mount = Path('salto-cosmico-rock/mount.js')
+          s = mount.read_text()
+          s = s.replace('cosmic-jump-DkePWGqE.js?v=stage-music-2', 'cosmic-jump-DkePWGqE.js?v=final-arena-visual-1')
+          mount.write_text(s)
+          index = Path('salto-cosmico-rock/index.html')
+          h = index.read_text()
+          h = h.replace('mount.js?v=stage-music-2', 'mount.js?v=final-arena-visual-1')
+          index.write_text(h)
+          PY
+      - name: Commit refresh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Refresh final arena and visual progression build"
+          git push origin master
