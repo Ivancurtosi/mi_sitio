@@ -1,0 +1,64 @@
+name: Fix Rock Tour boss arena
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-rock-boss-arena.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep final guardian inside the arena
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = p.read_text()
+
+          replacements = [
+              (
+                  "{x:6140,kind:`warden`,dir:-1}",
+                  "{x:6580,kind:`warden`,dir:-1}",
+                  "move guardian into final arena"
+              ),
+              (
+                  "let r=n.x;n.x+=n.vx*e,Ke(n,t,r,!0);let i=n.y+n.h;n.vy=Math.min(780,n.vy+1500*e)",
+                  "let r=n.x;n.x+=n.vx*e,Ke(n,t,r,!0),n.x=S(n.x,E.goalX-540,E.goalX-180-n.w);let i=n.y+n.h;n.vy=Math.min(780,n.vy+1500*e)",
+                  "keep guardian reachable near the goal"
+              ),
+              (
+                  "J.x>=E.goalX-160&&n&&q.time<=0&&Y(`EL GUARDIÁN DEL RUIDO`,`6 impactos para encender el amplificador`,1.2)",
+                  "J.x>=E.goalX-560&&n&&q.time<=0&&Y(`EL GUARDIÁN DEL RUIDO`,`6 golpes: saltale encima o usá RIFF`,1.2)",
+                  "introduce guardian before the player reaches the goal"
+              ),
+          ]
+
+          for old, new, label in replacements:
+              if old in s:
+                  s = s.replace(old, new, 1)
+                  print('patched:', label)
+              elif new in s:
+                  print('already patched:', label)
+              else:
+                  raise SystemExit(f'pattern not found: {label}')
+
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes needed'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m 'Fix final guardian arena soft-lock'
+          git push
