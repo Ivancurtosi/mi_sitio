@@ -1,0 +1,59 @@
+name: Fix Rock Tour final arena and visual progression
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-rock-final-arena-visual-progression.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Keep guardian fight playable and make later routes darker
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = path.read_text()
+
+          old_bg = "p={grove:[`./assets/rock-concert.webp`,`./assets/metal-wasteland.webp`],cavern:[`./assets/metal-forge.webp`,`./assets/prism-cavern.png`],sky:[`./assets/metal-storm.webp`,`./assets/dawn-isles.png`],citadel:[`./assets/rock-concert.webp`,`./assets/metal-storm.webp`]}"
+          new_bg = "p={grove:[`./assets/rock-concert.webp`,`./assets/metal-wasteland.webp`],cavern:[`./assets/metal-forge.webp`,`./assets/prism-cavern.png`],sky:[`./assets/metal-storm.webp`,`./assets/dawn-isles.png`],citadel:[`./assets/metal-wasteland.webp`,`./assets/prism-cavern.png`]}"
+          if old_bg not in s:
+              raise SystemExit('background map pattern not found')
+          s = s.replace(old_bg, new_bg, 1)
+
+          old_palette = "sky:{sky:`#070912`,soil:`#252b37`,edge:`#738fff`,deep:`#090a0e`,accent:`#ff3d22`,haze:`#25113c`},citadel:{sky:`#050506`,soil:`#292527`,edge:`#dc1b20`,deep:`#090708`,accent:`#e8edf0`,haze:`#310b12`}"
+          new_palette = "sky:{sky:`#02030a`,soil:`#151923`,edge:`#4f6082`,deep:`#02030a`,accent:`#b7c8ff`,haze:`#080d1b`},citadel:{sky:`#010101`,soil:`#171214`,edge:`#9f111a`,deep:`#020101`,accent:`#d9dde2`,haze:`#120205`}"
+          if old_palette not in s:
+              raise SystemExit('palette pattern not found')
+          s = s.replace(old_palette, new_palette, 1)
+
+          old_overlay = "e.fillStyle={grove:`rgba(70, 8, 3, .15)`,cavern:`rgba(5, 0, 10, .58)`,sky:`rgba(7, 11, 30, .16)`,citadel:`rgba(30, 2, 5, .23)`}[E.biome],e.fillRect(0,0,t,720);let a=e.createRadialGradient"
+          new_overlay = "e.fillStyle={grove:`rgba(70, 8, 3, .15)`,cavern:`rgba(5, 0, 10, .58)`,sky:`rgba(1, 4, 15, .48)`,citadel:`rgba(18, 0, 3, .58)`}[E.biome],e.fillRect(0,0,t,720),E.biome===`sky`&&(e.save(),e.globalAlpha=.15,e.fillStyle=`#aab9dc`,e.beginPath(),e.arc(t*.82,112,50,0,Math.PI*2),e.fill(),e.strokeStyle=`rgba(145,175,220,.32)`,e.lineWidth=2,Array.from({length:18},(_,rr)=>rr).forEach(rr=>{let xx=(rr*101+T*185)%Math.max(1,t),yy=(rr*47+T*255)%610;e.beginPath(),e.moveTo(xx,yy),e.lineTo(xx-16,yy+44),e.stroke()}),e.restore()),E.biome===`citadel`&&(e.save(),e.globalAlpha=.22,e.fillStyle=`#3b0308`,e.fillRect(0,430,t,290),e.globalAlpha=.18,e.fillStyle=`#7b1119`,Array.from({length:12},(_,rr)=>rr).forEach(rr=>{let xx=(rr*137+T*28)%Math.max(1,t),yy=510-(rr%4)*35;e.beginPath(),e.arc(xx,yy,18+rr%3*9,0,Math.PI*2),e.fill()}),e.restore());let a=e.createRadialGradient"
+          if old_overlay not in s:
+              raise SystemExit('overlay pattern not found')
+          s = s.replace(old_overlay, new_overlay, 1)
+
+          old_boss = "let n=L.some(e=>e.kind===`warden`&&e.active&&e.state!==`dead`);!Te&&J.x+J.w>=E.goalX&&!n?(Te=!0,G=2.35,J.invulnerable=9,u.current.left=!1,u.current.right=!1,X(Math.max(0,Math.ceil(O))*10+2e3),Y(ve===_.length-1?`¡GIRA COMPLETA!`:`RECITAL COMPLETO`,`Etapa ${E.id} superada`,2.1),o.current?.stopMusic(),o.current?.sfx(`goal`)):J.x>=E.goalX-560&&n&&q.time<=0&&(window.__rockPlaylist?.play(`boss`),Y(`EL GUARDIÁN DEL RUIDO`,`6 golpes: saltale encima o usá RIFF`,1.2));let i=S(720*(r.width/Math.max(1,r.height)),c,1640),s=Math.min(i*.4,560);J.x-D>s&&(D=Math.max(D,J.x-s)),D=S(D,E.startX-re,Math.max(0,E.width-i)),K=Math.max(0,K-e)"
+          new_boss = "let n=L.find(e=>e.kind===`warden`&&e.active&&e.state!==`dead`),rr=!!n;if(n&&J.x>=E.goalX-700){n.awake=!0;let e=De(E.goalX-360);(n.x<E.goalX-520||n.x>E.goalX-210||n.y>650)&&(n.x=E.goalX-360,n.y=e-n.h,n.vx=0,n.vy=0),J.x>E.goalX-120&&(J.x=E.goalX-120,J.vx=Math.min(0,J.vx)),q.time<=0&&(window.__rockPlaylist?.play(`boss`),Y(`EL GUARDIÁN DEL RUIDO`,`DERROTALO: 6 golpes para abrir el amplificador`,1.2))}!Te&&J.x+J.w>=E.goalX&&!rr&&(Te=!0,G=2.35,J.invulnerable=9,u.current.left=!1,u.current.right=!1,X(Math.max(0,Math.ceil(O))*10+2e3),Y(ve===_.length-1?`¡GIRA COMPLETA!`:`RECITAL COMPLETO`,`Etapa ${E.id} superada`,2.1),o.current?.stopMusic(),o.current?.sfx(`goal`));let i=S(720*(r.width/Math.max(1,r.height)),c,1640),s=Math.min(i*.4,560);J.x-D>s&&(D=Math.max(D,J.x-s)),rr&&J.x>=E.goalX-700&&(D=Math.min(D,Math.max(E.startX-re,E.goalX-980))),D=S(D,E.startX-re,Math.max(0,E.width-i)),K=Math.max(0,K-e)"
+          if old_boss not in s:
+              raise SystemExit('boss arena pattern not found')
+          s = s.replace(old_boss, new_boss, 1)
+
+          path.write_text(s)
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Fix final guardian soft-lock and darken later routes"
+          git push origin master
