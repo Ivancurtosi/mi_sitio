@@ -1,5 +1,6 @@
 name: Smoke test Salto Cosmico Rock
 
+# Rerun after GitHub Pages finished publishing the polish build.
 on:
   push:
     paths:
