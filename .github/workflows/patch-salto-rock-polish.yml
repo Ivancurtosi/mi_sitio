@@ -1,0 +1,64 @@
+name: Patch Salto Cosmico Rock polish
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-salto-rock-polish.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Patch game bundle safely
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          text = path.read_text(encoding='utf-8')
+
+          replacements = [
+              (
+                  "startMusic(e,t=!1){this.ensure(),this.currentTheme=t?`rush`:e,this.muted||window.__rockPlaylist?.play()}",
+                  "startMusic(e,t=!1){this.ensure(),this.currentTheme=t?`rush`:e,this.muted||window.__rockPlaylist?.play(this.currentTheme)}",
+                  'stage-aware music theme bridge'
+              ),
+              (
+                  "Oe=()=>E.blocks.map((e,t)=>({...e,id:t,active:!0,bump:0}))",
+                  "Oe=()=>E.blocks.map((e,t)=>{let n={...e,id:t,active:!0,bump:0};if(e.kind===`reward`||e.kind===`brittle`||e.kind===`hidden`){let t=De(e.x+e.w/2),r=t-(e.y+e.h);r<te+12&&(n.y=Math.floor((t-e.h-(te+12))/48)*48)}return n})",
+                  'grown-player block clearance'
+              ),
+              (
+                  "cavern:{sky:`#070608`,soil:`#29252e`,edge:`#ba3129`,deep:`#0b090d`,accent:`#d8dde2`,haze:`#30102e`}",
+                  "cavern:{sky:`#030205`,soil:`#211c27`,edge:`#8d2836`,deep:`#050306`,accent:`#c9c6d4`,haze:`#19071d`}",
+                  'darker route-two palette'
+              ),
+              (
+                  "cavern:`rgba(18, 4, 22, .22)`",
+                  "cavern:`rgba(12, 2, 18, .36)`",
+                  'darker route-two atmosphere'
+              ),
+          ]
+
+          for old, new, label in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly one match, found {count}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          git config user.name 'Salto Cosmico Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Polish Rock Tour blocks, music progression and route 2'
+          git push origin master
