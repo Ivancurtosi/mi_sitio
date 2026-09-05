@@ -147,4 +147,5 @@ ReactDOM.hydrateRoot(document.getElementById('root'), React.createElement(RockTo
   onRecoverableError(error) { console.warn('Rock Tour hydration:', error); }
 });
 document.documentElement.dataset.rockHydrated = '1';
+await import('./rock-tour-lose-sfx.js?v=lose-sfx-1');
 await import('./rock-tour-controls.js?v=rock-polish-2');
