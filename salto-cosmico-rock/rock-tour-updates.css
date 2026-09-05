@@ -72,9 +72,55 @@ html, body {
   font-size: 13px !important;
 }
 
-/* Android/Chrome shows an unavoidable native overlay whenever the Fullscreen API is used.
-   Hide the trigger so gameplay is never blocked by that browser message. */
-.fullscreen-btn { display: none !important; }
+/* Safe fullscreen: Android/Chrome will still show its own native hint, but gameplay is paused
+   behind this countdown so the player cannot lose a life while the hint blocks the controls. */
+.fullscreen-btn { display: inline-flex !important; }
+.rock-fullscreen-guard {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  background: rgba(5, 3, 7, .72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: opacity .16s ease, visibility .16s ease;
+}
+.rock-fullscreen-guard.show {
+  opacity: 1;
+  visibility: visible;
+}
+.rock-fullscreen-guard-inner {
+  min-width: 230px;
+  padding: 22px 28px 20px;
+  border: 1px solid rgba(255, 124, 74, .55);
+  border-radius: 18px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(28, 17, 22, .96), rgba(8, 6, 9, .96));
+  box-shadow: 0 18px 55px rgba(0,0,0,.55), inset 0 0 30px rgba(142, 36, 28, .12);
+}
+.rock-fullscreen-guard-inner small {
+  display: block;
+  margin-bottom: 8px;
+  font: 800 12px/1.2 ui-monospace, monospace;
+  letter-spacing: .12em;
+  color: #ffb58d;
+}
+.rock-fullscreen-guard-inner strong {
+  display: block;
+  font: 900 54px/1 ui-monospace, monospace;
+  color: #fff2d7;
+  text-shadow: 0 0 22px rgba(255, 90, 45, .48);
+}
+.rock-fullscreen-guard-inner span {
+  display: block;
+  margin-top: 9px;
+  font: 700 14px/1.25 system-ui, sans-serif;
+  color: rgba(255,255,255,.82);
+}
 
 .jump-btn.slide-jump-active { transform: scale(.94); filter: brightness(1.22); }
 @media (max-height: 560px) {
@@ -89,4 +135,9 @@ html, body {
     min-width: 104px !important;
     min-height: 104px !important;
   }
+  .rock-fullscreen-guard-inner {
+    min-width: 200px;
+    padding: 16px 22px 15px;
+  }
+  .rock-fullscreen-guard-inner strong { font-size: 46px; }
 }
