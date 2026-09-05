@@ -2,16 +2,18 @@ import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnK
 import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=rock-polish-2';
 
 const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/track${n}.mp3`, window.location.href).href]));
+const PLAYLIST = [1, 2, 3, 4, 5];
 const BASE_VOLUME = 0.48;
 const CROSSFADE_MS = 1200;
 
-// The tour gets darker, heavier and a little faster as the routes advance.
+// All five songs always stay in rotation. Advancing through the tour only
+// changes the feel slightly; it never removes tracks from the playlist.
 const THEMES = {
-  grove:   { order: [4, 2], rate: 0.97 },
-  cavern:  { order: [2, 3], rate: 1.00 },
-  sky:     { order: [3, 1], rate: 1.04 },
-  citadel: { order: [1, 5], rate: 1.08 },
-  rush:    { order: [5, 1], rate: 1.10 }
+  grove:   { rate: 0.97 },
+  cavern:  { rate: 1.00 },
+  sky:     { rate: 1.04 },
+  citadel: { rate: 1.08 },
+  rush:    { rate: 1.10 }
 };
 
 const decks = [new Audio(), new Audio()];
@@ -24,8 +26,7 @@ decks.forEach(deck => {
 });
 
 let activeDeck = 0;
-let theme = null;
-let order = THEMES.grove.order;
+let theme = 'grove';
 let orderPos = 0;
 let muted = false;
 let playing = false;
@@ -85,29 +86,14 @@ function crossfadeTo(trackNumber) {
 }
 
 function advanceTrack() {
-  if (!order.length || transitioning) return;
-  orderPos = (orderPos + 1) % order.length;
-  crossfadeTo(order[orderPos]);
+  if (transitioning) return;
+  orderPos = (orderPos + 1) % PLAYLIST.length;
+  crossfadeTo(PLAYLIST[orderPos]);
 }
 
 function setTheme(nextTheme) {
-  const next = THEMES[nextTheme] ? nextTheme : 'grove';
-  const changed = next !== theme;
-  theme = next;
-  order = cfg().order;
-
+  theme = THEMES[nextTheme] ? nextTheme : 'grove';
   decks.forEach(deck => { deck.playbackRate = cfg().rate; });
-  if (!changed) return false;
-
-  orderPos = 0;
-  const wanted = order[0];
-  const current = decks[activeDeck];
-  if (current.dataset.track && current.dataset.track !== String(wanted) && playing && !muted) {
-    crossfadeTo(wanted);
-  } else if (!current.dataset.track) {
-    setTrack(current, wanted);
-  }
-  return true;
 }
 
 // Start the next track before the old one fully ends, so there is no hard cut.
@@ -132,7 +118,7 @@ window.__rockPlaylist = {
     playing = true;
     setTheme(nextTheme || theme || 'grove');
     const deck = decks[activeDeck];
-    if (!deck.dataset.track) setTrack(deck, order[orderPos] || order[0]);
+    if (!deck.dataset.track) setTrack(deck, PLAYLIST[orderPos]);
     deck.playbackRate = cfg().rate;
     deck.muted = muted;
     deck.volume = BASE_VOLUME;
@@ -145,7 +131,11 @@ window.__rockPlaylist = {
   setMuted(value) {
     muted = !!value;
     decks.forEach(deck => { deck.muted = muted; });
-    if (muted) decks.forEach(deck => deck.pause());
+    if (muted) {
+      decks.forEach(deck => deck.pause());
+    } else if (playing && !transitioning) {
+      safePlay(decks[activeDeck]);
+    }
   }
 };
 
