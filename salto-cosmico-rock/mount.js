@@ -6,20 +6,21 @@ const PLAYLIST = [1, 2, 3, 4, 5];
 const BASE_VOLUME = 0.48;
 const CROSSFADE_MS = 1200;
 
-// All five songs always stay in rotation. Advancing through the tour only
-// changes the feel slightly; it never removes tracks from the playlist.
+// Always play the five original songs at their original speed and duration.
+// Stage progression must never shorten, restart or remove a song.
 const THEMES = {
-  grove:   { rate: 0.97 },
+  grove:   { rate: 1.00 },
   cavern:  { rate: 1.00 },
-  sky:     { rate: 1.04 },
-  citadel: { rate: 1.08 },
-  rush:    { rate: 1.10 }
+  sky:     { rate: 1.00 },
+  citadel: { rate: 1.00 },
+  rush:    { rate: 1.00 }
 };
 
 const decks = [new Audio(), new Audio()];
 decks.forEach(deck => {
   deck.preload = 'auto';
   deck.volume = BASE_VOLUME;
+  deck.playbackRate = 1;
   deck.preservesPitch = true;
   deck.mozPreservesPitch = true;
   deck.webkitPreservesPitch = true;
@@ -33,7 +34,6 @@ let playing = false;
 let transitioning = false;
 let fadeToken = 0;
 
-const cfg = () => THEMES[theme] || THEMES.grove;
 const setTrack = (deck, trackNumber, reset = true) => {
   const src = tracks[trackNumber];
   if (deck.dataset.track !== String(trackNumber)) {
@@ -41,7 +41,7 @@ const setTrack = (deck, trackNumber, reset = true) => {
     deck.dataset.track = String(trackNumber);
     if (reset) deck.currentTime = 0;
   }
-  deck.playbackRate = cfg().rate;
+  deck.playbackRate = 1;
 };
 
 const safePlay = deck => deck.play().catch(() => {});
@@ -92,11 +92,13 @@ function advanceTrack() {
 }
 
 function setTheme(nextTheme) {
+  // Keep stage identity for future musical arrangement work, but do not alter
+  // speed or restart the song that is currently playing.
   theme = THEMES[nextTheme] ? nextTheme : 'grove';
-  decks.forEach(deck => { deck.playbackRate = cfg().rate; });
+  decks.forEach(deck => { deck.playbackRate = 1; });
 }
 
-// Start the next track before the old one fully ends, so there is no hard cut.
+// Crossfade only at the natural end of each full song.
 setInterval(() => {
   if (!playing || muted || transitioning) return;
   const deck = decks[activeDeck];
@@ -119,7 +121,7 @@ window.__rockPlaylist = {
     setTheme(nextTheme || theme || 'grove');
     const deck = decks[activeDeck];
     if (!deck.dataset.track) setTrack(deck, PLAYLIST[orderPos]);
-    deck.playbackRate = cfg().rate;
+    deck.playbackRate = 1;
     deck.muted = muted;
     deck.volume = BASE_VOLUME;
     if (!muted && !transitioning) safePlay(deck);
