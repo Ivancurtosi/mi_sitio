@@ -160,3 +160,4 @@ ReactDOM.hydrateRoot(document.getElementById('root'), React.createElement(RockTo
 document.documentElement.dataset.rockHydrated = '1';
 await import('./rock-tour-lose-sfx.js?v=lose-sfx-1');
 await import('./rock-tour-controls.js?v=rock-polish-2');
+await import('./ivo-rock-start-menu.js?v=start-menu-1');
