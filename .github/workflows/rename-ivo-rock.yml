@@ -1,0 +1,68 @@
+name: Rename Rock Tour to Ivo Rock
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rename-ivo-rock.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Rename visible game branding to Ivo Rock
+        shell: python
+        run: |
+          from pathlib import Path
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+          replacements = {
+              '"aria-label":`Salto Cósmico, juego de plataformas`': '"aria-label":`Ivo Rock, juego de plataformas`',
+              '`SALTO CÓSMICO // ROCK TOUR`': '`IVO ROCK`',
+              'children:[`Salto`,(0,v.jsx)(`br`,{}),`Cósmico`]': 'children:[`Ivo`,(0,v.jsx)(`br`,{}),`Rock`]',
+              '`Salto Cósmico está diseñado para verse en horizontal.`': '`Ivo Rock está diseñado para verse en horizontal.`',
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'game branding pattern not found: {old}')
+              s = s.replace(old, new)
+          game.write_text(s)
+
+          mount = Path('salto-cosmico-rock/mount.js')
+          s = mount.read_text()
+          old = './assets/cosmic-jump-DkePWGqE.js?v=rock-tower-bg-1'
+          new = './assets/cosmic-jump-DkePWGqE.js?v=ivo-rock-1'
+          if old not in s:
+              raise SystemExit('mount cache pattern not found')
+          mount.write_text(s.replace(old, new, 1))
+
+          index = Path('salto-cosmico-rock/index.html')
+          s = index.read_text()
+          index_replacements = {
+              '<title>Salto Cósmico: Rock Tour</title>': '<title>Ivo Rock</title>',
+              'aria-label="Salto Cósmico, juego de plataformas"': 'aria-label="Ivo Rock, juego de plataformas"',
+              'SALTO CÓSMICO // ROCK TOUR': 'IVO ROCK',
+              '<h1>Salto<br>Cósmico</h1>': '<h1>Ivo<br>Rock</h1>',
+              'Salto Cósmico está diseñado para verse en horizontal.': 'Ivo Rock está diseñado para verse en horizontal.',
+              './mount.js?v=rock-tower-bg-1': './mount.js?v=ivo-rock-1',
+          }
+          for old, new in index_replacements.items():
+              if old not in s:
+                  raise SystemExit(f'index branding pattern not found: {old}')
+              s = s.replace(old, new)
+          index.write_text(s)
+
+      - name: Commit rename
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Rename game to Ivo Rock"
+          git push origin master
