@@ -1,4 +1,4 @@
-/* IVO ROCK retro start menu — layered over the existing game without changing gameplay visuals. */
+/* Simple classic platform-game start menu over the first Ivo Rock level background. */
 .ivo-start-menu {
   position: fixed;
   inset: 0;
@@ -7,8 +7,7 @@
   place-items: center;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 8%, rgba(255,62,29,.20), transparent 32%),
-    linear-gradient(rgba(3,2,4,.28), rgba(3,2,4,.78)),
+    linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.42)),
     url('./assets/rock-concert.webp') center/cover no-repeat;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   color: #fff;
@@ -16,190 +15,99 @@
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
+
 .ivo-start-menu::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: .18;
-  background: repeating-linear-gradient(0deg, rgba(255,255,255,.055) 0 1px, transparent 1px 4px);
-  mix-blend-mode: screen;
+  background: linear-gradient(to bottom, rgba(0,0,0,.08), rgba(0,0,0,.24));
 }
+
 .ivo-menu-stage {
   position: relative;
-  width: min(760px, calc(100vw - 28px));
-  max-height: calc(100dvh - 24px);
+  width: min(560px, calc(100vw - 30px));
+  padding: 28px 30px 24px;
   box-sizing: border-box;
-  overflow: auto;
-  padding: 22px 34px 20px;
-  border: 2px solid rgba(255,102,53,.65);
-  border-radius: 18px;
   text-align: center;
-  background: linear-gradient(180deg, rgba(11,8,12,.88), rgba(3,3,5,.94));
-  box-shadow: 0 28px 80px rgba(0,0,0,.68), inset 0 0 42px rgba(155,20,18,.14);
+  background: rgba(0,0,0,.26);
+  border: 0;
+  box-shadow: none;
 }
-.ivo-menu-kicker {
-  margin-bottom: 2px;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .22em;
-  color: #ffab79;
-}
-.ivo-menu-logo {
-  display: inline-grid;
-  line-height: .78;
-  margin-top: 4px;
-  transform: skew(-5deg);
-  text-shadow: 0 7px 0 #240406, 0 0 30px rgba(255,58,23,.36);
-}
-.ivo-menu-logo span,
-.ivo-menu-logo strong {
-  font-size: clamp(50px, 8vw, 82px);
+
+.ivo-menu-title {
+  margin: 0 0 28px;
+  font-size: clamp(52px, 10vw, 88px);
+  line-height: .9;
   font-weight: 1000;
-  letter-spacing: -.08em;
+  letter-spacing: -.06em;
+  color: #fff;
+  text-shadow: 4px 4px 0 #111, 0 0 18px rgba(0,0,0,.55);
 }
-.ivo-menu-logo span { color: #fff4df; }
-.ivo-menu-logo strong { color: #ff3d22; }
-.ivo-menu-bolt {
-  position: absolute;
-  top: 28px;
-  right: 32px;
-  font-size: 38px;
-  transform: rotate(8deg);
-  filter: drop-shadow(0 0 14px rgba(255,201,68,.55));
-}
-.ivo-menu-characters {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 12px;
-  align-items: center;
-  width: min(560px, 100%);
-  margin: 16px auto 14px;
-}
-.ivo-character-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  padding: 9px 12px;
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 12px;
-  text-align: left;
-  background: rgba(255,255,255,.055);
-}
-.ivo-character-icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 42px;
-  width: 42px;
-  height: 42px;
-  border: 2px solid rgba(255,255,255,.6);
-  border-radius: 7px;
-  font-size: 23px;
-  font-weight: 1000;
-  box-shadow: inset 0 0 18px rgba(255,255,255,.10);
-}
-.player-one .ivo-character-icon {
-  color: #fff4dc;
-  background: linear-gradient(145deg, #8d1818, #e94825);
-}
-.player-two .ivo-character-icon {
-  color: #dfffff;
-  background: linear-gradient(145deg, #44206e, #07899b);
-}
-.ivo-character-card b {
-  display: block;
-  font-size: 17px;
-  letter-spacing: .08em;
-}
-.ivo-character-card small {
-  display: block;
-  margin-top: 3px;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  color: rgba(255,255,255,.56);
-}
-.ivo-character-vs {
-  font-size: 11px;
-  font-weight: 1000;
-  color: #ffca66;
-}
+
 .ivo-menu-options {
-  width: min(470px, 100%);
+  width: min(360px, 100%);
   margin: 0 auto;
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
+
 .ivo-menu-choice {
   width: 100%;
-  min-height: 54px;
-  padding: 10px 16px;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  color: #f8f2e7;
-  background: rgba(0,0,0,.32);
-  font: 1000 20px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing: .05em;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 0;
+  color: #fff;
+  background: transparent;
+  font: 1000 21px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .03em;
+  text-align: left;
   cursor: pointer;
   touch-action: manipulation;
+  text-shadow: 2px 2px 0 #111;
 }
+
 .ivo-menu-choice span {
   display: inline-block;
-  width: 24px;
+  width: 30px;
   opacity: 0;
-  color: #ffcf5c;
+  color: #fff;
 }
-.ivo-menu-choice small {
-  margin-left: 8px;
-  font-size: 9px;
-  color: rgba(255,255,255,.5);
+
+.ivo-menu-choice.selected span,
+.ivo-menu-choice:focus-visible span {
+  opacity: 1;
 }
-.ivo-menu-choice.selected,
+
 .ivo-menu-choice:focus-visible {
   outline: none;
-  border-color: #ff5231;
-  background: linear-gradient(90deg, rgba(135,20,12,.58), rgba(21,9,10,.80));
-  box-shadow: 0 0 22px rgba(255,66,37,.18), inset 0 0 20px rgba(255,73,39,.08);
 }
-.ivo-menu-choice.selected span,
-.ivo-menu-choice:focus-visible span { opacity: 1; }
-.ivo-menu-sound {
-  margin-top: 13px;
-  padding: 8px 14px;
-  border: 1px solid rgba(255,213,112,.35);
-  border-radius: 999px;
-  color: #ffdda0;
-  background: rgba(56,34,5,.34);
-  font: 900 10px/1 ui-monospace, monospace;
-  letter-spacing: .08em;
+
+.ivo-menu-fullscreen {
+  margin-top: 24px;
+  padding: 9px 15px;
+  border: 2px solid rgba(255,255,255,.8);
+  border-radius: 4px;
+  color: #fff;
+  background: rgba(0,0,0,.38);
+  font: 900 12px/1 ui-monospace, monospace;
+  letter-spacing: .04em;
   cursor: pointer;
+  touch-action: manipulation;
+  text-shadow: 1px 1px 0 #111;
 }
-.ivo-menu-sound.on {
-  color: #8dfff3;
-  border-color: rgba(100,255,239,.38);
-  background: rgba(0,70,66,.26);
+
+.ivo-menu-fullscreen:active {
+  transform: translateY(1px);
 }
-.ivo-menu-status {
-  margin-top: 12px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .10em;
-  color: rgba(255,255,255,.64);
-}
-.ivo-menu-credit {
-  margin-top: 8px;
-  font-size: 8px;
-  letter-spacing: .28em;
-  color: rgba(255,255,255,.26);
-}
+
 .ivo-start-menu.starting .ivo-menu-stage {
-  animation: ivoMenuStart .72s ease both;
+  animation: ivoMenuStart .42s ease both;
 }
+
 @keyframes ivoMenuStart {
-  0% { transform: scale(1); filter: brightness(1); }
-  42% { transform: scale(1.025); filter: brightness(1.4); }
-  100% { transform: scale(.985); filter: brightness(.55); opacity: .15; }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .ivo-player-turn-tag {
@@ -218,10 +126,12 @@
   box-shadow: 0 5px 22px rgba(0,0,0,.35);
   pointer-events: none;
 }
+
 .ivo-player-turn-tag[data-player="2"] {
   color: #bfffff;
   border-color: rgba(92,245,255,.35);
 }
+
 .ivo-turn-banner {
   position: fixed;
   z-index: 119000;
@@ -232,49 +142,50 @@
   transform: translate(-50%, -50%) scale(.92);
   opacity: 0;
   pointer-events: none;
-  border: 2px solid rgba(255,83,48,.64);
-  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,.72);
+  border-radius: 4px;
   text-align: center;
-  background: rgba(7,5,8,.90);
-  box-shadow: 0 18px 50px rgba(0,0,0,.55), 0 0 30px rgba(255,56,31,.12);
+  background: rgba(0,0,0,.78);
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
   transition: opacity .14s ease, transform .14s ease;
 }
+
 .ivo-turn-banner.show {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
+
 .ivo-turn-banner small {
   display: block;
   margin-bottom: 5px;
   font: 900 10px/1 ui-monospace, monospace;
   letter-spacing: .16em;
-  color: #ffaf80;
+  color: #ddd;
 }
+
 .ivo-turn-banner strong {
   font: 1000 30px/1 ui-monospace, monospace;
   letter-spacing: .06em;
-  color: #fff4dc;
+  color: #fff;
 }
 
 @media (max-height: 560px) {
   .ivo-menu-stage {
-    width: min(780px, calc(100vw - 18px));
-    padding: 10px 24px 9px;
-    border-radius: 13px;
+    width: min(600px, calc(100vw - 18px));
+    padding: 12px 24px 10px;
   }
-  .ivo-menu-kicker { font-size: 9px; }
-  .ivo-menu-logo span,
-  .ivo-menu-logo strong { font-size: clamp(38px, 7vw, 58px); }
-  .ivo-menu-bolt { top: 14px; right: 22px; font-size: 28px; }
-  .ivo-menu-characters { margin: 7px auto; gap: 8px; }
-  .ivo-character-card { padding: 5px 8px; gap: 8px; }
-  .ivo-character-icon { width: 32px; height: 32px; flex-basis: 32px; font-size: 18px; }
-  .ivo-character-card b { font-size: 13px; }
-  .ivo-character-card small { font-size: 7px; margin-top: 1px; }
-  .ivo-menu-options { gap: 5px; }
-  .ivo-menu-choice { min-height: 40px; padding: 6px 12px; font-size: 15px; }
-  .ivo-menu-choice small { font-size: 7px; }
-  .ivo-menu-sound { margin-top: 7px; padding: 6px 10px; font-size: 8px; }
-  .ivo-menu-status { margin-top: 6px; font-size: 8px; }
-  .ivo-menu-credit { margin-top: 4px; }
+  .ivo-menu-title {
+    margin-bottom: 14px;
+    font-size: clamp(40px, 8vw, 62px);
+  }
+  .ivo-menu-options { gap: 3px; }
+  .ivo-menu-choice {
+    min-height: 37px;
+    font-size: 16px;
+  }
+  .ivo-menu-fullscreen {
+    margin-top: 10px;
+    padding: 7px 11px;
+    font-size: 9px;
+  }
 }
