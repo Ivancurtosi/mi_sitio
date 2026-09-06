@@ -5,14 +5,12 @@ const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/trac
 const BASE_VOLUME = 0.48;
 const CROSSFADE_MS = 900;
 
-// Musical progression: melodic -> dark -> fast -> heavy -> most aggressive boss track.
-// The five songs are kept at their original speed and duration.
 const THEME_TRACKS = {
-  grove: 4,    // Ruta 1 · heavy melódico / épico
-  cavern: 3,   // Ruta 2 · nu metal oscuro
-  sky: 1,      // Ruta 3 · thrash rápido
-  citadel: 2,  // Ruta 4 · groove pesado
-  boss: 5      // Guardián final · metal moderno agresivo
+  grove: 4,
+  cavern: 3,
+  sky: 1,
+  citadel: 2,
+  boss: 5
 };
 
 const decks = [new Audio(), new Audio()];
@@ -82,10 +80,7 @@ function crossfadeTo(trackNumber) {
 }
 
 function normalizeTheme(nextTheme) {
-  // Power-ups previously requested a temporary "rush" theme. Keep the song of
-  // the current level instead, so every route has a clear musical identity.
   if (nextTheme === 'rush') return theme;
-  // Once the final boss song starts, don't let a power-up ending switch it back.
   if (theme === 'boss' && nextTheme === 'citadel') return 'boss';
   return THEME_TRACKS[nextTheme] ? nextTheme : theme;
 }
@@ -94,9 +89,6 @@ window.__rockPlaylist = {
   play(nextTheme) {
     const wasPlaying = playing;
     const next = normalizeTheme(nextTheme || theme || 'grove');
-
-    // The boss cue is requested every frame while the warning is on screen.
-    // Ignore duplicate requests until the current crossfade finishes.
     if (transitioning && next === theme) {
       playing = true;
       return;
@@ -160,4 +152,4 @@ ReactDOM.hydrateRoot(document.getElementById('root'), React.createElement(RockTo
 document.documentElement.dataset.rockHydrated = '1';
 await import('./rock-tour-lose-sfx.js?v=lose-sfx-1');
 await import('./rock-tour-controls.js?v=rock-polish-2');
-await import('./ivo-rock-start-menu.js?v=start-menu-1');
+await import('./ivo-rock-start-menu.js?v=simple-menu-1');
