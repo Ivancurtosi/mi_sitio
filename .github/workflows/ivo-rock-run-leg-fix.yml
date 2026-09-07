@@ -1,0 +1,93 @@
+name: Ivo Rock rear leg running fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-run-leg-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Animate the rear leg while running
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+
+          boss_logic = re.search(r'else if\(n\.kind===`warden`\)\{.*?\}else\{n\.kind===`jumper`', s, re.S)
+          if not boss_logic:
+              raise SystemExit('Could not capture boss logic')
+          boss_logic = boss_logic.group(0)
+
+          old = 'let r=J.shotPose>0&&!J.crouching?0:n,runGrounded=J.grounded&&!J.crouching&&Math.abs(J.vx)>25,footFix=runGrounded?(Math.abs(J.vx)>d.walkSpeed?4:3):0;e.save(),runGrounded&&(e.globalAlpha=.24,e.fillStyle=`#000`,e.beginPath(),e.ellipse(J.x+J.w/2,J.y+J.h+2,Math.abs(J.vx)>d.walkSpeed?17:14,4,0,0,Math.PI*2),e.fill(),e.globalAlpha=1,e.translate(0,footFix)),P===`radiant`&&(e.shadowColor=`#ffc342`,e.shadowBlur=10);let i=w(e,le,r,J.x-20,J.y-11,J.w+40,J.h+11,J.facing)||ut(e,t,n,J.x+J.w/2,J.y-(J.crouching?3:8),J.h+(J.crouching?10:16),J.facing);'
+          new = 'let r=J.shotPose>0&&!J.crouching?0:n,runGrounded=J.grounded&&!J.crouching&&Math.abs(J.vx)>25,runFast=Math.abs(J.vx)>d.walkSpeed,runPhase=runGrounded?Math.sin(T*(runFast?12:9)*Math.PI):0,footFix=runGrounded?(runFast?4:3):0;e.save();if(runGrounded){e.globalAlpha=.24,e.fillStyle=`#000`,e.beginPath(),e.ellipse(J.x+J.w/2,J.y+J.h+2,runFast?17:14,4,0,0,Math.PI*2),e.fill(),e.globalAlpha=1,e.translate(0,footFix);let backSwing=-runPhase*J.facing,hipX=J.x+J.w/2-J.facing*2,hipY=J.y+J.h*.57,kneeX=hipX+backSwing*7,kneeY=J.y+J.h*.78+Math.abs(runPhase)*2,footX=hipX+backSwing*13,footY=J.y+J.h+1;e.save(),e.strokeStyle=`#1d4d78`,e.lineWidth=Math.max(4,J.h*.07),e.lineCap=`round`,e.lineJoin=`round`,e.beginPath(),e.moveTo(hipX,hipY),e.lineTo(kneeX,kneeY),e.lineTo(footX,footY),e.stroke(),e.strokeStyle=`#111216`,e.lineWidth=Math.max(4,J.h*.065),e.beginPath(),e.moveTo(footX-J.facing,footY),e.lineTo(footX+J.facing*(7+Math.abs(runPhase)*2),footY+1),e.stroke(),e.restore()}P===`radiant`&&(e.shadowColor=`#ffc342`,e.shadowBlur=10);let i=w(e,le,r,J.x-20,J.y-11,J.w+40,J.h+11,J.facing)||ut(e,t,n,J.x+J.w/2,J.y-(J.crouching?3:8),J.h+(J.crouching?10:16),J.facing);'
+          if s.count(old) != 1:
+              raise SystemExit(f'run render marker: expected 1, got {s.count(old)}')
+          s = s.replace(old, new, 1)
+
+          if boss_logic not in s:
+              raise SystemExit('Boss changed unexpectedly')
+          if 'backSwing=-runPhase*J.facing' not in s or 'runFast=Math.abs(J.vx)>d.walkSpeed' not in s:
+              raise SystemExit('Rear leg animation patch missing')
+          game.write_text(s)
+
+          mount = Path('salto-cosmico-rock/mount.js')
+          mm = mount.read_text()
+          old_import = "import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=run-grounded-1';"
+          new_import = "import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=run-legs-1';"
+          if mm.count(old_import) != 1:
+              raise SystemExit('mount game import marker missing')
+          mount.write_text(mm.replace(old_import, new_import, 1))
+
+          index = Path('salto-cosmico-rock/index.html')
+          ix = index.read_text()
+          if ix.count('./mount.js?v=run-grounded-1') != 1:
+              raise SystemExit('index mount marker missing')
+          index.write_text(ix.replace('./mount.js?v=run-grounded-1', './mount.js?v=run-legs-1', 1))
+
+      - name: Static validation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+          grep -q 'backSwing=-runPhase\*J.facing' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'run-legs-1' salto-cosmico-rock/mount.js
+          grep -q 'mount.js?v=run-legs-1' salto-cosmico-rock/index.html
+          grep -q 'DIABLITO EN LLAMAS' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+
+      - name: Browser smoke test
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?smoke=1&v=run-legs-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          cat /tmp/chrome.log
+          grep -q 'data-ivo-smoke="ok"' /tmp/dom.txt
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            echo 'Runtime JavaScript error detected'
+            exit 1
+          fi
+
+      - name: Commit rear leg visual fix
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m 'Animate Ivo rear leg while running'
+          git push origin master
