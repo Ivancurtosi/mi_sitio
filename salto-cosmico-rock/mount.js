@@ -1,5 +1,5 @@
 import { i as reactFactory, t as reactDomFactory } from './assets/framework-CXnKph_e.js';
-import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=combat-guitar-1';
+import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=combat-guitar-2';
 
 const tracks = Object.fromEntries([1,2,3,4,5].map(n => [n, new URL(`./audio/track${n}.mp3`, window.location.href).href]));
 const BASE_VOLUME = 0.48;
@@ -152,6 +152,6 @@ ReactDOM.hydrateRoot(document.getElementById('root'), React.createElement(RockTo
 document.documentElement.dataset.rockHydrated = '1';
 await import('./rock-tour-lose-sfx.js?v=lose-sfx-1');
 await import('./rock-tour-controls.js?v=rock-polish-2');
-await import('./ivo-rock-polish.js?v=combat-guitar-1');
-await import('./ivo-rock-stats.js?v=combat-guitar-1');
-await import('./ivo-rock-start-menu.js?v=combat-guitar-1');
+await import('./ivo-rock-polish.js?v=combat-guitar-2');
+await import('./ivo-rock-stats.js?v=combat-guitar-2');
+await import('./ivo-rock-start-menu.js?v=combat-guitar-2');
