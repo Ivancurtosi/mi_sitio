@@ -1,0 +1,180 @@
+name: Ivo Rock mobile performance pass
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-performance-pass.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Optimize hot paths without changing gameplay
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+
+          # Keep the final devil boss byte-for-byte identical through this performance pass.
+          boss_logic_match = re.search(r'else if\(n\.kind===`warden`\)\{.*?\}else\{n\.kind===`jumper`', s, re.S)
+          if not boss_logic_match:
+              raise SystemExit('Could not capture boss logic')
+          boss_logic = boss_logic_match.group(0)
+          render_start = s.find('ft=(e,t)=>{')
+          render_end = s.find('},pt=(e,t)=>{', render_start)
+          if render_start < 0 or render_end < 0:
+              raise SystemExit('Enemy render function not found')
+          boss_render_match = re.search(r'if\(t\.kind===`warden`\)\{.*?e\.restore\(\);return\}', s[render_start:render_end], re.S)
+          if not boss_render_match:
+              raise SystemExit('Could not capture boss render')
+          boss_render = boss_render_match.group(0)
+
+          def one(old, new, label):
+              global s
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              s = s.replace(old, new, 1)
+
+          # 1) Do not allocate a brand-new palette object every time a ground/block/platform draws.
+          palette_old = 'at=()=>({grove:{sky:`#080708`,soil:`#302a27`,edge:`#ff5a24`,deep:`#100d0c`,accent:`#ffd34e`,haze:`#641812`},cavern:{sky:`#010102`,soil:`#16121c`,edge:`#6f1f31`,deep:`#020103`,accent:`#c9c6d4`,haze:`#0b030f`},sky:{sky:`#02030a`,soil:`#151923`,edge:`#4f6082`,deep:`#02030a`,accent:`#b7c8ff`,haze:`#080d1b`},citadel:{sky:`#010101`,soil:`#171214`,edge:`#9f111a`,deep:`#020101`,accent:`#d9dde2`,haze:`#120205`}})[E.biome],Q='
+          palette_new = 'ivoPalettes={grove:{sky:`#080708`,soil:`#302a27`,edge:`#ff5a24`,deep:`#100d0c`,accent:`#ffd34e`,haze:`#641812`},cavern:{sky:`#010102`,soil:`#16121c`,edge:`#6f1f31`,deep:`#020103`,accent:`#c9c6d4`,haze:`#0b030f`},sky:{sky:`#02030a`,soil:`#151923`,edge:`#4f6082`,deep:`#02030a`,accent:`#b7c8ff`,haze:`#080d1b`},citadel:{sky:`#010101`,soil:`#171214`,edge:`#9f111a`,deep:`#020101`,accent:`#d9dde2`,haze:`#120205`}},at=()=>ivoPalettes[E.biome],Q='
+          one(palette_old, palette_new, 'palette cache')
+
+          # 2) Cache collision surfaces for each fixed physics step instead of rebuilding
+          # arrays and wrapper objects for the player, every enemy and every projectile.
+          one('Se=new Set,Ce=E.startX,H=0', 'Se=new Set,ivoSolidAll=null,ivoSolidNoPlatforms=null,Ce=E.startX,H=0', 'collision cache vars')
+          one(
+              'Me=(e=!0)=>[...E.grounds,...F.filter(e=>e.active&&e.kind!==`hidden`).map(e=>({...e,block:e})),...e?I.map(e=>({...e,platform:e})):[]],Ne=',
+              'Me=(e=!0)=>{let t=e?ivoSolidAll:ivoSolidNoPlatforms;if(t)return t;t=[...E.grounds,...F.filter(e=>e.active&&e.kind!==`hidden`).map(e=>({...e,block:e})),...(e?I.map(e=>({...e,platform:e})):[])];return e?ivoSolidAll=t:ivoSolidNoPlatforms=t,t},Ne=',
+              'collision cache function'
+          )
+          resets = s.count('F=Oe(),I=ke(),L=je()')
+          if resets != 2:
+              raise SystemExit(f'collision reset sites: expected 2, got {resets}')
+          s = s.replace('F=Oe(),I=ke(),L=je()', 'F=Oe(),I=ke(),ivoSolidAll=null,ivoSolidNoPlatforms=null,L=je()')
+          one(
+              'et=()=>[...E.grounds,...F.filter(e=>e.active&&e.kind!==`hidden`).map(e=>({...e,block:e}))],tt=',
+              'et=()=>Me(!1),tt=',
+              'enemy solids reuse'
+          )
+          one('T+=e,We(),qe(e)', 'T+=e,We(),ivoSolidAll=null,ivoSolidNoPlatforms=null,qe(e)', 'per-step cache invalidation')
+
+          # 3) Slightly reduce the mobile canvas backing resolution. This keeps the same CSS size
+          # and gameplay coordinates, but makes the phone paint ~13% fewer pixels per frame.
+          one(
+              'n=Math.sqrt((t?15e5:26e5)/Math.max(1,e.width*e.height)),i=Math.max(1,Math.min(window.devicePixelRatio||1,t?1.6:2,n))',
+              'n=Math.sqrt((t?13e5:26e5)/Math.max(1,e.width*e.height)),i=Math.max(1,Math.min(window.devicePixelRatio||1,t?1.45:2,n))',
+              'mobile render budget'
+          )
+
+          # Verify all approved enemies and the visibility fix are still present.
+          for marker in ['ivo-roadie.png','ivo-speaker.png','ivo-turtle.png','ivo-crow.png','dt=e=>{let t=']:
+              if marker not in s:
+                  raise SystemExit(f'missing approved/stability marker: {marker}')
+          if boss_logic not in s:
+              raise SystemExit('Boss gameplay changed unexpectedly')
+          final_render_start = s.find('ft=(e,t)=>{')
+          final_render_end = s.find('},pt=(e,t)=>{', final_render_start)
+          if boss_render not in s[final_render_start:final_render_end]:
+              raise SystemExit('Boss visual changed unexpectedly')
+
+          game.write_text(s)
+
+          # 4) The 2-player HUD poll is unnecessary in 1-player mode and was running 8x/sec.
+          menu = Path('salto-cosmico-rock/ivo-rock-start-menu.js')
+          ms = menu.read_text()
+          if ms.count('if (!state.started) return;') != 1:
+              raise SystemExit('menu poll start marker not found exactly once')
+          ms = ms.replace('if (!state.started) return;', 'if (!state.started || state.mode !== 2) return;', 1)
+          if ms.count('}, 120);') != 1:
+              raise SystemExit('menu poll interval marker not found exactly once')
+          ms = ms.replace('}, 120);', '}, 200);', 1)
+          if 'CONTINUAR' in ms or 'data-continue' in ms:
+              raise SystemExit('Continue unexpectedly reappeared')
+          menu.write_text(ms)
+
+          # 5) Campaign stats do not need to query the DOM more than once per second-ish.
+          stats = Path('salto-cosmico-rock/ivo-rock-stats.js')
+          ss = stats.read_text()
+          if ss.count('}, 300);') != 1:
+              raise SystemExit('stats poll interval marker not found exactly once')
+          ss = ss.replace('}, 300);', '}, 800);', 1)
+          stats.write_text(ss)
+
+          # 6) Many short-lived particles/fireworks mutate the DOM. Debounce control rescans so
+          # dozens of MutationObserver callbacks collapse into one animation-frame check.
+          controls = Path('salto-cosmico-rock/rock-tour-controls.js')
+          cs = controls.read_text()
+          observer_old = "  new MutationObserver(install).observe(document.documentElement, { childList: true, subtree: true });\n  install();"
+          observer_new = "  let installQueued = false;\n  const queueInstall = () => {\n    if (installQueued) return;\n    installQueued = true;\n    requestAnimationFrame(() => { installQueued = false; install(); });\n  };\n  new MutationObserver(queueInstall).observe(document.documentElement, { childList: true, subtree: true });\n  install();"
+          if cs.count(observer_old) != 1:
+              raise SystemExit('control observer marker not found exactly once')
+          cs = cs.replace(observer_old, observer_new, 1)
+          controls.write_text(cs)
+
+          # Cache-bust every touched runtime file.
+          mount = Path('salto-cosmico-rock/mount.js')
+          mm = mount.read_text()
+          if 'approved-enemies-2' not in mm or 'rock-tour-controls.js?v=rock-polish-2' not in mm:
+              raise SystemExit('mount cache markers missing')
+          mm = mm.replace('approved-enemies-2', 'performance-1')
+          mm = mm.replace('rock-tour-controls.js?v=rock-polish-2', 'rock-tour-controls.js?v=performance-1')
+          mount.write_text(mm)
+
+          index = Path('salto-cosmico-rock/index.html')
+          ix = index.read_text()
+          if 'approved-enemies-2' not in ix:
+              raise SystemExit('index cache marker missing')
+          index.write_text(ix.replace('approved-enemies-2', 'performance-1'))
+
+      - name: Static validation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+          node --check salto-cosmico-rock/rock-tour-controls.js
+          node --check salto-cosmico-rock/ivo-rock-start-menu.js
+          node --check salto-cosmico-rock/ivo-rock-stats.js
+          grep -q '13e5:26e5' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivoPalettes=' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivoSolidAll' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivo-roadie.png' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'DIABLITO EN LLAMAS' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          ! grep -q 'CONTINUAR' salto-cosmico-rock/ivo-rock-start-menu.js
+
+      - name: Browser smoke test Route 1 and Route 2
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?smoke=1&v=performance-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          cat /tmp/chrome.log
+          grep -q 'data-ivo-smoke="ok"' /tmp/dom.txt
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            echo 'Runtime JavaScript error detected'
+            exit 1
+          fi
+
+      - name: Commit verified performance build
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/ivo-rock-start-menu.js salto-cosmico-rock/ivo-rock-stats.js salto-cosmico-rock/rock-tour-controls.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m 'Improve Ivo Rock mobile frame pacing'
+          git push origin master
