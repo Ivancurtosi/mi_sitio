@@ -17,19 +17,14 @@ jobs:
         run: |
           from pathlib import Path
           s=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js').read_text()
-          def ctx(label, needle, before=450, after=950):
+          def ctx(label, needle, before=650, after=1600):
               i=s.find(needle)
               print('\n###',label,'idx',i)
               if i>=0: print(s[max(0,i-before):min(len(s),i+after)])
-          ctx('power comet','comet')
-          ctx('amp behavior','else if(n.kind===`amp`)')
-          ctx('warden behavior','else if(n.kind===`warden`)')
-          ctx('amp visual','if(t.kind===`amp`)')
-          ctx('warden visual','if(t.kind===`warden`)')
-          ctx('projectile collision','Me(!1).some')
-          ctx('enemy defeat stats','window.__ivoRockStats?.enemy(e.kind)')
-          ctx('goal polish call','window.__ivoRockPolish?.goal')
-          # Level 4 chunk
-          i=s.find('{id:4,name:')
-          j=s.find('],v=n()',i)
-          print('\n### LEVEL4\n',s[i:min(len(s), i+9000)])
+          ctx('R update','R=R.filter')
+          ctx('R render','R.forEach')
+          ctx('pickup handler','Ye=')
+          ctx('reward draw','reward')
+          ctx('power impact','window.__ivoRockPolish?.impact(`power`)')
+          ctx('draw player vicinity','J.x-D')
+          ctx('render enemies','for(let t of L)')
