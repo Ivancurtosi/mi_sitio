@@ -92,15 +92,15 @@
   };
 
   window.__ivoRockPolish = {
-    goal(final = false, bonus = 0) {
+    goal(final = false, bonus = 0, heightBonus = 0) {
       pulseFlash(false);
-      sparks(final ? 34 : 24);
+      sparks(final ? 46 : 34);
       solo(final);
       celebrationTitle.textContent = final ? '¡GIRA COMPLETA!' : 'RUTA COMPLETA';
-      celebrationBonus.textContent = `BONUS +${Math.max(0, Math.round(bonus)).toString().padStart(4, '0')}`;
+      celebrationBonus.textContent = heightBonus > 0 ? `ALTURA +${Math.round(heightBonus)} · TOTAL +${Math.max(0, Math.round(bonus))}` : `BONUS +${Math.max(0, Math.round(bonus))}`;
       celebration.classList.remove('show');
       requestAnimationFrame(() => celebration.classList.add('show'));
-      setTimeout(() => celebration.classList.remove('show'), final ? 2600 : 1900);
+      setTimeout(() => celebration.classList.remove('show'), final ? 3400 : 2800);
       navigator.vibrate?.(final ? [60, 35, 70, 35, 100] : [45, 30, 65]);
     },
 
