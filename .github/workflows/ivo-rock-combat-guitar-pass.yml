@@ -1,0 +1,172 @@
+name: Ivo Rock ordered combat and guitar finish pass
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-combat-guitar-pass.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: 1 - Shorten Ivo shots and turn them into flaming music notes
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=p.read_text()
+
+          old='z.push({x:J.facing>0?J.x+J.w-2:J.x-16,y:J.y+Math.min(32,J.h*.42),w:16,h:16,vx:J.facing*d.projectileSpeed,vy:38,life:3.2,active:!0})'
+          new='z.push({x:J.facing>0?J.x+J.w-2:J.x-16,y:J.y+Math.min(32,J.h*.42),w:18,h:18,vx:J.facing*d.projectileSpeed,vy:24,life:1.55,active:!0})'
+          if s.count(old)!=1: raise SystemExit(f'player shot spawn: {s.count(old)}')
+          s=s.replace(old,new,1)
+
+          pat=r'for\(let t of z\)if\(\$\(t\)\)\{e\.save\(\),e\.translate\(t\.x\+t\.w/2,t\.y\+t\.h/2\),e\.scale\(t\.vx>=0\?1:-1,1\),e\.shadowColor=`#ffc54b`.*?e\.restore\(\)\}'
+          repl='''for(let t of z)if($(t)){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(t.vx>=0?1:-1,1),e.rotate(Math.sin(T*11+t.x*.03)*.08),e.shadowColor=`#ff5a19`,e.shadowBlur=18,e.fillStyle=`rgba(255,71,20,.58)`,e.beginPath(),e.moveTo(-25,0),e.lineTo(-7,-8),e.lineTo(-9,8),e.closePath(),e.fill(),e.strokeStyle=`#ffd85a`,e.lineWidth=4,e.lineCap=`round`,e.beginPath(),e.moveTo(4,-11),e.lineTo(4,8),e.quadraticCurveTo(-5,3,-8,10),e.stroke(),e.fillStyle=`#fff08b`,e.beginPath(),e.ellipse(-7,10,7,5,-.28,0,Math.PI*2),e.fill(),e.strokeStyle=`#ff8c2f`,e.lineWidth=2,e.beginPath(),e.moveTo(4,-11),e.quadraticCurveTo(13,-7,14,-1),e.stroke(),e.restore()}'''
+          s2,n=re.subn(pat,repl,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'player shot render: {n}')
+          p.write_text(s2)
+
+      - name: Commit step 1
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Shorten Ivo flaming note projectiles"
+          git push origin master
+
+      - name: 2 - Increase Diablito attack pressure without changing its design
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=p.read_text()
+
+          changes=[
+            ('Math.abs(J.x-n.x)<760','Math.abs(J.x-n.x)<920','boss attack range'),
+            ('vx:e*(r?365:330),vy:r?-330:-300,life:r?5.6:5.2','vx:e*(r?415:370),vy:r?-340:-305,life:r?6.15:5.75','boss high fireball'),
+            ('vx:e*(r?390:355),vy:r?-150:-180,life:r?5.6:5.2','vx:e*(r?445:400),vy:r?-150:-175,life:r?6.15:5.75','boss low fireball'),
+            ('vx:e*340,vy:-430,life:5.8','vx:e*390,vy:-445,life:6.25','boss phase2 arc'),
+            ('vx:e*430,vy:-60,life:4.8','vx:e*480,vy:-55,life:5.35','boss phase2 fast'),
+            ('n.cooldown=r?.88:1.35','n.cooldown=r?.74:1.16','boss attack cadence')
+          ]
+          for old,new,label in changes:
+              if s.count(old)!=1: raise SystemExit(f'{label}: {s.count(old)}')
+              s=s.replace(old,new,1)
+          p.write_text(s)
+
+      - name: Commit step 2
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Increase Diablito ranged pressure"
+          git push origin master
+
+      - name: 3 - Replace the drummer with an evil rock turtle shooter
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=p.read_text()
+
+          count=s.count('drummer')
+          if count<3: raise SystemExit(f'expected drummer references, found {count}')
+          s=s.replace('drummer','turtle')
+
+          old='e===`turtle`?{w:60,h:56}'
+          new='e===`turtle`?{w:64,h:48}'
+          if s.count(old)!=1: raise SystemExit(f'turtle size: {s.count(old)}')
+          s=s.replace(old,new,1)
+
+          pat=r'else if\(n\.kind===`turtle`\)\{if\(n\.vx=0,n\.cooldown<=0&&Math\.abs\(J\.x-n\.x\)<620\)\{let e=J\.x<n\.x\?-1:1;B\.push\(\{x:n\.x\+n\.w/2\+e\*22,y:n\.y\+n\.h-13,w:34,h:14,vx:e\*355,vy:0,life:4\.2,active:!0,kind:`floorwave`\}\),n\.cooldown=2\.05\}\}'
+          repl='''else if(n.kind===`turtle`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<680){let e=J.x<n.x?-1:1;B.push({x:n.x+n.w/2+e*25,y:n.y+16,w:18,h:14,vx:e*330,vy:-55,life:3.2,active:!0,kind:`pick`}),B.push({x:n.x+n.w/2+e*22,y:n.y+20,w:16,h:13,vx:e*285,vy:-165,life:3.55,active:!0,kind:`pick`}),n.cooldown=1.82}}'''
+          s2,n=re.subn(pat,repl,s,count=1)
+          if n!=1: raise SystemExit(f'turtle behavior: {n}')
+          s=s2
+
+          oldphys='t.vy+=(t.kind===`flare`?440:t.kind===`wave`||t.kind===`floorwave`?0:80)*e'
+          newphys='t.vy+=(t.kind===`flare`?440:t.kind===`wave`||t.kind===`floorwave`?0:t.kind===`pick`?180:80)*e'
+          if s.count(oldphys)!=1: raise SystemExit(f'pick physics: {s.count(oldphys)}')
+          s=s.replace(oldphys,newphys,1)
+
+          vispat=r'if\(t\.kind===`turtle`\)\{.*?e\.restore\(\);return\}if\(t\.kind===`sentry`\)'
+          vis='''if(t.kind===`turtle`){e.save();let n=t.cooldown<.34,r=J.x<t.x?-1:1;e.translate(t.x+t.w/2,t.y+t.h/2),n&&(e.shadowColor=`#ff4a22`,e.shadowBlur=24,e.fillStyle=`rgba(255,84,28,.18)`,e.beginPath(),e.arc(r*24,-4,14+Math.sin(T*22)*3,0,Math.PI*2),e.fill()),e.fillStyle=`#243018`,e.beginPath(),e.ellipse(-4,6,27,20,0,0,Math.PI*2),e.fill(),e.strokeStyle=`#7a8b42`,e.lineWidth=4,e.stroke(),e.fillStyle=`#10130e`;for(let i of[-13,0,13]){e.beginPath(),e.moveTo(i-4,-9),e.lineTo(i,-23),e.lineTo(i+5,-8),e.closePath(),e.fill()}e.fillStyle=`#6d7f32`,e.beginPath(),e.ellipse(r*25,-1,16,13,0,0,Math.PI*2),e.fill(),e.fillStyle=`#ff5a35`,e.beginPath(),e.arc(r*30,-5,3,0,Math.PI*2),e.fill(),e.fillStyle=`#f4e4b4`,e.beginPath(),e.moveTo(r*36,1),e.lineTo(r*45,4),e.lineTo(r*36,8),e.closePath(),e.fill(),e.fillStyle=`#18191a`,Q(e,-17,1,27,9,4),e.fill(),e.fillStyle=`#d9dbdc`;for(let i of[-11,-3,5])e.fillRect(i,3,3,5);e.strokeStyle=`#b8bd83`,e.lineWidth=4;for(let i of[-17,13]){e.beginPath(),e.moveTo(i,20),e.lineTo(i-5,27),e.stroke()}e.fillStyle=`#111`,e.fillRect(-26,25,18,5),e.fillRect(8,25,18,5),e.restore();return}if(t.kind===`sentry`)'''
+          s2,n=re.subn(vispat,vis,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'turtle visual: {n}')
+          s=s2
+
+          marker='t.kind===`floorwave`?(e.scale(t.vx>=0?1:-1,1),e.shadowColor=`#ffcf49`'
+          if s.count(marker)!=1: raise SystemExit(f'projectile branch marker: {s.count(marker)}')
+          pick='''t.kind===`pick`?(e.scale(t.vx>=0?1:-1,1),e.rotate(T*8),e.shadowColor=`#ff5c24`,e.shadowBlur=16,e.fillStyle=`#ffd95f`,e.beginPath(),e.moveTo(12,0),e.lineTo(-7,-8),e.lineTo(-3,0),e.lineTo(-7,8),e.closePath(),e.fill(),e.strokeStyle=`#ff6a2a`,e.lineWidth=2,e.stroke()):'''
+          s=s.replace(marker,pick+marker,1)
+          p.write_text(s)
+
+      - name: Commit step 3
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Replace drummer with Tortuga del Riff"
+          git push origin master
+
+      - name: 4 - Replace the finish mast with a giant guitar and widen the jump gap
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=p.read_text()
+
+          for old,new,label in [
+            ('goalX:7824','goalX:7920','route1 goal'),
+            ('goalX:7536','goalX:7632','route2 goal'),
+            ('goalX:7488','goalX:7584','route3 goal'),
+            ('goalX:7008','goalX:7104','route4 goal')
+          ]:
+              if s.count(old)!=1: raise SystemExit(f'{label}: {s.count(old)}')
+              s=s.replace(old,new,1)
+
+          pat=r'ht=e=>\{let t=E\.goalX.*?\},_t='
+          goal='''ht=e=>{let t=E.goalX,n=De(t);if(!$({x:t-105,y:190,w:365,h:n-190}))return;e.save();let r=t+112,i=n-158;e.fillStyle=`rgba(5,4,8,.88)`,Q(e,r,i,154,158,10),e.fill(),e.strokeStyle=`rgba(255,118,45,.45)`,e.lineWidth=4,e.stroke(),e.fillStyle=`#17151a`;for(let a=0;a<4;a++)e.fillRect(r+a*38,i-13-(a%2)*8,31,21);e.fillStyle=`#08080b`,Q(e,r+49,n-82,58,82,7),e.fill(),e.strokeStyle=`#8d3031`,e.lineWidth=3,e.stroke(),e.fillStyle=`#efaa42`,e.font=`900 11px ui-monospace,monospace`,e.textAlign=`center`,e.fillText(`BACKSTAGE`,r+77,i+25);for(let a of[25,129]){e.fillStyle=`#0b0b0e`,Q(e,r+a-19,i+48,38,74,6),e.fill();for(let o of[0,31]){e.strokeStyle=`#55545b`,e.lineWidth=2,e.beginPath(),e.arc(r+a,i+66+o,11,0,Math.PI*2),e.stroke()}}e.shadowColor=`#ff6b2d`,e.shadowBlur=24,e.translate(t,n),e.fillStyle=`#171319`,e.strokeStyle=`#e6b84f`,e.lineWidth=4,e.beginPath(),e.moveTo(-26,-55),e.bezierCurveTo(-54,-86,-43,-126,-10,-134),e.bezierCurveTo(10,-151,42,-135,43,-101),e.bezierCurveTo(46,-72,27,-51,8,-44),e.bezierCurveTo(-6,-38,-19,-43,-26,-55),e.closePath(),e.fill(),e.stroke(),e.fillStyle=`#8c1719`,e.beginPath(),e.ellipse(11,-95,21,29,.25,0,Math.PI*2),e.fill(),e.fillStyle=`#f2cf62`,e.fillRect(-4,-274,17,155),e.strokeStyle=`#8b6b2d`,e.lineWidth=2;for(let a=0;a<8;a++){let o=-258+a*18;e.beginPath(),e.moveTo(-4,o),e.lineTo(13,o),e.stroke()}e.fillStyle=`#202025`,Q(e,-10,-348,29,78,8),e.fill(),e.strokeStyle=`#f2cf62`,e.lineWidth=3,e.stroke();e.fillStyle=`#ffd85c`;for(let a of[-1,9]){e.beginPath(),e.arc(a,-330,3.5,0,Math.PI*2),e.fill(),e.beginPath(),e.arc(a,-310,3.5,0,Math.PI*2),e.fill()}e.strokeStyle=`#fff0a0`,e.lineWidth=1.3;for(let a=0;a<4;a++){let o=-1+a*4;e.beginPath(),e.moveTo(o,-335),e.lineTo(o,-68),e.stroke()}e.fillStyle=`#f7e4b0`,Q(e,-8,-112,28,12,3),e.fill(),Q(e,-7,-90,28,12,3),e.fill(),e.fillStyle=`#ffb62e`,e.beginPath(),e.moveTo(9,-105),e.lineTo(-5,-83),e.lineTo(7,-83),e.lineTo(-1,-62),e.lineTo(18,-90),e.lineTo(7,-90),e.closePath(),e.fill(),e.font=`1000 11px ui-monospace,monospace`,e.textAlign=`right`,e.shadowBlur=8,e.fillStyle=`#ffe478`;for(let [a,o] of [[`5000`,-330],[`3000`,-275],[`1500`,-220],[`700`,-165],[`200`,-112]])e.fillText(a,-20,o);e.restore()},_t='''
+          s2,n=re.subn(pat,goal,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'giant guitar goal render: {n}')
+          p.write_text(s2)
+
+      - name: Commit step 4
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Add giant guitar competitive finish"
+          git push origin master
+
+      - name: 5 - Validate and publish cache-safe build
+        shell: python
+        run: |
+          from pathlib import Path
+          mount=Path('salto-cosmico-rock/mount.js')
+          index=Path('salto-cosmico-rock/index.html')
+          m=mount.read_text().replace('fine-polish-7','combat-guitar-1')
+          i=index.read_text().replace('fine-polish-7','combat-guitar-1')
+          mount.write_text(m)
+          index.write_text(i)
+
+      - name: Validate JavaScript
+        run: |
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+          node --check salto-cosmico-rock/ivo-rock-polish.js
+          node --check salto-cosmico-rock/ivo-rock-start-menu.js
+
+      - name: Commit final publish
+        run: |
+          git add salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Publish Ivo Rock combat guitar polish"
+          git push origin master
