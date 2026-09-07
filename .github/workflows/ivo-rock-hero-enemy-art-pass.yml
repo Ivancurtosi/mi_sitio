@@ -1,0 +1,121 @@
+name: Ivo Rock hero and approved enemy art pass
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-hero-enemy-art-pass.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Apply approved hero, enemy and guitar art updates
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=game.read_text()
+
+          def one(old,new,label):
+              global s
+              count=s.count(old)
+              if count!=1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              s=s.replace(old,new,1)
+
+          # 1) Ivo: about 15% more visual presence, but only a modest collision increase.
+          # Keep crouching at the current height so low passages remain playable.
+          one('u={small:44,grown:76,crouched:34}','u={small:47,grown:81,crouched:34}','player heights')
+          one('ee=36,y=u.small','ee=38,y=u.small','player width')
+          one(
+            'w(e,le,r,J.x-16,J.y-7,J.w+32,J.h+7,J.facing)||ut(e,t,n,J.x+J.w/2,J.y-(J.crouching?2:5),J.h+(J.crouching?8:10),J.facing)',
+            'w(e,le,r,J.x-20,J.y-11,J.w+40,J.h+11,J.facing)||ut(e,t,n,J.x+J.w/2,J.y-(J.crouching?3:8),J.h+(J.crouching?10:16),J.facing)',
+            'player visual scale'
+          )
+
+          # 2) Reduce enemy overload in Route 2: remove the sentry immediately behind the Punk Turtle.
+          one('{x:4280,kind:`sentry`,dir:-1},','','route2 crowded sentry')
+
+          # 3) Add the approved custom enemy visuals before the old generic atlas fallback.
+          turtle_marker='if(t.kind===`turtle`){'
+          if s.count(turtle_marker)!=1:
+              raise SystemExit(f'turtle visual marker: {s.count(turtle_marker)}')
+
+          roadie_speaker='''if(t.kind===`beetle`){e.save();let n=t.vx>=0?1:-1,r=Math.sin(T*11+t.id)*1.4;e.translate(t.x+t.w/2,t.y+t.h/2+r),e.scale(n,1),e.shadowColor=`#ff4a20`,e.shadowBlur=11,e.fillStyle=`#121317`,Q(e,-20,-13,17,28,5),e.fill(),e.strokeStyle=`#777b82`,e.lineWidth=2,e.stroke(),e.fillStyle=`#272a2f`,e.fillRect(-17,-9,10,18),e.strokeStyle=`#aeb2b8`,e.lineWidth=2,e.beginPath(),e.moveTo(-19,-7),e.lineTo(-28,-12),e.lineTo(-22,-2),e.moveTo(-18,8),e.lineTo(-27,14),e.lineTo(-21,3),e.stroke(),e.fillStyle=`#a31718`,e.beginPath(),e.ellipse(4,6,14,13,0,0,Math.PI*2),e.fill(),e.fillStyle=`#d52b1c`,e.beginPath(),e.arc(8,-7,12,0,Math.PI*2),e.fill(),e.fillStyle=`#e8d8b4`,e.beginPath(),e.moveTo(2,-17),e.lineTo(-3,-29),e.lineTo(7,-20),e.closePath(),e.fill(),e.beginPath(),e.moveTo(14,-17),e.lineTo(22,-27),e.lineTo(20,-15),e.closePath(),e.fill(),e.fillStyle=`#ffd84e`,e.beginPath(),e.ellipse(12,-8,4.8,3.2,-.12,0,Math.PI*2),e.fill(),e.fillStyle=`#220304`,e.beginPath(),e.arc(13,-8,1.6,0,Math.PI*2),e.fill(),e.strokeStyle=`#310304`,e.lineWidth=2.5,e.beginPath(),e.arc(8,-1,8,.15,Math.PI-.2),e.stroke(),e.fillStyle=`#fff0d2`;for(let a of[2,8,14]){e.beginPath(),e.moveTo(a,-1),e.lineTo(a+2,4),e.lineTo(a+4,-1),e.closePath(),e.fill()}e.strokeStyle=`#d52b1c`,e.lineWidth=3,e.beginPath(),e.moveTo(-16,11),e.quadraticCurveTo(-29,17,-24,26),e.stroke(),e.fillStyle=`#b9bcc1`,e.beginPath(),e.moveTo(-25,26),e.lineTo(-31,21),e.lineTo(-30,30),e.closePath(),e.fill(),e.fillStyle=`#17191d`,e.fillRect(-1,16,11,4),e.fillRect(11,15,10,4),e.restore();return}if(t.kind===`crawler`){e.save();let n=t.vx>=0?1:-1,r=t.state===`spin`,i=t.state===`shell`||r;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,1),r&&e.rotate(T*13+t.id),e.shadowColor=i?`#ff492f`:`#ff7a35`,e.shadowBlur=i?16:9,e.fillStyle=`#17191d`,Q(e,-22,i?-13:-18,44,i?27:36,7),e.fill(),e.strokeStyle=`#777b82`,e.lineWidth=3,e.stroke(),e.fillStyle=`#252932`,Q(e,-16,i?-9:-13,30,i?19:25,5),e.fill(),e.fillStyle=`#520e12`,e.beginPath(),e.arc(1,i?0:-1,i?10:12,0,Math.PI*2),e.fill(),e.fillStyle=`#e52a21`,e.beginPath(),e.arc(1,i?0:-1,i?6.5:8,0,Math.PI*2),e.fill(),e.fillStyle=`#ffcc55`,e.beginPath(),e.arc(3,-3,2.6,0,Math.PI*2),e.fill(),e.fillStyle=`#f2bf3a`,e.beginPath(),e.moveTo(-13,-12),e.lineTo(-5,-18),e.lineTo(-3,-9),e.closePath(),e.fill(),e.strokeStyle=`#c92325`,e.lineWidth=3,e.beginPath(),e.moveTo(-20,-7),e.quadraticCurveTo(-34,-17,-29,-29),e.stroke(),e.fillStyle=`#aeb1b7`,e.beginPath(),e.arc(-29,-29,3,0,Math.PI*2),e.fill();if(!i){e.strokeStyle=`#989da4`,e.lineWidth=3;for(let a of[-13,13]){e.beginPath(),e.moveTo(a,17),e.lineTo(a-5,24),e.stroke()}e.fillStyle=`#121418`,e.fillRect(-20,22,14,4),e.fillRect(7,22,14,4)}e.restore();return}'''
+          s=s.replace(turtle_marker,roadie_speaker+turtle_marker,1)
+
+          # 4) Replace the old duck-like turtle with the approved Tortuga Punk.
+          turtle_pat=r'if\(t\.kind===`turtle`\)\{.*?e\.restore\(\);return\}if\(t\.kind===`sentry`\)'
+          turtle_new='''if(t.kind===`turtle`){e.save();let n=t.cooldown<.34,r=J.x<t.x?-1:1;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(r,1),n&&(e.shadowColor=`#ff4b22`,e.shadowBlur=22,e.fillStyle=`rgba(255,76,24,.18)`,e.beginPath(),e.arc(31,-4,15+Math.sin(T*20)*3,0,Math.PI*2),e.fill()),e.shadowColor=`rgba(0,0,0,.45)`,e.shadowBlur=7,e.fillStyle=`#172016`,e.beginPath(),e.ellipse(-6,5,29,21,0,0,Math.PI*2),e.fill(),e.strokeStyle=`#646a5b`,e.lineWidth=4,e.stroke(),e.fillStyle=`#293522`,e.beginPath(),e.ellipse(-8,3,23,16,0,0,Math.PI*2),e.fill(),e.strokeStyle=`#9da29a`,e.lineWidth=2;for(let a=-20;a<=10;a+=10){e.beginPath(),e.moveTo(a,-5),e.lineTo(a+9,10),e.stroke()}e.fillStyle=`#c8cbd0`;for(let a of[-19,-7,7,18]){e.beginPath(),e.moveTo(a,-10),e.lineTo(a+4,-25-(Math.abs(a)%3)*2),e.lineTo(a+9,-9),e.closePath(),e.fill()}e.fillStyle=`#343b2a`,e.beginPath(),e.ellipse(25,2,16,13,0,0,Math.PI*2),e.fill(),e.fillStyle=`#111316`,e.beginPath(),e.moveTo(34,-1),e.lineTo(47,4),e.lineTo(34,9),e.closePath(),e.fill(),e.fillStyle=`#ff3d2e`,e.beginPath(),e.arc(29,-3,3.2,0,Math.PI*2),e.fill(),e.fillStyle=`#ffd268`,e.beginPath(),e.arc(30,-4,1.2,0,Math.PI*2),e.fill(),e.strokeStyle=`#aeb1b6`,e.lineWidth=3,e.beginPath(),e.moveTo(-22,14),e.lineTo(-28,23),e.moveTo(10,16),e.lineTo(6,25),e.stroke(),e.fillStyle=`#111316`,e.fillRect(-34,23,18,5),e.fillRect(-2,24,19,5),e.fillStyle=`#18191d`,Q(e,-17,0,28,9,4),e.fill(),e.fillStyle=`#d2d4d7`;for(let a of[-11,-3,5])e.fillRect(a,2,3,5),e.restore();return}if(t.kind===`sentry`)'''
+          s2,count=re.subn(turtle_pat,turtle_new,s,count=1,flags=re.S)
+          if count!=1:
+              raise SystemExit(f'turtle visual replacement: {count}')
+          s=s2
+
+          # 5) The remaining sentry role keeps its gameplay, but gets the approved Cuervo Infernal art
+          # instead of the old floating robot screen.
+          sentry_pat=r'if\(t\.kind===`sentry`\)\{.*?e\.restore\(\);return\}if\(t\.kind===`warden`\)'
+          sentry_new='''if(t.kind===`sentry`){e.save();let n=J.x<t.x?-1:1,r=t.cooldown<.28,i=Math.sin(T*8+t.id)*3;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,1),r&&(e.shadowColor=`#ff3a28`,e.shadowBlur=23,e.strokeStyle=`rgba(255,89,45,.55)`,e.lineWidth=3,e.beginPath(),e.arc(20,-5,17+Math.sin(T*20)*3,0,Math.PI*2),e.stroke()),e.fillStyle=`#15151b`,e.beginPath(),e.ellipse(-4,5,14,20,0,0,Math.PI*2),e.fill(),e.fillStyle=`#22222b`,e.beginPath(),e.moveTo(-7,-4),e.lineTo(-28,-15-i),e.lineTo(-22,9),e.lineTo(-7,13),e.closePath(),e.fill(),e.strokeStyle=`#4b4b54`,e.lineWidth=2,e.stroke(),e.fillStyle=`#d8d0b6`,e.beginPath(),e.arc(9,-9,10,0,Math.PI*2),e.fill(),e.beginPath(),e.moveTo(15,-11),e.lineTo(34,-5),e.lineTo(15,1),e.closePath(),e.fill(),e.fillStyle=`#100b0b`,e.beginPath(),e.arc(10,-10,4,0,Math.PI*2),e.fill(),e.fillStyle=`#ff3028`,e.beginPath(),e.arc(11,-10,2.5,0,Math.PI*2),e.fill(),e.strokeStyle=`#d8d0b6`,e.lineWidth=3;for(let a of[-9,4]){e.beginPath(),e.moveTo(a,20),e.lineTo(a-4,28),e.lineTo(a+3,25),e.moveTo(a-4,28),e.lineTo(a-9,28),e.stroke()}e.fillStyle=`#aeb1b5`;for(let a of[-11,-2,8]){e.beginPath(),e.moveTo(a,-10),e.lineTo(a+3,-20),e.lineTo(a+7,-9),e.closePath(),e.fill()}e.restore();return}if(t.kind===`warden`)'''
+          s2,count=re.subn(sentry_pat,sentry_new,s,count=1,flags=re.S)
+          if count!=1:
+              raise SystemExit(f'sentry/crow visual replacement: {count}')
+          s=s2
+
+          # 6) Give the final giant guitar a real, unmistakable electric-guitar body.
+          old_body='''e.fillStyle=`#171319`,e.strokeStyle=`#e6b84f`,e.lineWidth=4,e.beginPath(),e.moveTo(-26,-55),e.bezierCurveTo(-54,-86,-43,-126,-10,-134),e.bezierCurveTo(10,-151,42,-135,43,-101),e.bezierCurveTo(46,-72,27,-51,8,-44),e.bezierCurveTo(-6,-38,-19,-43,-26,-55),e.closePath(),e.fill(),e.stroke(),e.fillStyle=`#8c1719`,e.beginPath(),e.ellipse(11,-95,21,29,.25,0,Math.PI*2),e.fill(),e.fillStyle=`#f2cf62`'''
+          new_body='''e.fillStyle=`#171319`,e.strokeStyle=`#e6b84f`,e.lineWidth=4,e.beginPath(),e.moveTo(-8,-137),e.lineTo(-58,-116),e.lineTo(-38,-88),e.lineTo(-72,-55),e.lineTo(-25,-48),e.lineTo(-3,-79),e.lineTo(25,-50),e.lineTo(71,-59),e.lineTo(41,-88),e.lineTo(63,-119),e.lineTo(14,-137),e.closePath(),e.fill(),e.stroke(),e.fillStyle=`#8c1719`,e.beginPath(),e.moveTo(-3,-126),e.lineTo(-35,-108),e.lineTo(-21,-88),e.lineTo(-43,-63),e.lineTo(-15,-61),e.lineTo(1,-84),e.lineTo(24,-63),e.lineTo(44,-67),e.lineTo(27,-88),e.lineTo(42,-110),e.lineTo(10,-127),e.closePath(),e.fill(),e.fillStyle=`#efb94d`,Q(e,-8,-116,30,12,3),e.fill(),Q(e,-7,-94,30,12,3),e.fill(),e.fillStyle=`#d4d7da`;for(let a of[-25,44]){e.beginPath(),e.arc(a,-70,4,0,Math.PI*2),e.fill()}e.fillStyle=`#f2cf62`'''
+          one(old_body,new_body,'full guitar body')
+
+          game.write_text(s)
+
+          # Cache-bust all pieces without changing menu/music behavior.
+          mount=Path('salto-cosmico-rock/mount.js')
+          m=mount.read_text()
+          if 'combat-guitar-2' not in m:
+              raise SystemExit('mount cache marker not found')
+          mount.write_text(m.replace('combat-guitar-2','hero-enemies-1'))
+
+          index=Path('salto-cosmico-rock/index.html')
+          i=index.read_text()
+          if 'combat-guitar-2' not in i:
+              raise SystemExit('index cache marker not found')
+          index.write_text(i.replace('combat-guitar-2','hero-enemies-1'))
+
+      - name: Validate JavaScript
+        run: |
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+          node --check salto-cosmico-rock/ivo-rock-start-menu.js
+
+      - name: Browser smoke test for runtime regressions
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --v=1 --virtual-time-budget=9000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?v=hero-enemies-smoke' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            grep -E 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log
+            exit 1
+          fi
+          grep -q 'ivo-start-menu' /tmp/dom.txt
+          grep -q 'game-canvas' /tmp/dom.txt
+          grep -q 'data-rock-hydrated="1"' /tmp/dom.txt
+
+      - name: Commit and publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Enlarge Ivo and add approved rock enemy art"
+          git push origin master
