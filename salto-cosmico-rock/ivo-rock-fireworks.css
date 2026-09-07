@@ -1,0 +1,33 @@
+/* Short, obvious finish fireworks for Ivo Rock. */
+.ivo-firework-dot {
+  position: absolute;
+  left: var(--fw-x);
+  top: var(--fw-y);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fw-color);
+  box-shadow: 0 0 10px var(--fw-color), 0 0 20px var(--fw-color);
+  transform: translate(-50%, -50%) scale(.5);
+  opacity: 0;
+  animation: ivoFireworkBurst .92s cubic-bezier(.12,.63,.23,1) forwards;
+}
+.ivo-firework-core {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 50%;
+  animation: ivoFireworkCore .38s ease-out forwards;
+}
+@keyframes ivoFireworkBurst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
+  10% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--fw-dx)), calc(-50% + var(--fw-dy))) scale(.12); }
+}
+@keyframes ivoFireworkCore {
+  0% { opacity: .15; transform: scale(.3); }
+  35% { opacity: 1; transform: scale(1.8); }
+  100% { opacity: 0; transform: scale(.2); }
+}
