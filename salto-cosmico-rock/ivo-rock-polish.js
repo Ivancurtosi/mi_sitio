@@ -14,29 +14,6 @@
     <div class="ivo-polish-phase"><small>DIABLITO DEL METAL</small><strong>FASE 2 · EN LLAMAS</strong></div>`;
   document.body.appendChild(layer);
 
-  const finishWorld = document.createElement('div');
-  finishWorld.className = 'ivo-finish-world';
-  finishWorld.innerHTML = `
-    <div class="ivo-finish-mast">
-      <div class="ivo-finish-banner"><span>⚡</span><b>IVO<br>ROCK</b></div>
-      <i class="tick t5"><span>5000</span></i>
-      <i class="tick t3"><span>3000</span></i>
-      <i class="tick t15"><span>1500</span></i>
-      <i class="tick t75"><span>750</span></i>
-      <i class="tick t25"><span>250</span></i>
-      <div class="mast-base"></div>
-    </div>
-    <div class="ivo-finish-fortress">
-      <div class="fortress-top"><span></span><span></span><span></span></div>
-      <div class="fortress-sign">BACKSTAGE</div>
-      <div class="fortress-speaker s1"><i></i><i></i></div>
-      <div class="fortress-speaker s2"><i></i><i></i></div>
-      <div class="fortress-door"><b>⚡</b></div>
-      <div class="fortress-light l1"></div><div class="fortress-light l2"></div>
-      <div class="fortress-pyro p1"></div><div class="fortress-pyro p2"></div>
-    </div>`;
-  document.body.appendChild(finishWorld);
-
   const flash = layer.querySelector('.ivo-polish-flash');
   const celebration = layer.querySelector('.ivo-polish-celebration');
   const celebrationTitle = celebration.querySelector('strong');
@@ -120,53 +97,20 @@
     noise(.24, .08, .025);
   };
 
-  const updateFinishWorld = () => {
-    const state = window.__ivoRockFinishState;
-    const canvas = document.querySelector('.game-canvas');
-    if (!state || !canvas || document.hidden) {
-      finishWorld.style.display = 'none';
-      requestAnimationFrame(updateFinishWorld);
-      return;
-    }
-    const rect = canvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) {
-      finishWorld.style.display = 'none';
-      requestAnimationFrame(updateFinishWorld);
-      return;
-    }
-    const sx = rect.width / 1280;
-    const sy = rect.height / 720;
-    const screenX = rect.left + (state.goalX - state.cameraX) * sx;
-    const groundY = rect.top + 624 * sy;
-    const visible = screenX > rect.left - 100 * sx && screenX < rect.right + 260 * sx;
-    finishWorld.style.display = visible ? 'block' : 'none';
-    if (visible) {
-      finishWorld.style.left = `${screenX}px`;
-      finishWorld.style.top = `${groundY - 360 * sy}px`;
-      finishWorld.style.transform = `scale(${sx},${sy})`;
-      finishWorld.dataset.level = String(state.level || 1);
-    }
-    requestAnimationFrame(updateFinishWorld);
-  };
-  requestAnimationFrame(updateFinishWorld);
-
   window.__ivoRockPolish = {
-    goal(final = false, timeBonus = 0, heightBonus = 0) {
-      const total = Math.max(0, Math.round(timeBonus + heightBonus));
+    goal(final = false, totalBonus = 0, heightBonus = 0) {
+      const total = Math.max(0, Math.round(totalBonus));
+      const height = Math.max(0, Math.round(heightBonus));
+      const time = Math.max(0, total - height);
       pulseFlash(false);
-      sparks(final ? 42 : 30);
+      sparks(final ? 46 : 34);
       solo(final);
       celebrationTitle.textContent = final ? '¡GIRA COMPLETA!' : '¡RUTA COMPLETA!';
-      celebrationHeight.textContent = `ALTURA +${Math.max(0, Math.round(heightBonus)).toString().padStart(4, '0')}`;
-      celebrationTotal.textContent = `TIEMPO +${Math.max(0, Math.round(timeBonus)).toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;
+      celebrationHeight.textContent = `ALTURA +${height.toString().padStart(4, '0')}`;
+      celebrationTotal.textContent = `TIEMPO +${time.toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;
       celebration.classList.remove('show');
-      finishWorld.classList.remove('celebrate');
-      requestAnimationFrame(() => {
-        celebration.classList.add('show');
-        finishWorld.classList.add('celebrate');
-      });
-      setTimeout(() => celebration.classList.remove('show'), final ? 3300 : 2850);
-      setTimeout(() => finishWorld.classList.remove('celebrate'), 3200);
+      requestAnimationFrame(() => celebration.classList.add('show'));
+      setTimeout(() => celebration.classList.remove('show'), final ? 3400 : 2800);
       navigator.vibrate?.(final ? [60, 35, 70, 35, 100] : [45, 30, 65]);
     },
 
