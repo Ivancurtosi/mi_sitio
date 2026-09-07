@@ -53,7 +53,10 @@ jobs:
 
           # 2) Cache collision surfaces for each fixed physics step instead of rebuilding
           # arrays and wrapper objects for the player, every enemy and every projectile.
-          one('Se=new Set,Ce=E.startX,H=0', 'Se=new Set,ivoSolidAll=null,ivoSolidNoPlatforms=null,Ce=E.startX,H=0', 'collision cache vars')
+          cache_sites = s.count('Se=new Set,Ce=E.startX,H=0')
+          if cache_sites != 2:
+              raise SystemExit(f'collision cache var/reset sites: expected 2, got {cache_sites}')
+          s = s.replace('Se=new Set,Ce=E.startX,H=0', 'Se=new Set,ivoSolidAll=null,ivoSolidNoPlatforms=null,Ce=E.startX,H=0')
           one(
               'Me=(e=!0)=>[...E.grounds,...F.filter(e=>e.active&&e.kind!==`hidden`).map(e=>({...e,block:e})),...e?I.map(e=>({...e,platform:e})):[]],Ne=',
               'Me=(e=!0)=>{let t=e?ivoSolidAll:ivoSolidNoPlatforms;if(t)return t;t=[...E.grounds,...F.filter(e=>e.active&&e.kind!==`hidden`).map(e=>({...e,block:e})),...(e?I.map(e=>({...e,platform:e})):[])];return e?ivoSolidAll=t:ivoSolidNoPlatforms=t,t},Ne=',
