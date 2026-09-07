@@ -240,13 +240,15 @@
     setTimeout(() => {
       const playButton = [...document.querySelectorAll('.play-btn')].find(btn => /arrancar la gira/i.test(btn.textContent || ''));
       menu.remove();
-      state.started = true;
-      const hud = readHud();
-      state.lastLives = hud.lives;
-      state.lastStage = hud.stage;
-      renderHudTag();
-      if (mode === 2) announcePlayer(1);
       playButton?.click();
+      setTimeout(() => {
+        state.started = true;
+        const hud = readHud();
+        state.lastLives = hud.lives;
+        state.lastStage = hud.stage;
+        renderHudTag();
+        if (mode === 2) announcePlayer(1);
+      }, 90);
     }, 420);
   }
 
