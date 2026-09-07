@@ -5,6 +5,7 @@
   layer.className = 'ivo-polish-layer';
   layer.innerHTML = `
     <div class="ivo-polish-flash"></div>
+    <div class="ivo-polish-hit"></div>
     <div class="ivo-polish-celebration">
       <small>IVO ROCK</small>
       <strong>RUTA COMPLETA</strong>
@@ -16,6 +17,7 @@
   document.body.appendChild(layer);
 
   const flash = layer.querySelector('.ivo-polish-flash');
+  const hit = layer.querySelector('.ivo-polish-hit');
   const celebration = layer.querySelector('.ivo-polish-celebration');
   const celebrationTitle = celebration.querySelector('strong');
   const celebrationHeight = celebration.querySelector('.ivo-polish-height');
@@ -73,6 +75,15 @@
     flash.classList.remove('show');
     requestAnimationFrame(() => flash.classList.add('show'));
     setTimeout(() => flash.classList.remove('show'), fire ? 170 : 105);
+  };
+
+  const microImpact = kind => {
+    if (!hit) return;
+    hit.className = `ivo-polish-hit ${kind || 'enemy'}`;
+    void hit.offsetWidth;
+    hit.classList.add('show');
+    setTimeout(() => hit.classList.remove('show'), kind === 'boss' ? 115 : 80);
+    if (kind !== 'power') navigator.vibrate?.(kind === 'boss' ? 18 : 9);
   };
 
   const sparks = (count = 18) => {
@@ -171,6 +182,7 @@
     },
 
     impact(kind) {
+      microImpact(kind);
       if (kind === 'smash') {
         note(34, 0, .11, .035, 'square', -5);
         noise(0, .09, .022);
@@ -180,6 +192,9 @@
       } else if (kind === 'boss') {
         note(40, 0, .09, .035, 'sawtooth', -4);
         noise(0, .07, .02);
+      } else if (kind === 'enemy') {
+        note(43, 0, .055, .018, 'square', -3);
+        noise(0, .045, .012);
       }
     }
   };

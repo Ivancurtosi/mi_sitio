@@ -301,3 +301,7 @@
 }
 
 .ivo-polish-next{display:block;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.14);font:1000 11px/1.15 ui-monospace,monospace;letter-spacing:.11em;color:#ffd86a;opacity:.92}
+
+
+/* Micro hit flash: short enough not to hide gameplay. */
+.ivo-polish-hit{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 50% 54%,rgba(255,255,255,.28),transparent 36%);mix-blend-mode:screen}.ivo-polish-hit.show{animation:ivoMicroHit .085s ease-out}.ivo-polish-hit.smash{background:radial-gradient(circle at 50% 55%,rgba(190,139,255,.32),transparent 38%)}.ivo-polish-hit.boss{background:radial-gradient(circle at 50% 52%,rgba(255,80,28,.4),transparent 42%)}.ivo-polish-hit.power{background:radial-gradient(circle at 50% 52%,rgba(104,255,236,.26),transparent 40%)}@keyframes ivoMicroHit{0%{opacity:0}28%{opacity:1}100%{opacity:0}}
