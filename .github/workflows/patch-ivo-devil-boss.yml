@@ -1,0 +1,91 @@
+name: Patch Ivo Rock devil boss
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-ivo-devil-boss.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Upgrade final boss into a fire-throwing rock devil
+        shell: python
+        run: |
+          from pathlib import Path
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+
+          def replace_once(old, new, label):
+              global s
+              if old not in s:
+                  raise SystemExit(f'{label} pattern not found')
+              s = s.replace(old, new, 1)
+
+          # Slightly larger final enemy, still jumpable because defeating it remains optional.
+          replace_once("Ae=e=>e===`warden`?{w:82,h:70}:", "Ae=e=>e===`warden`?{w:92,h:82}:", 'devil size')
+
+          # Faster movement and a two-fireball pattern, with an occasional third high arc.
+          replace_once(
+              "if(n.guard<=0){let t=J.x<n.x?-125:125;n.vx=se(n.vx,t,320*e)}",
+              "if(n.guard<=0){let t=J.x<n.x?-145:145;n.vx=se(n.vx,t,360*e)}",
+              'devil movement'
+          )
+
+          replace_once(
+              "if(n.cooldown<=0){if(Math.abs(J.x-n.x)<560){let e=J.x<n.x?-1:1;B.push({x:n.x+n.w/2,y:n.y+28,w:22,h:22,vx:e*285,vy:-220,life:4,active:!0,kind:`flare`})}n.vy=-470,n.cooldown=1.25}",
+              "if(n.cooldown<=0){if(Math.abs(J.x-n.x)<700){let e=J.x<n.x?-1:1,r=Math.floor(T*1.7)%3;B.push({x:n.x+n.w/2+e*18,y:n.y+30,w:24,h:24,vx:e*330,vy:-300,life:5.2,active:!0,kind:`flare`}),B.push({x:n.x+n.w/2+e*16,y:n.y+42,w:22,h:22,vx:e*355,vy:-180,life:5.2,active:!0,kind:`flare`}),r===2&&B.push({x:n.x+n.w/2+e*12,y:n.y+20,w:20,h:20,vx:e*305,vy:-390,life:5.4,active:!0,kind:`flare`})}n.vy=-420,n.cooldown=1.35}",
+              'devil fire pattern'
+          )
+
+          # Fireballs stay airborne longer, so they actually threaten a useful part of the arena.
+          replace_once("t.vy+=(t.kind===`flare`?720:80)*e", "t.vy+=(t.kind===`flare`?440:80)*e", 'fireball gravity')
+
+          # Replace the amplifier stack with a readable devil silhouette: horns, glowing eyes,
+          # teeth, black rock vest, tail and health pips.
+          old_visual = "if(t.kind===`warden`){e.save();let n=1+Math.sin(T*5)*.018;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n),e.shadowColor=t.guard>0?`#ffe56e`:`#ff354f`,e.shadowBlur=18,e.fillStyle=`#121215`,Q(e,-37,-31,74,64,6),e.fill(),e.strokeStyle=`#666872`,e.lineWidth=4,e.stroke(),e.fillStyle=`#24242a`,Q(e,-29,-24,58,25,4),e.fill(),Q(e,-29,5,58,25,4),e.fill(),e.strokeStyle=`#7a7b83`,e.lineWidth=2,e.strokeRect(-29,-24,58,25),e.strokeRect(-29,5,58,25),e.fillStyle=`#050506`;for(let n of[-17,17]){e.beginPath(),e.arc(n,-12,9,0,Math.PI*2),e.fill(),e.beginPath(),e.arc(n,17,9,0,Math.PI*2),e.fill()}e.fillStyle=`#e52335`,e.fillRect(-25,-28,8,4),e.fillStyle=`#ffd858`,e.beginPath(),e.moveTo(2,-21),e.lineTo(-7,-3),e.lineTo(1,-3),e.lineTo(-4,14),e.lineTo(12,-8),e.lineTo(4,-8),e.closePath(),e.fill(),e.fillStyle=`#ffc95e`;for(let n=0;n<t.health;n++)e.fillRect(-29+n*10,35,6,4);e.restore();return}"
+          new_visual = "if(t.kind===`warden`){e.save();let n=1+Math.sin(T*5)*.025;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n),e.shadowColor=t.guard>0?`#ffe66a`:`#ff2b16`,e.shadowBlur=22,e.strokeStyle=`#8f1616`,e.lineWidth=6,e.lineCap=`round`,e.beginPath(),e.moveTo(31,18),e.quadraticCurveTo(48,19,43,39),e.stroke(),e.fillStyle=`#b21619`,e.beginPath(),e.moveTo(43,38),e.lineTo(52,31),e.lineTo(50,43),e.closePath(),e.fill(),e.fillStyle=`#631017`,e.beginPath(),e.ellipse(0,15,38,33,0,0,Math.PI*2),e.fill(),e.fillStyle=`#a9161d`,e.beginPath(),e.arc(0,-10,29,0,Math.PI*2),e.fill(),e.fillStyle=`#f0d0a0`,e.beginPath(),e.moveTo(-21,-30),e.lineTo(-39,-50),e.lineTo(-9,-35),e.closePath(),e.fill(),e.beginPath(),e.moveTo(21,-30),e.lineTo(39,-50),e.lineTo(9,-35),e.closePath(),e.fill(),e.fillStyle=`#151216`,Q(e,-28,10,56,30,7),e.fill(),e.fillStyle=`#aaa4a0`;for(let n of[-20,-10,0,10,20])e.beginPath(),e.arc(n,18,2.1,0,Math.PI*2),e.fill();e.fillStyle=`#ffd34f`;for(let n of[-11,11])e.beginPath(),e.ellipse(n,-12,7,5,0,0,Math.PI*2),e.fill();e.fillStyle=`#210305`;for(let n of[-11,11])e.beginPath(),e.arc(n+(J.x<t.x?-2:2),-12,2.5,0,Math.PI*2),e.fill();e.strokeStyle=`#2d0507`,e.lineWidth=3,e.beginPath(),e.arc(0,-1,13,.15,Math.PI-.15),e.stroke(),e.fillStyle=`#fff2d2`;for(let n of[-8,-2,4])e.beginPath(),e.moveTo(n,-1),e.lineTo(n+3,6),e.lineTo(n+6,-1),e.closePath(),e.fill();e.fillStyle=`#7b0d13`,e.beginPath(),e.arc(-36,15,9,0,Math.PI*2),e.arc(36,15,9,0,Math.PI*2),e.fill(),e.fillStyle=`#f0d0a0`;for(let n of[-36,36]){e.beginPath(),e.moveTo(n-5,12),e.lineTo(n,3),e.lineTo(n+2,14),e.closePath(),e.fill()}e.fillStyle=`#ffb13b`;for(let n=0;n<t.health;n++)e.fillRect(-30+n*10,45,6,5);e.restore();return}"
+          replace_once(old_visual, new_visual, 'devil visual')
+
+          # Make enemy fire look like fire, with a short flame tail and bright core.
+          old_projectile = "for(let t of B)$(t)&&(e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.shadowColor=`#ff628e`,e.shadowBlur=14,e.fillStyle=t.kind===`flare`?`#ff9b67`:`#ff628e`,e.beginPath(),e.arc(0,0,t.w/2,0,Math.PI*2),e.fill(),e.restore());"
+          new_projectile = "for(let t of B)$(t)&&(e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),t.kind===`flare`?(e.rotate(Math.atan2(t.vy,t.vx)),e.shadowColor=`#ff3a13`,e.shadowBlur=20,e.fillStyle=`rgba(255,67,18,.52)`,e.beginPath(),e.moveTo(-t.w*1.25,0),e.lineTo(-t.w*.12,-t.h*.46),e.lineTo(-t.w*.12,t.h*.46),e.closePath(),e.fill(),e.fillStyle=`#ff5a1f`,e.beginPath(),e.arc(0,0,t.w*.52,0,Math.PI*2),e.fill(),e.fillStyle=`#ffd95a`,e.beginPath(),e.arc(t.w*.10,-t.h*.08,t.w*.25,0,Math.PI*2),e.fill()):(e.shadowColor=`#ff628e`,e.shadowBlur=14,e.fillStyle=`#ff628e`,e.beginPath(),e.arc(0,0,t.w/2,0,Math.PI*2),e.fill()),e.restore());"
+          replace_once(old_projectile, new_projectile, 'fireball visual')
+
+          replace_once(
+              "Y(`TORRE DEL ESTRUENDO`,`Saltala para seguir · destruirla da bonus`,1.2)",
+              "Y(`DIABLITO DEL METAL`,`Saltalo o derrotalo · cuidado con el fuego`,1.2)",
+              'boss message'
+          )
+
+          game.write_text(s)
+
+          mount = Path('salto-cosmico-rock/mount.js')
+          ms = mount.read_text()
+          if "cosmic-jump-DkePWGqE.js?v=ivo-rock-1" not in ms:
+              raise SystemExit('mount game cache pattern not found')
+          ms = ms.replace("cosmic-jump-DkePWGqE.js?v=ivo-rock-1", "cosmic-jump-DkePWGqE.js?v=devil-boss-1", 1)
+          mount.write_text(ms)
+
+          index = Path('salto-cosmico-rock/index.html')
+          ix = index.read_text()
+          if "mount.js?v=simple-menu-1" not in ix:
+              raise SystemExit('index mount cache pattern not found')
+          ix = ix.replace("mount.js?v=simple-menu-1", "mount.js?v=devil-boss-1", 1)
+          index.write_text(ix)
+
+      - name: Commit devil boss
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Upgrade final boss to fire-throwing rock devil"
+          git push origin master
