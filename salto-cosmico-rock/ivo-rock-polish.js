@@ -10,6 +10,7 @@
       <strong>RUTA COMPLETA</strong>
       <b class="ivo-polish-height">ALTURA +0000</b>
       <em class="ivo-polish-total">TIEMPO +0000 · TOTAL +0000</em>
+      <span class="ivo-polish-next"></span>
     </div>
     <div class="ivo-polish-phase"><small>DIABLITO DEL METAL</small><strong>FASE 2 · EN LLAMAS</strong></div>`;
   document.body.appendChild(layer);
@@ -19,6 +20,7 @@
   const celebrationTitle = celebration.querySelector('strong');
   const celebrationHeight = celebration.querySelector('.ivo-polish-height');
   const celebrationTotal = celebration.querySelector('.ivo-polish-total');
+  const celebrationNext = celebration.querySelector('.ivo-polish-next');
   const phase = layer.querySelector('.ivo-polish-phase');
 
   let ctx = null;
@@ -98,19 +100,21 @@
   };
 
   window.__ivoRockPolish = {
-    goal(final = false, totalBonus = 0, heightBonus = 0) {
-      const total = Math.max(0, Math.round(totalBonus));
+    goal(final = false, timeBonus = 0, heightBonus = 0, nextName = '') {
+      const time = Math.max(0, Math.round(timeBonus));
       const height = Math.max(0, Math.round(heightBonus));
-      const time = Math.max(0, total - height);
+      const total = time + height;
       pulseFlash(false);
       sparks(final ? 46 : 34);
       solo(final);
       celebrationTitle.textContent = final ? '¡GIRA COMPLETA!' : '¡RUTA COMPLETA!';
       celebrationHeight.textContent = `ALTURA +${height.toString().padStart(4, '0')}`;
       celebrationTotal.textContent = `TIEMPO +${time.toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;
+      celebrationNext.textContent = final ? 'FIN DE LA GIRA' : (nextName ? `PRÓXIMA PARADA · ${String(nextName).toUpperCase()}` : '');
+      window.__ivoRockStats?.goal(height, time, final);
       celebration.classList.remove('show');
       requestAnimationFrame(() => celebration.classList.add('show'));
-      setTimeout(() => celebration.classList.remove('show'), final ? 3400 : 2800);
+      setTimeout(() => celebration.classList.remove('show'), final ? 3400 : 2850);
       navigator.vibrate?.(final ? [60, 35, 70, 35, 100] : [45, 30, 65]);
     },
 
