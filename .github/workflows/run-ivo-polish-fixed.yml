@@ -1,0 +1,51 @@
+name: Run fixed full Ivo Rock polish
+
+on:
+  push:
+    paths:
+      - '.github/workflows/run-ivo-polish-fixed.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Apply corrected full polish
+        shell: python
+        run: |
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/polish-ivo-rock-full.yml').read_text()
+          start = workflow.index('        run: |\n', workflow.index('Polish boss levels enemies celebration and effects')) + len('        run: |\n')
+          end = workflow.index('\n      - name: Syntax check', start)
+          block = workflow[start:end]
+          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in block.splitlines())
+
+          bad = "e.stroke();let rr=Math.max(0,Math.sin(T*1.55)-.992)*70;rr>0&&(e.globalAlpha=Math.min(.38,rr),e.fillStyle=`#dce8ff`,e.fillRect(0,0,t,720)),e.restore())"
+          good = "e.stroke(),Math.sin(T*1.55)>.992&&(e.globalAlpha=.32,e.fillStyle=`#dce8ff`,e.fillRect(0,0,t,720)),e.restore())"
+          if bad not in script:
+              raise SystemExit('storm syntax target not found in source patch')
+          script = script.replace(bad, good, 1)
+          exec(compile(script, '<fixed-polish>', 'exec'), {'__name__':'__main__'})
+
+      - name: Validate JavaScript
+        run: |
+          cp salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js /tmp/game.mjs
+          cp salto-cosmico-rock/mount.js /tmp/mount.mjs
+          node --check /tmp/game.mjs
+          node --check /tmp/mount.mjs
+          node --check salto-cosmico-rock/ivo-rock-polish.js
+
+      - name: Commit and publish polish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Polish Ivo Rock boss levels enemies and finale"
+          git push origin master
