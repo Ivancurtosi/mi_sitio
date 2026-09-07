@@ -299,3 +299,5 @@
   .ivo-polish-celebration b { margin-top: 6px; font-size: 12px; }
   .ivo-polish-celebration em { font-size: 10px; }
 }
+
+.ivo-polish-next{display:block;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.14);font:1000 11px/1.15 ui-monospace,monospace;letter-spacing:.11em;color:#ffd86a;opacity:.92}

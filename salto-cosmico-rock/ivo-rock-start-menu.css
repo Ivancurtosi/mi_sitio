@@ -189,3 +189,5 @@
     font-size: 9px;
   }
 }
+
+.ivo-menu-continue{color:#ffe16a}.ivo-player-turn-tag{display:flex;gap:7px;align-items:center;white-space:nowrap}.ivo-player-turn-tag span{opacity:.52;transition:opacity .14s ease,color .14s ease}.ivo-player-turn-tag span.active{opacity:1;color:#ffe16a;text-shadow:0 0 9px rgba(255,209,70,.55)}.ivo-player-turn-tag[data-player="2"] span.active{color:#7ffff5;text-shadow:0 0 9px rgba(92,245,255,.55)}.ivo-player-turn-tag i{opacity:.35;font-style:normal}
