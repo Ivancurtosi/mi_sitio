@@ -88,6 +88,44 @@
     }
   };
 
+  const fireworkBurst = (x, y, color, scale = 1) => {
+    const dots = 20;
+    for (let i = 0; i < dots; i++) {
+      const angle = (Math.PI * 2 * i) / dots + (i % 3) * .035;
+      const radius = (72 + (i % 5) * 11) * scale;
+      const dot = document.createElement('i');
+      dot.className = 'ivo-firework-dot';
+      dot.style.setProperty('--fw-x', `${x}%`);
+      dot.style.setProperty('--fw-y', `${y}%`);
+      dot.style.setProperty('--fw-dx', `${Math.cos(angle) * radius}px`);
+      dot.style.setProperty('--fw-dy', `${Math.sin(angle) * radius}px`);
+      dot.style.setProperty('--fw-color', color);
+      layer.appendChild(dot);
+      setTimeout(() => dot.remove(), 1050);
+    }
+    const core = document.createElement('i');
+    core.className = 'ivo-firework-core';
+    core.style.left = `${x}%`;
+    core.style.top = `${y}%`;
+    core.style.background = color;
+    core.style.boxShadow = `0 0 24px ${color}, 0 0 48px ${color}`;
+    layer.appendChild(core);
+    setTimeout(() => core.remove(), 420);
+  };
+
+  const fireworks = final => {
+    const bursts = final
+      ? [[20,28,'#ffd85c',0,1.08],[79,24,'#71fff0',170,1],[48,18,'#ff5a73',390,1.18],[30,16,'#a779ff',650,.92],[70,34,'#ff8a2d',860,1.02]]
+      : [[22,29,'#ffd85c',0,.95],[77,26,'#71fff0',190,.9],[50,18,'#ff5a73',430,1.02]];
+    bursts.forEach(([x, y, color, delay, scale], index) => {
+      setTimeout(() => {
+        fireworkBurst(x, y, color, scale);
+        noise(0, .075, index === 0 ? .03 : .022);
+        note(72 + (index % 3) * 4, 0, .12, .018, 'triangle', 5);
+      }, delay);
+    });
+  };
+
   const solo = final => {
     const base = final ? 52 : 55;
     const riff = final ? [0, 3, 5, 7, 10, 12, 15, 19] : [0, 3, 5, 7, 10, 12];
@@ -106,6 +144,7 @@
       const total = time + height;
       pulseFlash(false);
       sparks(final ? 46 : 34);
+      fireworks(final);
       solo(final);
       celebrationTitle.textContent = final ? '¡GIRA COMPLETA!' : '¡RUTA COMPLETA!';
       celebrationHeight.textContent = `ALTURA +${height.toString().padStart(4, '0')}`;
