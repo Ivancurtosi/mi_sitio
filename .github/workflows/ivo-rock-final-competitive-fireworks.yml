@@ -16,17 +16,14 @@ jobs:
         with:
           ref: master
 
-      - name: Patch finale layout and celebration
+      - name: Patch competitive finale layout
         shell: python
         run: |
           from pathlib import Path
 
           game_path = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
-          polish_path = Path('salto-cosmico-rock/ivo-rock-polish.js')
-          polish_css_path = Path('salto-cosmico-rock/ivo-rock-polish.css')
           mount_path = Path('salto-cosmico-rock/mount.js')
           index_path = Path('salto-cosmico-rock/index.html')
-
           s = game_path.read_text()
 
           def one(old, new, label):
@@ -36,128 +33,34 @@ jobs:
                   raise SystemExit(f'{label}: expected 1 match, got {count}')
               s = s.replace(old, new, 1)
 
-          # Finales: five amplifier steps, ascent only. The last step ends 240 px before
-          # the finish mast, tuned so a full-speed run + held jump reaches the 5000 zone.
+          # Five amplifier steps, ascent only. The top edge sits 240 px before the mast.
           one('...g(7248,5,1),...g(7536,4,-1)', '...g(7344,5,1)', 'route 1 ascent')
           one('...g(6816,5,1),...g(7104,4,-1)', '...g(7056,5,1)', 'route 2 ascent')
           one('...g(7056,5,1),...g(7344,4,-1)', '...g(7008,5,1)', 'route 3 ascent')
           one('p(6480,432,`solid`,void 0,3),...g(6816,5,1)]', 'p(6480,432,`solid`,void 0,3),...g(6528,5,1)]', 'route 4 ascent')
 
-          # Keep reach-check metadata consistent with the new staircase positions.
-          one('startX:7170,startFeetY:624,target:{x:7248,y:576,w:48,h:48}', 'startX:7270,startFeetY:624,target:{x:7344,y:576,w:48,h:48}', 'route 1 final reach check')
-          one('startX:6750,startFeetY:624,target:{x:6816,y:576,w:48,h:48}', 'startX:6450,startFeetY:624,target:{x:6528,y:576,w:48,h:48}', 'route 4 final reach check')
+          one('startX:7170,startFeetY:624,target:{x:7248,y:576,w:48,h:48}', 'startX:7270,startFeetY:624,target:{x:7344,y:576,w:48,h:48}', 'route 1 reach check')
+          one('startX:6750,startFeetY:624,target:{x:6816,y:576,w:48,h:48}', 'startX:6450,startFeetY:624,target:{x:6528,y:576,w:48,h:48}', 'route 4 reach check')
 
-          # Make the height zones match the labels on the mast and reward a genuinely fast jump.
+          # Tighten the mast scoring zones so full-speed jumping is what earns 5000.
           one(
               'goalTier=J.y+J.h<=350?4:J.y+J.h<=420?3:J.y+J.h<=490?2:J.y+J.h<=560?1:0',
               'goalTier=J.y+J.h<=285?4:J.y+J.h<=365?3:J.y+J.h<=445?2:J.y+J.h<=525?1:0',
-              'competitive height tiers'
+              'height tiers'
           )
 
           game_path.write_text(s)
 
-          p = polish_path.read_text()
-          firework_marker = '  const solo = final => {'
-          if 'const fireworkBurst = ' not in p:
-              if firework_marker not in p:
-                  raise SystemExit('firework insertion marker missing')
-              fireworks = r'''  const fireworkBurst = (x, y, color, scale = 1) => {
-    const dots = 20;
-    for (let i = 0; i < dots; i++) {
-      const angle = (Math.PI * 2 * i) / dots + (i % 3) * .035;
-      const radius = (72 + (i % 5) * 11) * scale;
-      const dot = document.createElement('i');
-      dot.className = 'ivo-firework-dot';
-      dot.style.setProperty('--fw-x', `${x}%`);
-      dot.style.setProperty('--fw-y', `${y}%`);
-      dot.style.setProperty('--fw-dx', `${Math.cos(angle) * radius}px`);
-      dot.style.setProperty('--fw-dy', `${Math.sin(angle) * radius}px`);
-      dot.style.setProperty('--fw-color', color);
-      layer.appendChild(dot);
-      setTimeout(() => dot.remove(), 1050);
-    }
-    const core = document.createElement('i');
-    core.className = 'ivo-firework-core';
-    core.style.left = `${x}%`;
-    core.style.top = `${y}%`;
-    core.style.background = color;
-    core.style.boxShadow = `0 0 24px ${color}, 0 0 48px ${color}`;
-    layer.appendChild(core);
-    setTimeout(() => core.remove(), 420);
-  };
-
-  const fireworks = final => {
-    const bursts = final
-      ? [[20,28,'#ffd85c',0,1.08],[79,24,'#71fff0',170,1],[48,18,'#ff5a73',390,1.18],[30,16,'#a779ff',650,.92],[70,34,'#ff8a2d',860,1.02]]
-      : [[22,29,'#ffd85c',0,.95],[77,26,'#71fff0',190,.9],[50,18,'#ff5a73',430,1.02]];
-    bursts.forEach(([x, y, color, delay, scale], index) => {
-      setTimeout(() => {
-        fireworkBurst(x, y, color, scale);
-        noise(0, .075, index === 0 ? .03 : .022);
-        note(72 + (index % 3) * 4, 0, .12, .018, 'triangle', 5);
-      }, delay);
-    });
-  };
-
-'''
-              p = p.replace(firework_marker, fireworks + firework_marker, 1)
-
-          old_goal_fx = '''      pulseFlash(false);
-      sparks(final ? 46 : 34);
-      solo(final);'''
-          new_goal_fx = '''      pulseFlash(false);
-      sparks(final ? 46 : 34);
-      fireworks(final);
-      solo(final);'''
-          if old_goal_fx not in p:
-              raise SystemExit('goal fireworks call marker missing')
-          p = p.replace(old_goal_fx, new_goal_fx, 1)
-          polish_path.write_text(p)
-
-          css = polish_css_path.read_text()
-          if '.ivo-firework-dot {' not in css:
-              css += r'''
-
-/* Short, obvious finish fireworks. */
-.ivo-firework-dot {
-  position: absolute;
-  left: var(--fw-x);
-  top: var(--fw-y);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--fw-color);
-  box-shadow: 0 0 10px var(--fw-color), 0 0 20px var(--fw-color);
-  transform: translate(-50%, -50%) scale(.5);
-  opacity: 0;
-  animation: ivoFireworkBurst .92s cubic-bezier(.12,.63,.23,1) forwards;
-}
-.ivo-firework-core {
-  position: absolute;
-  width: 13px;
-  height: 13px;
-  margin: -6.5px 0 0 -6.5px;
-  border-radius: 50%;
-  animation: ivoFireworkCore .38s ease-out forwards;
-}
-@keyframes ivoFireworkBurst {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
-  10% { opacity: 1; }
-  72% { opacity: 1; }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--fw-dx)), calc(-50% + var(--fw-dy))) scale(.12); }
-}
-@keyframes ivoFireworkCore {
-  0% { opacity: .15; transform: scale(.3); }
-  35% { opacity: 1; transform: scale(1.8); }
-  100% { opacity: 0; transform: scale(.2); }
-}
-'''
-          polish_css_path.write_text(css)
-
-          # Cache bust every changed asset so phones do not keep the previous finale.
           mount = mount_path.read_text().replace('complete-pass-3', 'finale-competition-1')
           mount_path.write_text(mount)
+
           index = index_path.read_text().replace('complete-pass-3', 'finale-competition-1')
+          fireworks_css = '<link rel="stylesheet" href="./ivo-rock-fireworks.css?v=finale-competition-1">'
+          if fireworks_css not in index:
+              marker = '<link rel="stylesheet" href="./ivo-rock-stats.css?v=finale-competition-1">'
+              if marker not in index:
+                  raise SystemExit('stats css marker missing')
+              index = index.replace(marker, marker + '\n  ' + fireworks_css, 1)
           index_path.write_text(index)
 
       - name: Validate JavaScript
@@ -170,6 +73,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/ivo-rock-polish.js salto-cosmico-rock/ivo-rock-polish.css salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
-          git commit -m "Make Ivo Rock finales competitive and add fireworks"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Make Ivo Rock finales competitive"
           git push origin master
