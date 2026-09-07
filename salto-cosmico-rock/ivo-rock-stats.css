@@ -1,0 +1,31 @@
+.ivo-final-stats {
+  width: min(390px, 92%);
+  margin: 13px auto 15px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,225,106,.34);
+  border-radius: 9px;
+  background: rgba(0,0,0,.28);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.ivo-final-stats > strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #ffe16a;
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+.ivo-final-stats > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 3px 0;
+  font-size: 11px;
+}
+.ivo-final-stats span { color: #d8d9dd; }
+.ivo-final-stats b { color: #fff; }
+
+@media (max-height:560px) {
+  .ivo-final-stats { margin: 8px auto 9px; padding: 7px 11px; }
+  .ivo-final-stats > div { padding: 2px 0; font-size: 9px; }
+}
