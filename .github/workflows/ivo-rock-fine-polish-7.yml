@@ -1,0 +1,230 @@
+name: Ivo Rock seven-step fine polish
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-fine-polish-7.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: 1 - Make impacts feel heavier
+        shell: python
+        run: |
+          from pathlib import Path
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          polish=Path('salto-cosmico-rock/ivo-rock-polish.js')
+          cssp=Path('salto-cosmico-rock/ivo-rock-polish.css')
+          s=game.read_text()
+          old='K=Math.max(K,.055),o.current?.sfx(`stomp`),window.__ivoRockStats?.enemy(e.kind))'
+          new='K=Math.max(K,.075),o.current?.sfx(`stomp`),window.__ivoRockPolish?.impact(`enemy`),window.__ivoRockStats?.enemy(e.kind))'
+          if s.count(old)!=1: raise SystemExit(f'enemy impact hook: {s.count(old)}')
+          game.write_text(s.replace(old,new,1))
+
+          p=polish.read_text()
+          if '<div class="ivo-polish-hit"></div>' not in p:
+              p=p.replace('<div class="ivo-polish-flash"></div>','<div class="ivo-polish-flash"></div>\n    <div class="ivo-polish-hit"></div>',1)
+              p=p.replace("  const flash = layer.querySelector('.ivo-polish-flash');","  const flash = layer.querySelector('.ivo-polish-flash');\n  const hit = layer.querySelector('.ivo-polish-hit');",1)
+              marker='  const sparks = (count = 18) => {'
+              helper='''  const microImpact = kind => {\n    if (!hit) return;\n    hit.className = `ivo-polish-hit ${kind || 'enemy'}`;\n    void hit.offsetWidth;\n    hit.classList.add('show');\n    setTimeout(() => hit.classList.remove('show'), kind === 'boss' ? 115 : 80);\n    if (kind !== 'power') navigator.vibrate?.(kind === 'boss' ? 18 : 9);\n  };\n\n'''
+              if marker not in p: raise SystemExit('micro impact marker missing')
+              p=p.replace(marker,helper+marker,1)
+          p=p.replace('    impact(kind) {\n      if (kind === \'smash\') {','    impact(kind) {\n      microImpact(kind);\n      if (kind === \'smash\') {',1)
+          p=p.replace("      } else if (kind === 'boss') {\n        note(40, 0, .09, .035, 'sawtooth', -4);\n        noise(0, .07, .02);\n      }","      } else if (kind === 'boss') {\n        note(40, 0, .09, .035, 'sawtooth', -4);\n        noise(0, .07, .02);\n      } else if (kind === 'enemy') {\n        note(43, 0, .055, .018, 'square', -3);\n        noise(0, .045, .012);\n      }",1)
+          polish.write_text(p)
+
+          css=cssp.read_text()
+          if '.ivo-polish-hit {' not in css:
+              css += '''\n\n/* Micro hit flash: short enough not to hide gameplay. */\n.ivo-polish-hit{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 50% 54%,rgba(255,255,255,.28),transparent 36%);mix-blend-mode:screen}.ivo-polish-hit.show{animation:ivoMicroHit .085s ease-out}.ivo-polish-hit.smash{background:radial-gradient(circle at 50% 55%,rgba(190,139,255,.32),transparent 38%)}.ivo-polish-hit.boss{background:radial-gradient(circle at 50% 52%,rgba(255,80,28,.4),transparent 42%)}.ivo-polish-hit.power{background:radial-gradient(circle at 50% 52%,rgba(104,255,236,.26),transparent 40%)}@keyframes ivoMicroHit{0%{opacity:0}28%{opacity:1}100%{opacity:0}}\n'''
+          cssp.write_text(css)
+        
+      - name: Commit step 1
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/ivo-rock-polish.js salto-cosmico-rock/ivo-rock-polish.css
+          git commit -m "Polish Ivo Rock hit feedback"
+          git push origin master
+
+      - name: 2 - Add readable attack telegraphs
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=game.read_text()
+          m=re.search(r'if\(t\.kind===`amp`\)\{.*?e\.restore\(\);return\}if\(t\.kind===`jumper`\)',s,re.S)
+          if not m: raise SystemExit('amp visual block missing')
+          block=m.group(0)
+          block2=block.replace('t.cooldown<.28','t.cooldown<.42')
+          if block2==block: raise SystemExit('amp telegraph threshold missing')
+          s=s[:m.start()]+block2+s[m.end():]
+          old='if(t.kind===`warden`){e.save();let r=t.health<=3,n=1+Math.sin(T*5)*.025;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n*1.12),r&&'
+          new='if(t.kind===`warden`){e.save();let r=t.health<=3,i=t.cooldown<.32,n=1+Math.sin(T*5)*.025;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n*1.12),i&&(e.globalAlpha=.82,e.strokeStyle=`#fff06b`,e.lineWidth=5,e.beginPath(),e.moveTo(-24,7),e.lineTo(-43,-20),e.moveTo(24,7),e.lineTo(43,-20),e.stroke(),e.shadowColor=`#ffe45a`,e.shadowBlur=34,e.strokeStyle=`rgba(255,239,105,.55)`,e.lineWidth=3,e.beginPath(),e.arc(0,-8,47+Math.sin(T*18)*4,0,Math.PI*2),e.stroke(),e.globalAlpha=1),r&&'
+          if s.count(old)!=1: raise SystemExit(f'boss telegraph prefix: {s.count(old)}')
+          game.write_text(s.replace(old,new,1))
+
+      - name: Commit step 2
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Add enemy attack telegraphs"
+          git push origin master
+
+      - name: 3 - Give the boss a cleaner dramatic arena
+        shell: python
+        run: |
+          from pathlib import Path
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=game.read_text()
+          old='n.x=S(n.x,E.goalX-900,E.goalX-500-n.w)'
+          new='n.x=S(n.x,E.goalX-940,E.goalX-470-n.w)'
+          if s.count(old)!=1: raise SystemExit(f'boss arena clamp: {s.count(old)}')
+          s=s.replace(old,new,1)
+          marker='e.fillRect(0,0,t,720),E.biome===`grove`&&'
+          arena='''e.fillRect(0,0,t,720),E.biome===`citadel`&&J.x>5700&&(e.save(),e.globalAlpha=.2,e.fillStyle=`#190001`,e.fillRect(0,0,t,720),[.18,.5,.82].forEach((n,r)=>{let i=t*n;e.fillStyle=r===1?`rgba(255,112,35,.13)`:`rgba(255,32,24,.11)`,e.beginPath(),e.moveTo(i-24,0),e.lineTo(i-145,624),e.lineTo(i+145,624),e.lineTo(i+24,0),e.closePath(),e.fill()}),e.globalAlpha=.58,e.fillStyle=`#ff642b`,Array.from({length:13},(_,r)=>{let i=(r*137+Math.floor(T*72))%Math.max(1,t),a=565-(r*47+T*31)%210;e.fillRect(i,a,2+r%3,5+r%5)}),e.globalAlpha=.38,e.strokeStyle=`#ff8b3d`,e.lineWidth=3,e.beginPath(),e.moveTo(t*.08,607),e.lineTo(t*.92,607),e.stroke(),e.restore()),E.biome===`grove`&&'''
+          if s.count(marker)!=1: raise SystemExit(f'arena backdrop marker: {s.count(marker)}')
+          game.write_text(s.replace(marker,arena,1))
+
+      - name: Commit step 3
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Upgrade the Diablito boss arena"
+          git push origin master
+
+      - name: 4 - Make powerups instantly readable
+        shell: python
+        run: |
+          from pathlib import Path
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=game.read_text()
+          old='pt=(e,t)=>{if(!$(t))return;if(w(e,C,'
+          aura='''pt=(e,t)=>{if(!$(t))return;let a={seed:`#7effbc`,prism:`#77efff`,comet:`#ffe57a`,life:`#ff7da5`}[t.kind]||`#ffffff`,o=t.x+t.w/2,c=t.y+t.h/2;e.save(),e.translate(o,c),e.globalAlpha=.18+.08*Math.sin(T*6+t.x),e.strokeStyle=a,e.lineWidth=2,e.shadowColor=a,e.shadowBlur=18,e.beginPath(),e.arc(0,0,25+Math.sin(T*4+t.x)*2,0,Math.PI*2),e.stroke(),e.globalAlpha=.12,e.beginPath(),e.arc(0,0,32+Math.sin(T*3+t.x)*3,0,Math.PI*2),e.stroke(),e.restore();if(w(e,C,'''
+          if s.count(old)!=1: raise SystemExit(f'powerup draw marker: {s.count(old)}')
+          game.write_text(s.replace(old,aura,1))
+
+      - name: Commit step 4
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Improve Ivo Rock powerup readability"
+          git push origin master
+
+      - name: 5 - Upgrade the final tour celebration
+        shell: python
+        run: |
+          from pathlib import Path
+          polish=Path('salto-cosmico-rock/ivo-rock-polish.js')
+          cssp=Path('salto-cosmico-rock/ivo-rock-polish.css')
+          p=polish.read_text()
+          if 'ivo-final-stage' not in p:
+              html='''    <div class="ivo-final-stage"><div class="ivo-final-beams"><i></i><i></i><i></i></div><div class="ivo-final-crowd">${'<i></i>'.repeat(18)}</div><div class="ivo-final-riser"><span>⚡</span><b>IVO</b></div><strong>ÚLTIMO BIS</strong><small>GIRA COMPLETA</small></div>\n'''
+              p=p.replace('    <div class="ivo-polish-phase">',html+'    <div class="ivo-polish-phase">',1)
+              p=p.replace("  const phase = layer.querySelector('.ivo-polish-phase');","  const phase = layer.querySelector('.ivo-polish-phase');\n  const finalStage = layer.querySelector('.ivo-final-stage');",1)
+              p=p.replace('      solo(final);','      solo(final);\n      if (final && finalStage) {\n        finalStage.classList.remove(\'show\');\n        requestAnimationFrame(() => finalStage.classList.add(\'show\'));\n        setTimeout(() => finalStage.classList.remove(\'show\'), 3900);\n      }',1)
+          polish.write_text(p)
+          css=cssp.read_text()
+          if '.ivo-final-stage{' not in css:
+              css += '''\n\n/* Short end-of-tour concert scene behind the score card. */\n.ivo-final-stage{position:absolute;inset:0;opacity:0;overflow:hidden;background:linear-gradient(rgba(7,0,8,.25),rgba(18,0,3,.7));transition:opacity .18s ease}.ivo-final-stage.show{opacity:1}.ivo-final-beams i{position:absolute;top:-12%;width:16vw;height:92vh;transform-origin:50% 0;clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);background:rgba(255,62,32,.12);filter:blur(2px);animation:ivoFinalBeam .55s ease-in-out infinite alternate}.ivo-final-beams i:nth-child(1){left:15%;transform:rotate(13deg);background:rgba(255,205,75,.12)}.ivo-final-beams i:nth-child(2){left:42%;transform:rotate(-5deg);background:rgba(255,48,63,.14)}.ivo-final-beams i:nth-child(3){right:15%;transform:rotate(-13deg);background:rgba(100,255,241,.1)}.ivo-final-crowd{position:absolute;left:5%;right:5%;bottom:0;height:25%;display:flex;align-items:flex-end;justify-content:space-around}.ivo-final-crowd i{width:3.3%;max-width:24px;height:42%;border-radius:50% 50% 18% 18%;background:#08080a;box-shadow:0 -8px 0 -3px #08080a;animation:ivoCrowd .28s ease-in-out infinite alternate}.ivo-final-crowd i:nth-child(3n){height:58%;animation-delay:.12s}.ivo-final-crowd i:nth-child(4n){height:48%;animation-delay:.2s}.ivo-final-riser{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);width:112px;height:92px;border:3px solid #73767c;background:#111216;display:grid;place-items:center;box-shadow:0 0 45px rgba(255,65,30,.38)}.ivo-final-riser span{font-size:42px;color:#ffd95b;text-shadow:0 0 18px #ff6b29}.ivo-final-riser b{position:absolute;bottom:7px;color:#fff1c2;font:1000 12px ui-monospace,monospace;letter-spacing:.12em}.ivo-final-stage>strong,.ivo-final-stage>small{position:absolute;left:50%;transform:translateX(-50%);text-align:center;text-shadow:0 3px 18px #000}.ivo-final-stage>strong{top:10%;font:1000 clamp(25px,5vw,56px) ui-monospace,monospace;color:#ffe16b;letter-spacing:.08em}.ivo-final-stage>small{top:18%;font:1000 12px ui-monospace,monospace;color:#8afff4;letter-spacing:.18em}@keyframes ivoFinalBeam{to{filter:brightness(1.5) blur(1px);opacity:.55}}@keyframes ivoCrowd{to{transform:translateY(-8px) rotate(2deg)}}\n'''
+          cssp.write_text(css)
+
+      - name: Commit step 5
+        run: |
+          git add salto-cosmico-rock/ivo-rock-polish.js salto-cosmico-rock/ivo-rock-polish.css
+          git commit -m "Upgrade the end-of-tour celebration"
+          git push origin master
+
+      - name: 6 - Add the Rock Drummer enemy
+        shell: python
+        run: |
+          from pathlib import Path
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=game.read_text()
+          old='Ae=e=>e===`warden`?{w:96,h:100}:e===`amp`?{w:58,h:42}:e===`bat`?{w:50,h:34}:'
+          new='Ae=e=>e===`warden`?{w:96,h:100}:e===`amp`?{w:58,h:42}:e===`drummer`?{w:60,h:56}:e===`bat`?{w:50,h:34}:'
+          if s.count(old)!=1: raise SystemExit(f'drummer size marker: {s.count(old)}')
+          s=s.replace(old,new,1)
+          if '{x:4030,kind:`drummer`' not in s:
+              old2='{x:1780,y:360,kind:`bat`,range:120},{x:5140,kind:`amp`,dir:-1}]'
+              new2='{x:1780,y:360,kind:`bat`,range:120},{x:5140,kind:`amp`,dir:-1},{x:4030,kind:`drummer`,dir:-1}]'
+              if s.count(old2)!=1: raise SystemExit(f'route2 drummer insertion: {s.count(old2)}')
+              s=s.replace(old2,new2,1)
+              old3='{x:1460,y:330,kind:`bat`,range:135},{x:5720,kind:`jumper`,dir:-1}]'
+              new3='{x:1460,y:330,kind:`bat`,range:135},{x:5720,kind:`jumper`,dir:-1},{x:4520,kind:`drummer`,dir:-1}]'
+              if s.count(old3)!=1: raise SystemExit(f'route3 drummer insertion: {s.count(old3)}')
+              s=s.replace(old3,new3,1)
+          marker='n.cooldown=1.85}}else if(n.kind===`sentry`){'
+          drummer='''n.cooldown=1.85}}else if(n.kind===`drummer`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<620){let e=J.x<n.x?-1:1;B.push({x:n.x+n.w/2+e*22,y:n.y+n.h-13,w:34,h:14,vx:e*355,vy:0,life:4.2,active:!0,kind:`floorwave`}),n.cooldown=2.05}}else if(n.kind===`sentry`){'''
+          if s.count(marker)!=1: raise SystemExit(f'drummer behavior marker: {s.count(marker)}')
+          s=s.replace(marker,drummer,1)
+          oldphys='t.vy+=(t.kind===`flare`?440:t.kind===`wave`?0:80)*e'
+          newphys='t.vy+=(t.kind===`flare`?440:t.kind===`wave`||t.kind===`floorwave`?0:80)*e'
+          if s.count(oldphys)!=1: raise SystemExit(f'floorwave physics: {s.count(oldphys)}')
+          s=s.replace(oldphys,newphys,1)
+          oldcol='t.kind!==`wave`&&Me(!1).some(e=>x(t,e))&&(t.active=!1)'
+          newcol='t.kind!==`wave`&&t.kind!==`floorwave`&&Me(!1).some(e=>x(t,e))&&(t.active=!1)'
+          if s.count(oldcol)!=1: raise SystemExit(f'floorwave collision: {s.count(oldcol)}')
+          s=s.replace(oldcol,newcol,1)
+          wave='''t.kind===`wave`?(e.scale(t.vx>=0?1:-1,1),e.shadowColor=`#ff632f`,e.shadowBlur=18,e.strokeStyle=`#ffd55f`,e.lineWidth=3,[6,12,18].forEach(n=>{e.beginPath(),e.arc(-7,0,n,-.95,.95),e.stroke()})):(e.shadowColor=`#ff628e`'''
+          floor='''t.kind===`wave`?(e.scale(t.vx>=0?1:-1,1),e.shadowColor=`#ff632f`,e.shadowBlur=18,e.strokeStyle=`#ffd55f`,e.lineWidth=3,[6,12,18].forEach(n=>{e.beginPath(),e.arc(-7,0,n,-.95,.95),e.stroke()})):t.kind===`floorwave`?(e.scale(t.vx>=0?1:-1,1),e.shadowColor=`#ffcf49`,e.shadowBlur=16,e.strokeStyle=`#ffe778`,e.lineWidth=4,e.beginPath(),e.moveTo(-19,4),e.quadraticCurveTo(-10,-8,0,4),e.quadraticCurveTo(10,16,20,4),e.stroke(),e.strokeStyle=`rgba(255,105,38,.75)`,e.lineWidth=2,e.beginPath(),e.moveTo(-15,9),e.lineTo(15,9),e.stroke()):(e.shadowColor=`#ff628e`'''
+          if s.count(wave)!=1: raise SystemExit(f'floorwave render marker: {s.count(wave)}')
+          s=s.replace(wave,floor,1)
+          sentry='if(t.kind===`sentry`){'
+          drumvis='''if(t.kind===`drummer`){e.save();let n=t.cooldown<.34;e.translate(t.x+t.w/2,t.y+t.h/2),n&&(e.shadowColor=`#ffe66c`,e.shadowBlur=22),e.fillStyle=`#17151a`,e.beginPath(),e.arc(0,-12,12,0,Math.PI*2),e.fill(),e.fillStyle=`#ffcf5b`;for(let r of[-4,4])e.beginPath(),e.arc(r,-14,1.8,0,Math.PI*2),e.fill();e.fillStyle=`#7d1621`,e.beginPath(),e.arc(0,11,17,0,Math.PI*2),e.fill(),e.strokeStyle=`#c6c8cf`,e.lineWidth=3,e.stroke(),e.fillStyle=`#111216`,e.beginPath(),e.arc(0,11,8,0,Math.PI*2),e.fill(),e.fillStyle=`#7d1621`;for(let r of[-19,19])e.beginPath(),e.arc(r,5,9,0,Math.PI*2),e.fill(),e.strokeStyle=`#c6c8cf`,e.stroke();e.strokeStyle=`#e3c58b`,e.lineWidth=3,e.lineCap=`round`,e.beginPath(),n?(e.moveTo(-7,-5),e.lineTo(-22,-30),e.moveTo(7,-5),e.lineTo(22,-30)):(e.moveTo(-7,-5),e.lineTo(-18,3),e.moveTo(7,-5),e.lineTo(18,3)),e.stroke(),e.strokeStyle=`#d7b856`,e.lineWidth=2,e.beginPath(),e.moveTo(-28,-18),e.lineTo(-14,-18),e.moveTo(14,-18),e.lineTo(28,-18),e.stroke(),e.fillStyle=`#d7b856`;for(let r of[-28,28])e.beginPath(),e.ellipse(r,-18,9,3,0,0,Math.PI*2),e.fill();e.restore();return}'''
+          if s.count(sentry)<1: raise SystemExit('sentry visual marker missing')
+          s=s.replace(sentry,drumvis+sentry,1)
+          game.write_text(s)
+
+      - name: Commit step 6
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          git commit -m "Add the Rock Drummer shockwave enemy"
+          git push origin master
+
+      - name: 7 - Audit enemy placement and publish cache-safe build
+        shell: python
+        run: |
+          from pathlib import Path
+          game=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          mount=Path('salto-cosmico-rock/mount.js')
+          index=Path('salto-cosmico-rock/index.html')
+          s=game.read_text()
+          moves=[
+            ('{x:4680,kind:`amp`,dir:-1}','{x:4800,kind:`amp`,dir:-1}','route1 pedal'),
+            ('{x:5140,kind:`amp`,dir:-1}','{x:5200,kind:`amp`,dir:-1}','route2 pedal'),
+            ('{x:5860,kind:`amp`,dir:-1}','{x:5410,kind:`amp`,dir:-1}','route4 pedal'),
+          ]
+          for old,new,label in moves:
+              if s.count(old)!=1: raise SystemExit(f'{label}: {s.count(old)}')
+              s=s.replace(old,new,1)
+          game.write_text(s)
+          m=mount.read_text()
+          if 'boss-pedal-fix-1' not in m: raise SystemExit('mount cache marker missing')
+          mount.write_text(m.replace('boss-pedal-fix-1','fine-polish-7'))
+          h=index.read_text()
+          if 'boss-pedal-fix-1' not in h: raise SystemExit('index cache marker missing')
+          index.write_text(h.replace('boss-pedal-fix-1','fine-polish-7'))
+
+      - name: Validate final JavaScript
+        run: |
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/ivo-rock-polish.js
+          node --check salto-cosmico-rock/mount.js
+          grep -q 'kind===`drummer`' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivo-final-stage' salto-cosmico-rock/ivo-rock-polish.js
+          grep -q 'fine-polish-7' salto-cosmico-rock/mount.js
+
+      - name: Commit step 7
+        run: |
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Audit Ivo Rock enemy placement and publish fine polish"
+          git push origin master
