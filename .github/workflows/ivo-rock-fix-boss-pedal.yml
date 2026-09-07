@@ -1,0 +1,100 @@
+name: Ivo Rock boss arena and cursed pedal fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-fix-boss-pedal.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Patch boss arena and cursed pedal enemy
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game_path = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          mount_path = Path('salto-cosmico-rock/mount.js')
+          index_path = Path('salto-cosmico-rock/index.html')
+          s = game_path.read_text()
+
+          def one(old, new, label):
+              global s
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              s = s.replace(old, new, 1)
+
+          def subone(pattern, repl, label):
+              global s
+              s2, count = re.subn(pattern, repl, s, count=1, flags=re.S)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 regex match, got {count}')
+              s = s2
+
+          # Make the final devil a little taller, while keeping him readable on mobile.
+          subone(
+              r"Ae=e=>e===`warden`\?\{w:\d+,h:\d+\}:e===`amp`\?\{w:\d+,h:\d+\}:",
+              "Ae=e=>e===`warden`?{w:96,h:100}:e===`amp`?{w:58,h:42}:",
+              'boss and pedal sizes'
+          )
+
+          # The finish staircase now starts near x=6528. Keep the boss in a clean arena before it,
+          # instead of clamping him inside the amplifier steps.
+          one('{x:6580,kind:`warden`,dir:-1}', '{x:6290,kind:`warden`,dir:-1}', 'boss spawn')
+          one('{x:6120,kind:`amp`,dir:-1}', '{x:5860,kind:`amp`,dir:-1}', 'route 4 pedal spacing')
+          one('n.x=S(n.x,E.goalX-540,E.goalX-180-n.w)', 'n.x=S(n.x,E.goalX-900,E.goalX-500-n.w)', 'boss arena clamp')
+
+          # Higher jumps in both phases, especially once the devil is on fire.
+          one('n.vy=r?-500:-420', 'n.vy=r?-610:-500', 'boss jump height')
+
+          # Stretch the devil drawing vertically so the visual matches the taller hitbox.
+          one('e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n),r&&', 'e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n*1.12),r&&', 'boss visual height')
+
+          # The sound-wave enemy should remain dangerous even when scenery/amplifiers are in front.
+          # Sonic waves pass through level geometry, but still expire normally and still hit Ivo.
+          subone(
+              r"Me\(!1\)\.some\(e=>x\(t,e\)\)&&\(t\.active=!1\)",
+              "t.kind!==`wave`&&Me(!1).some(e=>x(t,e))&&(t.active=!1)",
+              'wave obstacle penetration'
+          )
+          one('else if(n.kind===`amp`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<560)', 'else if(n.kind===`amp`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<640)', 'pedal attack range')
+
+          # Replace the unclear blue cube with a clearly rock-themed cursed distortion pedal.
+          pedal = r'''if(t.kind===`amp`){e.save();let n=t.cooldown<.28?1.08:1,r=J.x<t.x?-1:1;e.translate(t.x+t.w/2,t.y+t.h/2),e.rotate(Math.sin(T*18+t.id)*.035*(t.cooldown<.28?1:0)),e.scale(n,1/n),e.shadowColor=t.cooldown<.28?`#ff4d24`:`#ffb33f`,e.shadowBlur=t.cooldown<.28?20:8,e.fillStyle=`#171217`,e.beginPath(),e.moveTo(-29,-13),e.lineTo(24,-17),e.lineTo(29,17),e.lineTo(-26,20),e.closePath(),e.fill(),e.strokeStyle=`#8b7074`,e.lineWidth=3,e.stroke(),e.fillStyle=`#310b10`,Q(e,-21,-9,38,20,4),e.fill(),e.fillStyle=`#ffca4f`;for(let a of[-13,0,13])e.beginPath(),e.arc(a,-4,3.2,0,Math.PI*2),e.fill();e.fillStyle=t.cooldown<.28?`#fff36f`:`#df332d`,e.beginPath(),e.arc(15,10,5,0,Math.PI*2),e.fill(),e.fillStyle=`#c9c9cf`,e.beginPath(),e.arc(-13,11,6,0,Math.PI*2),e.fill(),e.fillStyle=`#26262b`,e.beginPath(),e.arc(-13,11,2.6,0,Math.PI*2),e.fill(),e.fillStyle=`#ff6938`,e.font=`1000 8px ui-monospace,monospace`,e.textAlign=`center`,e.fillText(`RIFF`,0,7),e.strokeStyle=`#ffd55d`,e.lineWidth=2,e.beginPath(),e.moveTo(r*20,-1),e.lineTo(r*29,-5),e.stroke(),e.restore();return}if(t.kind===`jumper`)'''
+          subone(r"if\(t\.kind===`amp`\)\{e\.save\(\);let n=t\.cooldown<\.28\?1\.08:1;.*?e\.restore\(\);return\}if\(t\.kind===`jumper`\)", pedal, 'cursed pedal visual')
+
+          # Warm up the sonic-wave palette so it reads as a rock/distortion attack, not a blue UI effect.
+          one('e.shadowColor=`#74fff0`,e.shadowBlur=16,e.strokeStyle=`#8afff4`', 'e.shadowColor=`#ff632f`,e.shadowBlur=18,e.strokeStyle=`#ffd55f`', 'wave visual palette')
+
+          game_path.write_text(s)
+
+          mount = mount_path.read_text()
+          mount = mount.replace('finale-competition-1', 'boss-pedal-fix-1')
+          mount_path.write_text(mount)
+
+          index = index_path.read_text()
+          index = index.replace('finale-competition-1', 'boss-pedal-fix-1')
+          index_path.write_text(index)
+
+      - name: Validate JavaScript
+        run: |
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+
+      - name: Commit and publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Fix Ivo Rock boss arena and cursed pedal enemy"
+          git push origin master
