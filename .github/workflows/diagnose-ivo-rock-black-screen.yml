@@ -12,6 +12,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: master
+          fetch-depth: 20
+      - name: Trace gt references
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s=p.read_text()
+          hits=list(re.finditer(r'\bgt\b',s))
+          print('gt exact-word hits:',len(hits))
+          for k,m in enumerate(hits):
+              a=max(0,m.start()-500); b=min(len(s),m.end()+700)
+              print(f'\n--- GT HIT {k+1} @ {m.start()} ---\n{s[a:b]}')
+          for needle in ['gt=', 'let gt', 'const gt', ',gt=', 'gt=>']:
+              print(needle, s.find(needle))
       - name: Start local server and run browser smoke test
         shell: bash
         run: |
@@ -20,14 +35,6 @@ jobs:
           sleep 2
           CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
           echo "CHROME=$CHROME"
-          if [ -z "$CHROME" ]; then
-            echo "No Chrome/Chromium available"
-            exit 1
-          fi
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --v=1 --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?v=diag' >/tmp/dom.txt 2>/tmp/chrome.log || true
-          echo '--- CHROME ERRORS ---'
-          grep -Ei 'Uncaught|ReferenceError|TypeError|SyntaxError|error' /tmp/chrome.log | tail -120 || true
-          echo '--- DOM TAIL ---'
-          tail -80 /tmp/dom.txt || true
-          echo '--- HTTP LOG ---'
-          cat /tmp/ivo-http.log || true
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --v=1 --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?v=diag2' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          echo '--- CHROME JS ERRORS ---'
+          grep -Ei 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log | tail -80 || true
