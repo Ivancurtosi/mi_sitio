@@ -95,5 +95,5 @@
       window.__ivoRockStats.route(route);
     }
     renderFinal();
-  }, 300);
+  }, 800);
 })();

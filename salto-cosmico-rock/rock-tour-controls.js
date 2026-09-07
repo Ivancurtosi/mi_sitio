@@ -194,7 +194,13 @@
     sendControl('jump', false);
   };
   const install = () => { installAnalog(); installRunSlide(); installSafeFullscreen(); };
-  new MutationObserver(install).observe(document.documentElement, { childList: true, subtree: true });
+  let installQueued = false;
+  const queueInstall = () => {
+    if (installQueued) return;
+    installQueued = true;
+    requestAnimationFrame(() => { installQueued = false; install(); });
+  };
+  new MutationObserver(queueInstall).observe(document.documentElement, { childList: true, subtree: true });
   install();
   window.addEventListener('blur', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });

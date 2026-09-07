@@ -173,7 +173,7 @@
   }
 
   setInterval(() => {
-    if (!state.started) return;
+    if (!state.started || state.mode !== 2) return;
     const { lives, stage } = readHud();
     if (state.lastLives == null && lives != null) state.lastLives = lives;
     if (state.lastStage == null && stage != null) state.lastStage = stage;
@@ -190,7 +190,7 @@
 
     if (lives != null) state.lastLives = lives;
     if (stage != null) state.lastStage = stage;
-  }, 120);
+  }, 200);
 
   function startGame(mode) {
     if (state.starting) return;
