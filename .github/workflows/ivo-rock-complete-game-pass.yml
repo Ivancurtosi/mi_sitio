@@ -1,0 +1,583 @@
+name: Complete Ivo Rock gameplay pass
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-complete-game-pass.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Apply full gameplay pass
+        shell: python
+        run: |
+          from pathlib import Path
+
+          game_path = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          menu_path = Path('salto-cosmico-rock/ivo-rock-start-menu.js')
+          menu_css_path = Path('salto-cosmico-rock/ivo-rock-start-menu.css')
+          polish_path = Path('salto-cosmico-rock/ivo-rock-polish.js')
+          polish_css_path = Path('salto-cosmico-rock/ivo-rock-polish.css')
+          stats_path = Path('salto-cosmico-rock/ivo-rock-stats.js')
+          stats_css_path = Path('salto-cosmico-rock/ivo-rock-stats.css')
+          mount_path = Path('salto-cosmico-rock/mount.js')
+          index_path = Path('salto-cosmico-rock/index.html')
+
+          s = game_path.read_text()
+
+          def one(old, new, label):
+              global s
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              s = s.replace(old, new, 1)
+
+          # 1) Difficulty progression: Route 1 a touch friendlier, Routes 3/4 sharper.
+          one(
+              'o=e.kind===`crawler`?72:e.kind===`beetle`?82:e.kind===`spike`?68:e.kind===`jumper`?94:0;return',
+              'o=(e.kind===`crawler`?72:e.kind===`beetle`?82:e.kind===`spike`?68:e.kind===`jumper`?94:0)*([0,.88,1,1.08,1.15][E.id]||1);return',
+              'enemy speed progression'
+          )
+          one(
+              'cooldown:.7+t%4*.22,phase2:!1,health:e.kind===`warden`?6:1',
+              'cooldown:(.7+t%4*.22)*([0,1.14,1.02,.94,.86][E.id]||1),phase2:!1,health:e.kind===`warden`?6:1',
+              'enemy attack cadence progression'
+          )
+          one('checkpoints:[3456],goalX:7536', 'checkpoints:[3456,5568],goalX:7536', 'route 2 extra checkpoint')
+          one('checkpoints:[3456],goalX:7488', 'checkpoints:[3456,5136],goalX:7488', 'route 3 extra checkpoint')
+
+          # 2) Enemy animation/readability polish.
+          one(
+              'if(t.kind===`amp`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.shadowColor=`#5dfff0`',
+              'if(t.kind===`amp`){e.save();let n=t.cooldown<.28?1.08:1;e.translate(t.x+t.w/2,t.y+t.h/2),e.rotate(Math.sin(T*18+t.id)*.04*(t.cooldown<.28?1:0)),e.scale(n,1/n),e.shadowColor=`#5dfff0`',
+              'amplifier anticipation animation'
+          )
+          one(
+              'if(t.kind===`jumper`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#5d1525`',
+              'if(t.kind===`jumper`){e.save();let n=t.grounded?1:Math.max(.82,1-Math.abs(t.vy)/1800);e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(1+(1-n)*.5,n),e.fillStyle=`#5d1525`',
+              'jumper squash stretch'
+          )
+          one(
+              'if(t.kind===`sentry`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#5c4b8f`',
+              'if(t.kind===`sentry`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.rotate(Math.sin(T*3+t.id)*.06),e.fillStyle=`#5c4b8f`',
+              'sentry idle animation'
+          )
+          one(
+              'if(ut(e,3,n,t.x+t.w/2,t.y-Math.max(0,r-t.h),r,i)||(',
+              'if(ut(e,3,n,t.x+t.w/2,t.y-Math.max(0,r-t.h)+Math.sin(T*8+t.id)*1.5,r,i)||(',
+              'base enemy walk bob'
+          )
+
+          # 3) One golden secret pick in each route.
+          one('goalX:7824,reachChecks:', 'goalX:7824,goldenPick:{x:7448,y:292},reachChecks:', 'route 1 golden pick')
+          one('goalX:7536,reachChecks:', 'goalX:7536,goldenPick:{x:6910,y:286},reachChecks:', 'route 2 golden pick')
+          one('goalX:7488,reachChecks:', 'goalX:7488,goldenPick:{x:6360,y:236},reachChecks:', 'route 3 golden pick')
+          one('goalX:7008,reachChecks:', 'goalX:7008,goldenPick:{x:5928,y:236},reachChecks:', 'route 4 golden pick')
+
+          marker = 'Te=!1,goalBonus=0,goalTier=0,q='
+          if s.count(marker) != 2:
+              raise SystemExit(f'golden state reset: expected 2 matches, got {s.count(marker)}')
+          s = s.replace(marker, 'Te=!1,goalBonus=0,goalTier=0,goldenTaken=!1,q=', 2)
+
+          one(
+              'E.shards.forEach(([e,t],n)=>{xe.has(n)||x(J,{x:e-12,y:t-16,w:24,h:32})&&(xe.add(n),Re(e,t))});for(let[e,t]of E.checkpoints.entries())',
+              'E.shards.forEach(([e,t],n)=>{xe.has(n)||x(J,{x:e-12,y:t-16,w:24,h:32})&&(xe.add(n),Re(e,t))});E.goldenPick&&!goldenTaken&&x(J,{x:E.goldenPick.x-18,y:E.goldenPick.y-22,w:36,h:44})&&(goldenTaken=!0,X(3e3),Z(E.goldenPick.x,E.goldenPick.y,`#ffd84a`,34,`spark`),Y(`PÚA DORADA`,`SECRETO ENCONTRADO · +3000`,1.8),o.current?.sfx(`life`),window.__ivoRockStats?.secret(E.id));for(let[e,t]of E.checkpoints.entries())',
+              'golden pick collection'
+          )
+          one(
+              'E.shards.forEach(([n,r],i)=>{!xe.has(i)&&n>=D-40&&n<=D+t+40&&mt(e,n,r)}),R.forEach',
+              'E.shards.forEach(([n,r],i)=>{!xe.has(i)&&n>=D-40&&n<=D+t+40&&mt(e,n,r)}),E.goldenPick&&!goldenTaken&&E.goldenPick.x>=D-50&&E.goldenPick.x<=D+t+50&&(e.save(),e.translate(E.goldenPick.x,E.goldenPick.y),e.rotate(Math.sin(T*3)*.18),e.shadowColor=`#ffd84a`,e.shadowBlur=24,e.fillStyle=`#ffd84a`,e.beginPath(),e.moveTo(0,-22),e.lineTo(15,0),e.lineTo(0,22),e.lineTo(-15,0),e.closePath(),e.fill(),e.fillStyle=`#fff4a8`,e.font=`1000 13px ui-monospace,monospace`,e.textAlign=`center`,e.fillText(`★`,0,5),e.restore()),R.forEach',
+              'golden pick drawing'
+          )
+
+          # Stats hooks for shards and defeated enemies.
+          one('o.current?.sfx(`shard`),N>=100', 'o.current?.sfx(`shard`),window.__ivoRockStats?.shard(),N>=100', 'shard stats hook')
+          one('K=Math.max(K,.055),o.current?.sfx(`stomp`))},Qe=', 'K=Math.max(K,.055),o.current?.sfx(`stomp`),window.__ivoRockStats?.enemy(e.kind))},Qe=', 'enemy stats hook')
+
+          # 4/7/8) Cleaner transition data, proper height/time split, save/continue hooks.
+          one(
+              'window.__ivoRockPolish?.goal(ve===_.length-1,Math.max(0,Math.ceil(O))*10+goalBonus,goalBonus)',
+              'window.__ivoRockPolish?.goal(ve===_.length-1,Math.max(0,Math.ceil(O))*10,goalBonus,ve===_.length-1?``:_[ve+1]?.name||``)',
+              'goal celebration payload'
+          )
+
+          one(
+              's.current={resetCampaign:()=>{be=0,A=3,N=0,P=`small`,fe(0),de(3),ue(0),g(`small`),Ie(0,!1)}}',
+              'window.__rockSetLives=e=>{let t=Math.max(0,Math.floor(Number(e)||0));A=t,de(A)},s.current={resetCampaign:()=>{let e=Math.max(0,Math.min(_.length-1,Math.floor(Number(window.__ivoContinueLevel)||0))),t=Math.max(1,Math.floor(Number(window.__ivoStartingLives)||3));be=0,A=t,N=0,P=`small`,fe(0),de(t),ue(0),g(`small`),Ie(e,!1)}}',
+              'continue and lives bridge'
+          )
+
+          # Route hook lets stats/save layer keep exact progress.
+          one(
+              'j(),o.current?.startMusic(E.biome,!1)};s.current=',
+              'j(),o.current?.startMusic(E.biome,!1),window.__ivoRockStats?.route(E.id)};s.current=',
+              'route stats hook'
+          )
+
+          game_path.write_text(s)
+
+          # 4) Upgrade celebration/transition copy without changing core visual identity.
+          p = polish_path.read_text()
+          p = p.replace(
+              '<em class="ivo-polish-total">TIEMPO +0000 · TOTAL +0000</em>',
+              '<em class="ivo-polish-total">TIEMPO +0000 · TOTAL +0000</em><span class="ivo-polish-next"></span>',
+              1
+          )
+          p = p.replace(
+              "const celebrationTotal = celebration.querySelector('.ivo-polish-total');\n  const phase =",
+              "const celebrationTotal = celebration.querySelector('.ivo-polish-total');\n  const celebrationNext = celebration.querySelector('.ivo-polish-next');\n  const phase =",
+              1
+          )
+          p = p.replace(
+              'goal(final = false, timeBonus = 0, heightBonus = 0) {',
+              "goal(final = false, timeBonus = 0, heightBonus = 0, nextName = '') {",
+              1
+          )
+          p = p.replace(
+              "celebrationTotal.textContent = `TIEMPO +${Math.max(0, Math.round(timeBonus)).toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;",
+              "celebrationTotal.textContent = `TIEMPO +${Math.max(0, Math.round(timeBonus)).toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;\n      celebrationNext.textContent = final ? 'FIN DE LA GIRA' : (nextName ? `PRÓXIMA PARADA · ${String(nextName).toUpperCase()}` : '');\n      window.__ivoRockStats?.goal(heightBonus, timeBonus, final);",
+              1
+          )
+          polish_path.write_text(p)
+
+          css = polish_css_path.read_text()
+          extra_polish_css = r'''
+
+.ivo-polish-next {
+  display: block;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.14);
+  font: 1000 11px/1.15 ui-monospace, monospace;
+  letter-spacing: .11em;
+  color: #ffd86a;
+  opacity: .92;
+}
+'''
+          if '.ivo-polish-next {' not in css:
+              css += extra_polish_css
+          polish_css_path.write_text(css)
+
+          # 5/8) Simple menu stays simple, now with real separate lives and CONTINUAR.
+          menu_path.write_text(r'''(() => {
+  if (window.__ivoRockMenuInstalled) return;
+  window.__ivoRockMenuInstalled = true;
+
+  const SAVE_KEY = 'ivo-rock-progress-v3';
+  const readSave = () => {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch { return {}; }
+  };
+  const saved = readSave();
+  const state = {
+    mode: Number(saved.mode) === 2 ? 2 : 1,
+    activePlayer: 1,
+    started: false,
+    starting: false,
+    lastLives: null,
+    lastStage: null,
+    switchTimer: 0,
+    maxUnlocked: Math.max(1, Math.min(4, Number(saved.maxUnlocked) || 1)),
+    playerLives: {
+      1: Math.max(0, Number(saved.p1Lives) || 3),
+      2: Math.max(0, Number(saved.p2Lives) || 3)
+    }
+  };
+
+  const players = { 1: { name: 'IVO' }, 2: { name: 'VOLT' } };
+  window.__ivoGameMode = state.mode;
+  window.__ivoActivePlayer = 1;
+
+  const persist = () => {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        mode: state.mode,
+        maxUnlocked: state.maxUnlocked,
+        p1Lives: state.playerLives[1],
+        p2Lives: state.playerLives[2]
+      }));
+    } catch {}
+  };
+
+  const proto = window.CanvasRenderingContext2D?.prototype;
+  if (proto && !proto.__ivoRockDrawImagePatched) {
+    const nativeDrawImage = proto.drawImage;
+    Object.defineProperty(proto, '__ivoRockDrawImagePatched', { value: true });
+    proto.drawImage = function (...args) {
+      const image = args[0];
+      const src = image && typeof image.src === 'string' ? image.src : '';
+      const isHero = src.includes('rock-hero.webp');
+      if (!isHero || window.__ivoActivePlayer !== 2) return nativeDrawImage.apply(this, args);
+      this.save();
+      try {
+        if ('filter' in this) this.filter = 'hue-rotate(155deg) saturate(1.55) contrast(1.08) brightness(.95)';
+        nativeDrawImage.apply(this, args);
+        if (args.length >= 9) {
+          const dx = Number(args[5]), dy = Number(args[6]), dw = Number(args[7]), dh = Number(args[8]);
+          if ([dx, dy, dw, dh].every(Number.isFinite)) {
+            this.filter = 'none';
+            this.shadowColor = '#65f7ff';
+            this.shadowBlur = 7;
+            this.fillStyle = '#65f7ff';
+            this.beginPath();
+            this.moveTo(dx + dw * .40, dy + dh * .15);
+            this.lineTo(dx + dw * .50, dy - dh * .035);
+            this.lineTo(dx + dw * .60, dy + dh * .15);
+            this.closePath();
+            this.fill();
+            this.shadowBlur = 0;
+          }
+        }
+      } finally { this.restore(); }
+    };
+  }
+
+  const menu = document.createElement('div');
+  menu.className = 'ivo-start-menu';
+  menu.innerHTML = `
+    <div class="ivo-menu-stage" role="dialog" aria-modal="true" aria-label="Menú principal de Ivo Rock">
+      <h1 class="ivo-menu-title">IVO ROCK</h1>
+      <div class="ivo-menu-options" role="group" aria-label="Modo de juego">
+        <button type="button" class="ivo-menu-choice selected" data-mode="1"><span>▶</span> 1 PLAYER</button>
+        <button type="button" class="ivo-menu-choice" data-mode="2"><span>▶</span> 2 PLAYERS</button>
+        ${state.maxUnlocked > 1 ? `<button type="button" class="ivo-menu-choice ivo-menu-continue" data-continue="1"><span>▶</span> CONTINUAR · RUTA ${state.maxUnlocked}</button>` : ''}
+      </div>
+      <button type="button" class="ivo-menu-fullscreen" aria-label="Pantalla completa">⛶ PANTALLA COMPLETA</button>
+    </div>`;
+  document.body.appendChild(menu);
+
+  const choices = [...menu.querySelectorAll('.ivo-menu-choice')];
+  const fullscreenButton = menu.querySelector('.ivo-menu-fullscreen');
+
+  function startMenuMusic() { try { window.__rockPlaylist?.play('boss'); } catch {} }
+  startMenuMusic();
+  const firstGesture = () => {
+    startMenuMusic();
+    menu.removeEventListener('pointerdown', firstGesture, true);
+    menu.removeEventListener('touchstart', firstGesture, true);
+  };
+  menu.addEventListener('pointerdown', firstGesture, true);
+  menu.addEventListener('touchstart', firstGesture, { capture: true, passive: true });
+
+  async function requestFullscreen() {
+    startMenuMusic();
+    const el = document.documentElement;
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) return;
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+    } catch {}
+  }
+  fullscreenButton.addEventListener('click', e => { e.preventDefault(); requestFullscreen(); });
+
+  function ensureHudTag() {
+    let tag = document.querySelector('.ivo-player-turn-tag');
+    if (!tag) {
+      tag = document.createElement('div');
+      tag.className = 'ivo-player-turn-tag';
+      document.body.appendChild(tag);
+    }
+    return tag;
+  }
+
+  function renderHudTag() {
+    const tag = ensureHudTag();
+    if (state.mode !== 2 || !state.started) { tag.hidden = true; return; }
+    tag.hidden = false;
+    tag.dataset.player = String(state.activePlayer);
+    tag.innerHTML = `<span class="${state.activePlayer === 1 ? 'active' : ''}">P1 IVO ×${state.playerLives[1]}</span><i>·</i><span class="${state.activePlayer === 2 ? 'active' : ''}">P2 VOLT ×${state.playerLives[2]}</span>`;
+  }
+
+  function announcePlayer(player) {
+    if (state.mode !== 2 || !state.started) return;
+    let banner = document.querySelector('.ivo-turn-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.className = 'ivo-turn-banner';
+      document.body.appendChild(banner);
+    }
+    banner.innerHTML = `<small>TURNO DE</small><strong>${players[player].name}</strong>`;
+    banner.classList.remove('show');
+    requestAnimationFrame(() => banner.classList.add('show'));
+    setTimeout(() => banner.classList.remove('show'), 900);
+  }
+
+  function syncEngineLives() {
+    if (state.mode === 2) window.__rockSetLives?.(state.playerLives[state.activePlayer]);
+  }
+
+  function setActivePlayer(player, announce = false) {
+    state.activePlayer = player;
+    window.__ivoActivePlayer = player;
+    document.documentElement.dataset.ivoPlayer = String(player);
+    renderHudTag();
+    requestAnimationFrame(syncEngineLives);
+    if (announce) announcePlayer(player);
+    persist();
+  }
+
+  function switchPlayer(delay = 0) {
+    if (state.mode !== 2 || !state.started) return;
+    clearTimeout(state.switchTimer);
+    state.switchTimer = setTimeout(() => {
+      const other = state.activePlayer === 1 ? 2 : 1;
+      if (state.playerLives[other] > 0) setActivePlayer(other, true);
+      else if (state.playerLives[state.activePlayer] > 0) setActivePlayer(state.activePlayer, true);
+    }, delay);
+  }
+
+  function readHud() {
+    const livesItem = [...document.querySelectorAll('.hud-item')].find(el => el.querySelector('span')?.textContent?.trim() === 'VIDAS');
+    const lives = Number(((livesItem?.querySelector('b')?.textContent || '').match(/\d+/) || [])[0]);
+    const stage = Number(((document.querySelector('.hud-stage b')?.textContent || '').match(/\d+/) || [])[0]);
+    return { lives: Number.isFinite(lives) ? lives : null, stage: Number.isFinite(stage) ? stage : null };
+  }
+
+  setInterval(() => {
+    if (!state.started) return;
+    const { lives, stage } = readHud();
+    if (state.lastLives == null && lives != null) state.lastLives = lives;
+    if (state.lastStage == null && stage != null) state.lastStage = stage;
+
+    if (stage != null) {
+      state.maxUnlocked = Math.max(state.maxUnlocked, Math.min(4, stage));
+      if (state.lastStage != null && stage > state.lastStage) {
+        state.maxUnlocked = Math.max(state.maxUnlocked, stage);
+        persist();
+        if (state.mode === 2) switchPlayer(180);
+      }
+    }
+
+    if (state.mode === 2 && lives != null && state.lastLives != null && lives < state.lastLives) {
+      state.playerLives[state.activePlayer] = Math.max(0, lives);
+      renderHudTag();
+      persist();
+      const other = state.activePlayer === 1 ? 2 : 1;
+      if (state.playerLives[other] > 0) switchPlayer(720);
+    }
+
+    if (lives != null) state.lastLives = lives;
+    if (stage != null) state.lastStage = stage;
+  }, 120);
+
+  function startGame(mode, continueRun = false) {
+    if (state.starting) return;
+    state.starting = true;
+    state.mode = mode;
+    window.__ivoGameMode = mode;
+
+    if (!continueRun) {
+      state.playerLives = { 1: 3, 2: 3 };
+      window.__ivoContinueLevel = 0;
+      window.__ivoRockStats?.reset();
+    } else {
+      state.playerLives[1] = Math.max(1, state.playerLives[1] || 3);
+      state.playerLives[2] = Math.max(1, state.playerLives[2] || 3);
+      window.__ivoContinueLevel = Math.max(0, state.maxUnlocked - 1);
+    }
+
+    window.__ivoStartingLives = state.playerLives[1];
+    setActivePlayer(1, false);
+    startMenuMusic();
+    choices.forEach(btn => btn.classList.toggle('selected', btn.dataset.continue === '1' ? continueRun : Number(btn.dataset.mode) === mode));
+    menu.classList.add('starting');
+    persist();
+
+    setTimeout(() => {
+      const playButton = [...document.querySelectorAll('.play-btn')].find(btn => /arrancar la gira/i.test(btn.textContent || ''));
+      menu.remove();
+      state.started = true;
+      const hud = readHud();
+      state.lastLives = hud.lives;
+      state.lastStage = hud.stage;
+      renderHudTag();
+      if (mode === 2) announcePlayer(1);
+      playButton?.click();
+    }, 420);
+  }
+
+  choices.forEach(button => {
+    button.addEventListener('pointerenter', () => {
+      choices.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+      startMenuMusic();
+    });
+    button.addEventListener('click', e => {
+      e.preventDefault();
+      if (button.dataset.continue === '1') startGame(state.mode, true);
+      else startGame(Number(button.dataset.mode), false);
+    });
+  });
+
+  let keyboardIndex = 0;
+  window.addEventListener('keydown', e => {
+    if (!document.body.contains(menu) || state.starting) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      keyboardIndex = (keyboardIndex + (e.key === 'ArrowDown' ? 1 : -1) + choices.length) % choices.length;
+      choices.forEach((btn, i) => btn.classList.toggle('selected', i === keyboardIndex));
+      startMenuMusic();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      choices[keyboardIndex]?.click();
+    }
+  });
+})();
+''')
+
+          menu_css = menu_css_path.read_text()
+          extra_menu_css = r'''
+
+.ivo-menu-continue { color: #ffe16a; }
+.ivo-player-turn-tag {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  white-space: nowrap;
+}
+.ivo-player-turn-tag span { opacity: .52; transition: opacity .14s ease, color .14s ease; }
+.ivo-player-turn-tag span.active { opacity: 1; color: #ffe16a; text-shadow: 0 0 9px rgba(255,209,70,.55); }
+.ivo-player-turn-tag[data-player="2"] span.active { color: #7ffff5; text-shadow: 0 0 9px rgba(92,245,255,.55); }
+.ivo-player-turn-tag i { opacity: .35; font-style: normal; }
+'''
+          if '.ivo-menu-continue {' not in menu_css:
+              menu_css += extra_menu_css
+          menu_css_path.write_text(menu_css)
+
+          # 7/8) Campaign stats, final screen and persistence across CONTINUAR.
+          stats_path.write_text(r'''(() => {
+  if (window.__ivoRockStats) return;
+  const KEY = 'ivo-rock-campaign-stats-v2';
+  const fresh = () => ({ shards: 0, enemies: 0, secrets: [], bestHeight: 0, routes: 0, totalTime: 0, routeStarted: performance.now(), currentRoute: 1 });
+  const load = () => {
+    try { return { ...fresh(), ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch { return fresh(); }
+  };
+  let stats = load();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(stats)); } catch {} };
+
+  function renderFinal() {
+    const panels = [...document.querySelectorAll('.overlay .panel')];
+    const panel = panels.find(p => /lo\s*lograste/i.test(p.textContent || '') || /gira completa/i.test(p.textContent || ''));
+    if (!panel || panel.querySelector('.ivo-final-stats')) return;
+    const box = document.createElement('div');
+    box.className = 'ivo-final-stats';
+    box.innerHTML = `
+      <strong>RESUMEN DE LA GIRA</strong>
+      <div><span>PÚAS</span><b>${stats.shards}</b></div>
+      <div><span>ENEMIGOS</span><b>${stats.enemies}</b></div>
+      <div><span>PÚAS DORADAS</span><b>${stats.secrets.length}/4</b></div>
+      <div><span>MEJOR ALTURA</span><b>+${stats.bestHeight}</b></div>
+      <div><span>TIEMPO DE GIRA</span><b>${Math.max(1, Math.round(stats.totalTime))} s</b></div>`;
+    const play = panel.querySelector('.play-btn');
+    if (play) panel.insertBefore(box, play); else panel.appendChild(box);
+  }
+
+  window.__ivoRockStats = {
+    reset() { stats = fresh(); save(); },
+    shard() { stats.shards += 1; save(); },
+    enemy() { stats.enemies += 1; save(); },
+    secret(level) {
+      const id = Number(level) || 0;
+      if (!stats.secrets.includes(id)) stats.secrets.push(id);
+      save();
+    },
+    route(level) {
+      const now = performance.now();
+      if (stats.currentRoute && stats.routeStarted && stats.currentRoute !== Number(level)) {
+        stats.totalTime += Math.max(0, (now - stats.routeStarted) / 1000);
+      }
+      stats.currentRoute = Number(level) || 1;
+      stats.routeStarted = now;
+      save();
+    },
+    goal(heightBonus = 0, timeBonus = 0, final = false) {
+      stats.bestHeight = Math.max(stats.bestHeight, Number(heightBonus) || 0);
+      stats.routes = Math.min(4, stats.routes + 1);
+      const now = performance.now();
+      if (stats.routeStarted) stats.totalTime += Math.max(0, (now - stats.routeStarted) / 1000);
+      stats.routeStarted = now;
+      save();
+      if (final) setTimeout(renderFinal, 3800);
+    }
+  };
+  setInterval(renderFinal, 500);
+})();
+''')
+
+          stats_css_path.write_text(r'''.ivo-final-stats {
+  width: min(390px, 92%);
+  margin: 13px auto 15px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,225,106,.34);
+  border-radius: 9px;
+  background: rgba(0,0,0,.28);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.ivo-final-stats > strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #ffe16a;
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+.ivo-final-stats > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 3px 0;
+  font-size: 11px;
+}
+.ivo-final-stats span { color: #d8d9dd; }
+.ivo-final-stats b { color: #fff; }
+@media (max-height:560px) {
+  .ivo-final-stats { margin: 8px auto 9px; padding: 7px 11px; }
+  .ivo-final-stats > div { padding: 2px 0; font-size: 9px; }
+}
+''')
+
+          # Cache bust + load helpers.
+          mount = mount_path.read_text()
+          mount = mount.replace("./assets/cosmic-jump-DkePWGqE.js?v=rock-finale-3", "./assets/cosmic-jump-DkePWGqE.js?v=complete-pass-1")
+          mount = mount.replace("./ivo-rock-polish.js?v=rock-finale-3", "./ivo-rock-polish.js?v=complete-pass-1")
+          mount = mount.replace("./ivo-rock-start-menu.js?v=simple-menu-1", "./ivo-rock-start-menu.js?v=complete-pass-1")
+          if "./ivo-rock-stats.js?v=complete-pass-1" not in mount:
+              marker = "await import('./ivo-rock-start-menu.js?v=complete-pass-1');"
+              if marker not in mount:
+                  raise SystemExit('start menu import marker not found')
+              mount = mount.replace(marker, "await import('./ivo-rock-stats.js?v=complete-pass-1');\n" + marker, 1)
+          mount_path.write_text(mount)
+
+          index = index_path.read_text()
+          index = index.replace("./ivo-rock-start-menu.css?v=simple-menu-1", "./ivo-rock-start-menu.css?v=complete-pass-1")
+          index = index.replace("./ivo-rock-polish.css?v=rock-finale-3", "./ivo-rock-polish.css?v=complete-pass-1")
+          index = index.replace("./mount.js?v=rock-finale-3", "./mount.js?v=complete-pass-1")
+          if './ivo-rock-stats.css?v=complete-pass-1' not in index:
+              marker = '<link rel="stylesheet" href="./ivo-rock-polish.css?v=complete-pass-1">'
+              if marker not in index:
+                  raise SystemExit('polish CSS marker not found')
+              index = index.replace(marker, marker + '\n  <link rel="stylesheet" href="./ivo-rock-stats.css?v=complete-pass-1">', 1)
+          index_path.write_text(index)
+
+      - name: Validate JavaScript
+        run: |
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/ivo-rock-start-menu.js
+          node --check salto-cosmico-rock/ivo-rock-polish.js
+          node --check salto-cosmico-rock/ivo-rock-stats.js
+          node --check salto-cosmico-rock/mount.js
+
+      - name: Commit and publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/ivo-rock-start-menu.js salto-cosmico-rock/ivo-rock-start-menu.css salto-cosmico-rock/ivo-rock-polish.js salto-cosmico-rock/ivo-rock-polish.css salto-cosmico-rock/ivo-rock-stats.js salto-cosmico-rock/ivo-rock-stats.css salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Complete Ivo Rock gameplay polish pass"
+          git push origin master
