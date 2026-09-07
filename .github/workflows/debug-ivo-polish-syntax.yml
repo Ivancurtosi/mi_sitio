@@ -1,0 +1,35 @@
+name: Debug Ivo Rock polish syntax
+
+on:
+  push:
+    paths:
+      - '.github/workflows/debug-ivo-polish-syntax.yml'
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Find failing transformation
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess, textwrap
+
+          y = Path('.github/workflows/polish-ivo-rock-full.yml').read_text()
+          start = y.index('        run: |\n', y.index('Polish boss levels enemies celebration and effects')) + len('        run: |\n')
+          end = y.index('\n      - name: Syntax check', start)
+          block = y[start:end]
+          lines = []
+          for line in block.splitlines():
+              lines.append(line[10:] if line.startswith('          ') else line)
+          script = '\n'.join(lines)
+
+          inject = '''\ndef check(label):\n    Path('/tmp/game.mjs').write_text(s)\n    p = subprocess.run(['node','--check','/tmp/game.mjs'], text=True, capture_output=True)\n    if p.returncode:\n        print('FAILED AFTER:', label)\n        print(p.stderr[-5000:])\n        raise SystemExit(1)\n    print('OK AFTER:', label)\n\n'''
+          script = script.replace('def replace_once(old, new, label):\n', inject + 'def replace_once(old, new, label):\n', 1)
+          script = script.replace('    s = s.replace(old, new, 1)\n', '    s = s.replace(old, new, 1)\n    check(label)\n', 1)
+          script = script.replace("add_enemies(4, [\"{x:2280,y:340,kind:`bat`,range:125}\", \"{x:6120,kind:`amp`,dir:-1}\"])\n", "add_enemies(4, [\"{x:2280,y:340,kind:`bat`,range:125}\", \"{x:6120,kind:`amp`,dir:-1}\"])\ncheck('enemy insertion')\n", 1)
+          script = 'import subprocess\n' + script
+          exec(compile(script, '<polish-debug>', 'exec'), {'__name__':'__main__'})
