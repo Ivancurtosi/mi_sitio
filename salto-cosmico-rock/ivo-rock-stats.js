@@ -15,13 +15,17 @@
 
   const load = () => {
     try {
-      return { ...fresh(), ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) };
+      const loaded = { ...fresh(), ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) };
+      loaded.routeStarted = performance.now();
+      return loaded;
     } catch {
       return fresh();
     }
   };
 
   let stats = load();
+  let lastHudRoute = null;
+
   const save = () => {
     try { localStorage.setItem(KEY, JSON.stringify(stats)); } catch {}
   };
@@ -49,6 +53,7 @@
   window.__ivoRockStats = {
     reset() {
       stats = fresh();
+      lastHudRoute = null;
       save();
     },
     shard() {
@@ -67,9 +72,6 @@
     route(level) {
       const now = performance.now();
       const id = Number(level) || 1;
-      if (stats.currentRoute && stats.routeStarted && stats.currentRoute !== id) {
-        stats.totalTime += Math.max(0, (now - stats.routeStarted) / 1000);
-      }
       stats.currentRoute = id;
       stats.routeStarted = now;
       save();
@@ -79,11 +81,19 @@
       stats.routes = Math.min(4, stats.routes + 1);
       const now = performance.now();
       if (stats.routeStarted) stats.totalTime += Math.max(0, (now - stats.routeStarted) / 1000);
-      stats.routeStarted = now;
+      stats.routeStarted = 0;
       save();
       if (final) setTimeout(renderFinal, 3800);
     }
   };
 
-  setInterval(renderFinal, 500);
+  setInterval(() => {
+    const routeText = document.querySelector('.hud-stage b')?.textContent || '';
+    const route = Number((routeText.match(/\d+/) || [])[0]);
+    if (Number.isFinite(route) && route > 0 && route !== lastHudRoute) {
+      lastHudRoute = route;
+      window.__ivoRockStats.route(route);
+    }
+    renderFinal();
+  }, 300);
 })();
