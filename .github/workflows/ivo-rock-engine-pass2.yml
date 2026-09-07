@@ -1,0 +1,115 @@
+name: Ivo Rock complete engine pass
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-engine-pass2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Patch gameplay engine and caches
+        shell: python
+        run: |
+          from pathlib import Path
+
+          game_path = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          menu_css_path = Path('salto-cosmico-rock/ivo-rock-start-menu.css')
+          polish_css_path = Path('salto-cosmico-rock/ivo-rock-polish.css')
+          mount_path = Path('salto-cosmico-rock/mount.js')
+          index_path = Path('salto-cosmico-rock/index.html')
+          s = game_path.read_text()
+
+          def one(old, new, label):
+              global s
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              s = s.replace(old, new, 1)
+
+          one('o=e.kind===`crawler`?72:e.kind===`beetle`?82:e.kind===`spike`?68:e.kind===`jumper`?94:0;return', 'o=(e.kind===`crawler`?72:e.kind===`beetle`?82:e.kind===`spike`?68:e.kind===`jumper`?94:0)*([0,.88,1,1.08,1.15][E.id]||1);return', 'enemy speed progression')
+          one('cooldown:.7+t%4*.22,phase2:!1,health:e.kind===`warden`?6:1', 'cooldown:(.7+t%4*.22)*([0,1.14,1.02,.94,.86][E.id]||1),phase2:!1,health:e.kind===`warden`?6:1', 'enemy cadence progression')
+          one('checkpoints:[3456],goalX:7536', 'checkpoints:[3456,5568],goalX:7536', 'route 2 checkpoint')
+          one('checkpoints:[3456],goalX:7488', 'checkpoints:[3456,5136],goalX:7488', 'route 3 checkpoint')
+
+          one('if(t.kind===`amp`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.shadowColor=`#5dfff0`', 'if(t.kind===`amp`){e.save();let n=t.cooldown<.28?1.08:1;e.translate(t.x+t.w/2,t.y+t.h/2),e.rotate(Math.sin(T*18+t.id)*.04*(t.cooldown<.28?1:0)),e.scale(n,1/n),e.shadowColor=`#5dfff0`', 'amp animation')
+          one('if(t.kind===`jumper`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#5d1525`', 'if(t.kind===`jumper`){e.save();let n=t.grounded?1:Math.max(.82,1-Math.abs(t.vy)/1800);e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(1+(1-n)*.5,n),e.fillStyle=`#5d1525`', 'jumper animation')
+          one('if(t.kind===`sentry`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#5c4b8f`', 'if(t.kind===`sentry`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.rotate(Math.sin(T*3+t.id)*.06),e.fillStyle=`#5c4b8f`', 'sentry animation')
+          one('if(ut(e,3,n,t.x+t.w/2,t.y-Math.max(0,r-t.h),r,i)||(', 'if(ut(e,3,n,t.x+t.w/2,t.y-Math.max(0,r-t.h)+Math.sin(T*8+t.id)*1.5,r,i)||(', 'base enemy bob')
+
+          one('goalX:7824,reachChecks:', 'goalX:7824,goldenPick:{x:7448,y:292},reachChecks:', 'route 1 golden pick')
+          one('goalX:7536,reachChecks:', 'goalX:7536,goldenPick:{x:6910,y:286},reachChecks:', 'route 2 golden pick')
+          one('goalX:7488,reachChecks:', 'goalX:7488,goldenPick:{x:6360,y:236},reachChecks:', 'route 3 golden pick')
+          one('goalX:7008,reachChecks:', 'goalX:7008,goldenPick:{x:5928,y:236},reachChecks:', 'route 4 golden pick')
+
+          marker = 'Te=!1,goalBonus=0,goalTier=0,q='
+          if s.count(marker) != 2:
+              raise SystemExit(f'golden state: expected 2 matches, got {s.count(marker)}')
+          s = s.replace(marker, 'Te=!1,goalBonus=0,goalTier=0,goldenTaken=!1,q=', 2)
+
+          one('E.shards.forEach(([e,t],n)=>{xe.has(n)||x(J,{x:e-12,y:t-16,w:24,h:32})&&(xe.add(n),Re(e,t))});for(let[e,t]of E.checkpoints.entries())', 'E.shards.forEach(([e,t],n)=>{xe.has(n)||x(J,{x:e-12,y:t-16,w:24,h:32})&&(xe.add(n),Re(e,t))});E.goldenPick&&!goldenTaken&&x(J,{x:E.goldenPick.x-18,y:E.goldenPick.y-22,w:36,h:44})&&(goldenTaken=!0,X(3e3),Z(E.goldenPick.x,E.goldenPick.y,`#ffd84a`,34,`spark`),Y(`PÚA DORADA`,`SECRETO ENCONTRADO · +3000`,1.8),o.current?.sfx(`life`),window.__ivoRockStats?.secret(E.id));for(let[e,t]of E.checkpoints.entries())', 'golden collection')
+          one('E.shards.forEach(([n,r],i)=>{!xe.has(i)&&n>=D-40&&n<=D+t+40&&mt(e,n,r)}),R.forEach', 'E.shards.forEach(([n,r],i)=>{!xe.has(i)&&n>=D-40&&n<=D+t+40&&mt(e,n,r)}),E.goldenPick&&!goldenTaken&&E.goldenPick.x>=D-50&&E.goldenPick.x<=D+t+50&&(e.save(),e.translate(E.goldenPick.x,E.goldenPick.y),e.rotate(Math.sin(T*3)*.18),e.shadowColor=`#ffd84a`,e.shadowBlur=24,e.fillStyle=`#ffd84a`,e.beginPath(),e.moveTo(0,-22),e.lineTo(15,0),e.lineTo(0,22),e.lineTo(-15,0),e.closePath(),e.fill(),e.fillStyle=`#fff4a8`,e.font=`1000 13px ui-monospace,monospace`,e.textAlign=`center`,e.fillText(`★`,0,5),e.restore()),R.forEach', 'golden drawing')
+
+          one('o.current?.sfx(`shard`),N>=100', 'o.current?.sfx(`shard`),window.__ivoRockStats?.shard(),N>=100', 'shard stats')
+          one('K=Math.max(K,.055),o.current?.sfx(`stomp`))},Qe=', 'K=Math.max(K,.055),o.current?.sfx(`stomp`),window.__ivoRockStats?.enemy(e.kind))},Qe=', 'enemy stats')
+          one('window.__ivoRockPolish?.goal(ve===_.length-1,Math.max(0,Math.ceil(O))*10+goalBonus,goalBonus)', 'window.__ivoRockPolish?.goal(ve===_.length-1,Math.max(0,Math.ceil(O))*10,goalBonus,ve===_.length-1?``:_[ve+1]?.name||``)', 'goal payload')
+          one('s.current={resetCampaign:()=>{be=0,A=3,N=0,P=`small`,fe(0),de(3),ue(0),g(`small`),Ie(0,!1)}}', 'window.__rockSetLives=e=>{let t=Math.max(0,Math.floor(Number(e)||0));A=t,de(A)},s.current={resetCampaign:()=>{let e=Math.max(0,Math.min(_.length-1,Math.floor(Number(window.__ivoContinueLevel)||0))),t=Math.max(1,Math.floor(Number(window.__ivoStartingLives)||3));be=0,A=t,N=0,P=`small`,fe(0),de(t),ue(0),g(`small`),Ie(e,!1)}}', 'continue and lives bridge')
+
+          game_path.write_text(s)
+
+          css = polish_css_path.read_text()
+          if '.ivo-polish-next{' not in css and '.ivo-polish-next {' not in css:
+              css += '\n.ivo-polish-next{display:block;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.14);font:1000 11px/1.15 ui-monospace,monospace;letter-spacing:.11em;color:#ffd86a;opacity:.92}\n'
+          polish_css_path.write_text(css)
+
+          css = menu_css_path.read_text()
+          if '.ivo-menu-continue{' not in css and '.ivo-menu-continue {' not in css:
+              css += '\n.ivo-menu-continue{color:#ffe16a}.ivo-player-turn-tag{display:flex;gap:7px;align-items:center;white-space:nowrap}.ivo-player-turn-tag span{opacity:.52;transition:opacity .14s ease,color .14s ease}.ivo-player-turn-tag span.active{opacity:1;color:#ffe16a;text-shadow:0 0 9px rgba(255,209,70,.55)}.ivo-player-turn-tag[data-player="2"] span.active{color:#7ffff5;text-shadow:0 0 9px rgba(92,245,255,.55)}.ivo-player-turn-tag i{opacity:.35;font-style:normal}\n'
+          menu_css_path.write_text(css)
+
+          mount = mount_path.read_text()
+          mount = mount.replace('./assets/cosmic-jump-DkePWGqE.js?v=rock-finale-3', './assets/cosmic-jump-DkePWGqE.js?v=complete-pass-1')
+          mount = mount.replace('./ivo-rock-polish.js?v=rock-finale-3', './ivo-rock-polish.js?v=complete-pass-1')
+          mount = mount.replace('./ivo-rock-start-menu.js?v=simple-menu-1', './ivo-rock-start-menu.js?v=complete-pass-1')
+          menu_import = "await import('./ivo-rock-start-menu.js?v=complete-pass-1');"
+          if "./ivo-rock-stats.js?v=complete-pass-1" not in mount:
+              if menu_import not in mount:
+                  raise SystemExit('menu import marker missing')
+              mount = mount.replace(menu_import, "await import('./ivo-rock-stats.js?v=complete-pass-1');\n" + menu_import, 1)
+          mount_path.write_text(mount)
+
+          index = index_path.read_text()
+          index = index.replace('./ivo-rock-start-menu.css?v=simple-menu-1', './ivo-rock-start-menu.css?v=complete-pass-1')
+          index = index.replace('./ivo-rock-polish.css?v=rock-finale-3', './ivo-rock-polish.css?v=complete-pass-1')
+          index = index.replace('./mount.js?v=rock-finale-3', './mount.js?v=complete-pass-1')
+          stats_css = '<link rel="stylesheet" href="./ivo-rock-stats.css?v=complete-pass-1">'
+          if stats_css not in index:
+              marker = '<link rel="stylesheet" href="./ivo-rock-polish.css?v=complete-pass-1">'
+              if marker not in index:
+                  raise SystemExit('polish CSS marker missing')
+              index = index.replace(marker, marker + '\n  ' + stats_css, 1)
+          index_path.write_text(index)
+
+      - name: Validate JavaScript
+        run: |
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/ivo-rock-start-menu.js
+          node --check salto-cosmico-rock/ivo-rock-polish.js
+          node --check salto-cosmico-rock/ivo-rock-stats.js
+          node --check salto-cosmico-rock/mount.js
+
+      - name: Commit and publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/ivo-rock-start-menu.css salto-cosmico-rock/ivo-rock-polish.css salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Complete Ivo Rock gameplay polish pass"
+          git push origin master
