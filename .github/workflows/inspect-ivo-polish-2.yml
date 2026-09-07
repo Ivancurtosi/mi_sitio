@@ -1,0 +1,31 @@
+name: Inspect Ivo Rock polish targets 2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-ivo-polish-2.yml'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Print level four and projectile snippets
+        shell: python
+        run: |
+          from pathlib import Path
+          s = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js').read_text()
+          for m, before, after in [
+            ('{id:4,name:', 100, 9000),
+            ('t.kind===`flare`?440:80', 2200, 3600),
+            ('for(let t of B)', 1400, 2200),
+            ('B=B.filter', 1600, 1800),
+            ('ft(e,t)', 1800, 2800),
+            ('G>0', 1800, 2600),
+          ]:
+              print('\n===== MARKER:', m, '=====')
+              i=s.find(m)
+              if i<0: print('NOT FOUND'); continue
+              print(s[max(0,i-before):min(len(s),i+after)])
