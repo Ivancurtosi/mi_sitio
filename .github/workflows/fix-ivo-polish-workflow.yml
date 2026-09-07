@@ -1,0 +1,35 @@
+name: Fix Ivo Rock polish workflow
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-ivo-polish-workflow.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Fix sky effect expression and retrigger polish
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('.github/workflows/polish-ivo-rock-full.yml')
+          s = p.read_text()
+          old = "e.stroke();let rr=Math.max(0,Math.sin(T*1.55)-.992)*70;rr>0&&(e.globalAlpha=Math.min(.38,rr),e.fillStyle=`#dce8ff`,e.fillRect(0,0,t,720)),e.restore())"
+          new = "e.stroke(),Math.sin(T*1.55)>.992&&(e.globalAlpha=.32,e.fillStyle=`#dce8ff`,e.fillRect(0,0,t,720)),e.restore())"
+          if old not in s:
+              raise SystemExit('sky syntax pattern not found')
+          p.write_text(s.replace(old, new, 1))
+      - name: Commit workflow fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/polish-ivo-rock-full.yml
+          git commit -m "Fix storm visual syntax in Ivo Rock polish"
+          git push origin master
