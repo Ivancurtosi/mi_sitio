@@ -1,0 +1,42 @@
+name: Inspect Ivo Rock polish targets
+
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-ivo-polish.yml'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Print relevant game snippets
+        shell: python
+        run: |
+          from pathlib import Path
+          s = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js').read_text()
+          markers = [
+            'kind===`beetle`', 'kind===`crawler`', 'kind===`sentry`', 'kind===`wisp`',
+            'kind===`spike`', 'kind===`warden`',
+            'for(let n of L)', 'for(let t of L)',
+            'o.current?.sfx(`goal`)', 'RECITAL COMPLETO',
+            'E.biome===`grove`', 'E.biome===`cavern`', 'E.biome===`sky`', 'E.biome===`citadel`',
+            'sfx(`stomp`)', 'sfx(`break`)', 'sfx(`power`)', 'sfx(`shard`)'
+          ]
+          for m in markers:
+              print('\n===== MARKER:', m, '=====')
+              start = 0
+              found = 0
+              while True:
+                  i = s.find(m, start)
+                  if i < 0 or found >= 4: break
+                  a = max(0, i-900)
+                  b = min(len(s), i+1800)
+                  print(s[a:b])
+                  print('\n---')
+                  found += 1
+                  start = i + len(m)
+              if found == 0:
+                  print('NOT FOUND')
