@@ -13,6 +13,7 @@
       <em class="ivo-polish-total">TIEMPO +0000 · TOTAL +0000</em>
       <span class="ivo-polish-next"></span>
     </div>
+    <div class="ivo-final-stage"><div class="ivo-final-beams"><i></i><i></i><i></i></div><div class="ivo-final-crowd">${'<i></i>'.repeat(18)}</div><div class="ivo-final-riser"><span>⚡</span><b>IVO</b></div><strong>ÚLTIMO BIS</strong><small>GIRA COMPLETA</small></div>
     <div class="ivo-polish-phase"><small>DIABLITO DEL METAL</small><strong>FASE 2 · EN LLAMAS</strong></div>`;
   document.body.appendChild(layer);
 
@@ -24,6 +25,7 @@
   const celebrationTotal = celebration.querySelector('.ivo-polish-total');
   const celebrationNext = celebration.querySelector('.ivo-polish-next');
   const phase = layer.querySelector('.ivo-polish-phase');
+  const finalStage = layer.querySelector('.ivo-final-stage');
 
   let ctx = null;
   const ensureAudio = () => {
@@ -157,6 +159,11 @@
       sparks(final ? 46 : 34);
       fireworks(final);
       solo(final);
+      if (final && finalStage) {
+        finalStage.classList.remove('show');
+        requestAnimationFrame(() => finalStage.classList.add('show'));
+        setTimeout(() => finalStage.classList.remove('show'), 3900);
+      }
       celebrationTitle.textContent = final ? '¡GIRA COMPLETA!' : '¡RUTA COMPLETA!';
       celebrationHeight.textContent = `ALTURA +${height.toString().padStart(4, '0')}`;
       celebrationTotal.textContent = `TIEMPO +${time.toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;
