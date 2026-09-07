@@ -1,4 +1,4 @@
-/* Extra game polish: short non-interactive celebration and boss phase overlays. */
+/* Extra game polish: finish landmark, celebration and boss phase overlays. */
 .ivo-polish-layer {
   position: fixed;
   inset: 0;
@@ -62,8 +62,17 @@
 .ivo-polish-celebration b {
   display: block;
   margin-top: 9px;
-  font-size: 15px;
+  font-size: 16px;
   color: #ffe263;
+}
+.ivo-polish-celebration em {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  color: #8afff4;
+  letter-spacing: .04em;
 }
 .ivo-polish-phase {
   border-color: rgba(255,70,28,.78);
@@ -85,6 +94,200 @@
   100% { transform: translate(var(--dx), var(--dy)) rotate(240deg) scale(.25); opacity: 0; }
 }
 
+/* World-space finish landmark: a tall rock mast plus a speaker/backstage fortress. */
+.ivo-finish-world {
+  position: fixed;
+  width: 260px;
+  height: 360px;
+  z-index: 6;
+  pointer-events: none;
+  transform-origin: 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  filter: drop-shadow(0 14px 18px rgba(0,0,0,.45));
+}
+.ivo-finish-mast {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 74px;
+  height: 320px;
+}
+.ivo-finish-mast::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  bottom: 18px;
+  width: 7px;
+  height: 286px;
+  border-radius: 8px;
+  background: linear-gradient(90deg,#6d6f75,#f3f3f4 45%,#777a80);
+  box-shadow: 0 0 10px rgba(255,255,255,.22);
+}
+.ivo-finish-banner {
+  position: absolute;
+  left: 12px;
+  top: 3px;
+  width: 62px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  box-sizing: border-box;
+  clip-path: polygon(0 0,100% 0,84% 100%,0 86%);
+  background: linear-gradient(135deg,#7b1016,#d52620 58%,#601015);
+  border: 2px solid rgba(255,218,97,.8);
+  color: #fff1b5;
+  box-shadow: 0 0 16px rgba(255,58,25,.45);
+}
+.ivo-finish-banner span { font-size: 22px; line-height: 1; color: #ffd34f; }
+.ivo-finish-banner b { font-size: 9px; line-height: .95; letter-spacing: .06em; }
+.ivo-finish-mast .tick {
+  position: absolute;
+  left: 4px;
+  width: 17px;
+  height: 2px;
+  background: rgba(255,227,99,.9);
+  box-shadow: 0 0 5px rgba(255,227,99,.45);
+}
+.ivo-finish-mast .tick span {
+  position: absolute;
+  left: 21px;
+  top: -6px;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 1000;
+  color: #ffe56b;
+  text-shadow: 0 2px 3px #000;
+}
+.ivo-finish-mast .t5 { top: 45px; }
+.ivo-finish-mast .t3 { top: 105px; }
+.ivo-finish-mast .t15 { top: 165px; }
+.ivo-finish-mast .t75 { top: 225px; }
+.ivo-finish-mast .t25 { top: 276px; }
+.mast-base {
+  position: absolute;
+  left: -5px;
+  bottom: 0;
+  width: 30px;
+  height: 20px;
+  border-radius: 5px 5px 2px 2px;
+  background: linear-gradient(#2d3035,#0b0c0f);
+  border: 2px solid #6b6e73;
+}
+
+.ivo-finish-fortress {
+  position: absolute;
+  left: 88px;
+  bottom: 0;
+  width: 158px;
+  height: 165px;
+  border: 4px solid #5c6067;
+  border-bottom-width: 8px;
+  background: linear-gradient(180deg,#26292e 0 18%,#101216 18% 100%);
+  box-shadow: inset 0 0 0 4px #050607, inset 0 -28px 40px rgba(0,0,0,.55), 0 0 22px rgba(255,51,22,.16);
+}
+.fortress-top {
+  position: absolute;
+  left: -4px;
+  top: -24px;
+  width: calc(100% + 8px);
+  height: 24px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+}
+.fortress-top span { width: 34px; height: 24px; background: #202328; border: 3px solid #5c6067; border-bottom: 0; }
+.fortress-sign {
+  position: absolute;
+  left: 25px;
+  top: 12px;
+  width: 108px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #f3ba45;
+  background: #2b0909;
+  color: #ffd75e;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: .09em;
+  box-shadow: 0 0 12px rgba(255,91,31,.25);
+}
+.fortress-speaker {
+  position: absolute;
+  top: 48px;
+  width: 38px;
+  height: 75px;
+  border: 3px solid #575b62;
+  background: #07080a;
+}
+.fortress-speaker.s1 { left: 10px; }
+.fortress-speaker.s2 { right: 10px; }
+.fortress-speaker i {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 9px auto 0;
+  border-radius: 50%;
+  border: 3px solid #454950;
+  background: radial-gradient(circle,#1f2125 0 28%,#050506 30% 100%);
+}
+.fortress-door {
+  position: absolute;
+  left: 57px;
+  bottom: 0;
+  width: 44px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border: 3px solid #6d7075;
+  border-bottom: 0;
+  background: linear-gradient(90deg,#050607,#17191d 48%,#050607 52%);
+  transform-origin: right center;
+  transition: transform .5s ease, filter .3s ease;
+}
+.fortress-door b { color: #e44a24; font-size: 25px; text-shadow: 0 0 12px rgba(255,81,28,.55); }
+.fortress-light {
+  position: absolute;
+  top: 38px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5a1717;
+  box-shadow: 0 0 5px rgba(255,58,26,.25);
+}
+.fortress-light.l1 { left: 51px; }
+.fortress-light.l2 { right: 51px; }
+.fortress-pyro {
+  position: absolute;
+  bottom: 6px;
+  width: 12px;
+  height: 0;
+  opacity: 0;
+  transform-origin: bottom center;
+}
+.fortress-pyro.p1 { left: -15px; }
+.fortress-pyro.p2 { right: -15px; }
+.ivo-finish-world.celebrate .fortress-door { transform: perspective(80px) rotateY(-55deg); filter: brightness(1.8); }
+.ivo-finish-world.celebrate .fortress-light {
+  background: #ffe36e;
+  box-shadow: 0 0 20px #ff7625,0 0 38px rgba(255,58,24,.8);
+  animation: ivoLightBlink .24s steps(2,end) infinite;
+}
+.ivo-finish-world.celebrate .fortress-pyro {
+  height: 95px;
+  opacity: 1;
+  background: linear-gradient(to top,#ff391c 0 28%,#ff9c2e 50%,#ffe46c 74%,transparent 100%);
+  clip-path: polygon(50% 0,66% 30%,100% 18%,76% 58%,94% 75%,60% 68%,50% 100%,39% 68%,5% 76%,24% 56%,0 20%,35% 31%);
+  animation: ivoPyro .22s ease-in-out infinite alternate;
+}
+.ivo-finish-world.celebrate .ivo-finish-banner { animation: ivoBannerWave .25s ease-in-out infinite alternate; }
+@keyframes ivoPyro { from { transform: scaleY(.7) scaleX(.75); filter: brightness(1); } to { transform: scaleY(1.08) scaleX(1.1); filter: brightness(1.45); } }
+@keyframes ivoLightBlink { 50% { opacity: .35; } }
+@keyframes ivoBannerWave { from { transform: skewY(-2deg); } to { transform: skewY(3deg) translateX(2px); } }
+
 @media (max-height: 560px) {
   .ivo-polish-celebration,
   .ivo-polish-phase {
@@ -94,4 +297,5 @@
   .ivo-polish-celebration strong,
   .ivo-polish-phase strong { font-size: clamp(23px, 4.4vw, 36px); }
   .ivo-polish-celebration b { margin-top: 6px; font-size: 12px; }
+  .ivo-polish-celebration em { font-size: 10px; }
 }
