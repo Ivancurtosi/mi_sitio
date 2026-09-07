@@ -17,14 +17,14 @@ jobs:
         run: |
           from pathlib import Path
           s=Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js').read_text()
-          def ctx(label, needle, before=650, after=1600):
+          def ctx(label, needle, before=850, after=2400):
               i=s.find(needle)
               print('\n###',label,'idx',i)
               if i>=0: print(s[max(0,i-before):min(len(s),i+after)])
-          ctx('R update','R=R.filter')
-          ctx('R render','R.forEach')
-          ctx('pickup handler','Ye=')
-          ctx('reward draw','reward')
-          ctx('power impact','window.__ivoRockPolish?.impact(`power`)')
-          ctx('draw player vicinity','J.x-D')
-          ctx('render enemies','for(let t of L)')
+          ctx('powerup draw def','pt=')
+          ctx('enemy size def','Ae=')
+          ctx('enemy init def','je=')
+          for lid in [1,2,3,4]:
+              i=s.find(f'{{id:{lid},name:')
+              j=s.find('platforms:[',i)
+              print(f'\n### LEVEL {lid} ENEMIES/BLOCKS\n', s[max(i,j-1800):j+500] if i>=0 and j>=0 else 'missing')
