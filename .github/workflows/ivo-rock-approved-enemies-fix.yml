@@ -1,0 +1,234 @@
+name: Ivo Rock approved enemies and stability fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-approved-enemies-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Apply approved enemy art, visibility fix, and remove Continue
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+
+          # Preserve the final devil boss exactly as it is now.
+          warden_logic_match = re.search(r'else if\(n\.kind===`warden`\)\{.*?\}else\{n\.kind===`jumper`', s, re.S)
+          if not warden_logic_match:
+              raise SystemExit('Could not capture current warden gameplay')
+          warden_logic = warden_logic_match.group(0)
+
+          render_start = s.find('ft=(e,t)=>{')
+          render_end = s.find('},pt=(e,t)=>{', render_start)
+          if render_start < 0 or render_end < 0:
+              raise SystemExit('Enemy render function not found')
+          render = s[render_start:render_end]
+          warden_render_match = re.search(r'if\(t\.kind===`warden`\)\{.*?e\.restore\(\);return\}', render, re.S)
+          if not warden_render_match:
+              raise SystemExit('Could not capture current warden render')
+          warden_render = warden_render_match.group(0)
+
+          # Load the exact approved sprite art extracted from the concept board.
+          props_pat = r'(C=ce\(`\./assets/rock-props\.webp`,\[\[.*?\]\]\)),w='
+          m = re.search(props_pat, s, re.S)
+          if not m:
+              raise SystemExit('rock-props atlas declaration not found')
+          approved_loader = r'''\1,ivoEnemyArt=(()=>{let e={};for(let[t,n]of Object.entries({roadie:`./assets/ivo-roadie.png`,speaker:`./assets/ivo-speaker.png`,turtle:`./assets/ivo-turtle.png`,crow:`./assets/ivo-crow.png`})) {let r=new Image;r.src=n,e[t]=r}return e})(),ivoDrawEnemy=(e,t,n,r,i,a=1,o=0)=>{let s=ivoEnemyArt[n];if(!s||!s.complete||!s.naturalWidth)return!1;return e.save(),e.translate(t.x+t.w/2,t.y+t.h/2+o),e.scale(a,1),e.imageSmoothingEnabled=!1,e.drawImage(s,-r/2,-i/2,r,i),e.restore(),!0},w='''
+          s, count = re.subn(props_pat, approved_loader, s, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'approved sprite loader replacement count={count}')
+
+          # Fix the reported invisibility: never skip drawing the hero during invulnerability.
+          old_blink = 'dt=e=>{if(J.invulnerable>0&&Math.floor(T*18)%2==0)return;let t='
+          if s.count(old_blink) != 1:
+              raise SystemExit(f'hero blink marker count={s.count(old_blink)}')
+          s = s.replace(old_blink, 'dt=e=>{let t=', 1)
+
+          # Re-read the render segment after loader insertion and replace the crude placeholder art.
+          render_start = s.find('ft=(e,t)=>{')
+          render_end = s.find('},pt=(e,t)=>{', render_start)
+          render = s[render_start:render_end]
+
+          def sub_render(pattern, replacement, label):
+              global render
+              render2, n = re.subn(pattern, replacement, render, count=1, flags=re.S)
+              if n != 1:
+                  raise SystemExit(f'{label}: replacement count={n}')
+              render = render2
+
+          sub_render(
+              r'if\(t\.kind===`bat`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`bat`||t.kind===`wisp`){let n=t.vx>=0?1:-1,r=t.kind===`bat`?60:56,i=t.kind===`bat`?47:44,a=Math.sin(T*8+t.id)*2;if(ivoDrawEnemy(e,t,`crow`,r,i,n,a))return}''',
+              'bat/wisp -> approved crow'
+          )
+          sub_render(
+              r'if\(t\.kind===`amp`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`amp`){let n=J.x<t.x?-1:1,r=t.cooldown<.42?1.08:1;if(ivoDrawEnemy(e,t,`speaker`,72*r,54/r,n,0))return}''',
+              'amp -> approved speaker'
+          )
+          sub_render(
+              r'if\(t\.kind===`jumper`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`jumper`){let n=t.vx>=0?1:-1,r=t.grounded?1:Math.max(.84,1-Math.abs(t.vy)/1900);if(ivoDrawEnemy(e,t,`roadie`,62*(1+(1-r)*.18),52*r,n,0))return}''',
+              'jumper -> approved roadie'
+          )
+          sub_render(
+              r'if\(t\.kind===`turtle`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`turtle`){let n=J.x<t.x?-1:1,r=t.cooldown<.34?1.05:1;if(ivoDrawEnemy(e,t,`turtle`,76*r,56/r,n,0))return}''',
+              'turtle -> approved punk turtle'
+          )
+          sub_render(
+              r'if\(t\.kind===`sentry`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`sentry`){let n=J.x<t.x?-1:1,r=Math.sin(T*7+t.id)*2;if(ivoDrawEnemy(e,t,`crow`,62,49,n,r))return}''',
+              'sentry -> approved crow'
+          )
+          sub_render(
+              r'if\(t\.kind===`beetle`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`beetle`){let n=t.vx>=0?1:-1,r=Math.sin(T*9+t.id)*1.2;if(ivoDrawEnemy(e,t,`roadie`,60,50,n,r))return}''',
+              'beetle -> approved roadie'
+          )
+          sub_render(
+              r'if\(t\.kind===`crawler`\)\{.*?e\.restore\(\);return\}',
+              '''if(t.kind===`crawler`){let n=t.vx>=0?1:-1,r=t.state===`spin`,i=t.state===`shell`||r;e.save(),r&&(e.translate(t.x+t.w/2,t.y+t.h/2),e.rotate(T*12+t.id),e.translate(-(t.x+t.w/2),-(t.y+t.h/2)));let a=ivoDrawEnemy(e,t,`turtle`,i?58:66,i?42:49,n,0);e.restore();if(a)return}''',
+              'crawler -> approved punk turtle'
+          )
+
+          # Insert a dedicated approved Roadie visual for the non-stompable spike enemy.
+          marker = 'if(t.kind===`warden`){'
+          if render.count(marker) != 1:
+              raise SystemExit(f'warden render marker count={render.count(marker)}')
+          render = render.replace(marker, 'if(t.kind===`spike`){let n=t.vx>=0?1:-1;if(ivoDrawEnemy(e,t,`roadie`,58,49,n,0))return}'+marker, 1)
+
+          s = s[:render_start] + render + s[render_end:]
+
+          # Hidden debug-only hooks used by the smoke test; no normal gameplay/UI impact.
+          debug_marker = 'window.__rockSetLives=e=>{let t=Math.max(0,Math.floor(Number(e)||0));A=t,de(A)},'
+          if s.count(debug_marker) != 1:
+              raise SystemExit(f'debug hook marker count={s.count(debug_marker)}')
+          debug_hooks = debug_marker + 'window.__ivoDebugLoadLevel=e=>Ie(Math.max(0,Math.min(_.length-1,Number(e)||0)),!1,0),window.__ivoDebugState=()=>({stage:E.id,player:{x:J.x,y:J.y,w:J.w,h:J.h},dead:J.dead}),'
+          s = s.replace(debug_marker, debug_hooks, 1)
+
+          # Confirm the boss code was not changed.
+          if warden_logic not in s:
+              raise SystemExit('Warden gameplay changed unexpectedly')
+          final_render_start = s.find('ft=(e,t)=>{')
+          final_render_end = s.find('},pt=(e,t)=>{', final_render_start)
+          final_render = s[final_render_start:final_render_end]
+          if warden_render not in final_render:
+              raise SystemExit('Warden visual changed unexpectedly')
+
+          game.write_text(s)
+
+          # Remove saved route continuation entirely. Every new game starts from Route 1.
+          menu = Path('salto-cosmico-rock/ivo-rock-start-menu.js')
+          ms = menu.read_text()
+          ms, n = re.subn(
+              r"  const SAVE_KEY = 'ivo-rock-progress-v3';\n  const readSave = \(\) => \{.*?\n  const saved = readSave\(\);\n",
+              "  try { localStorage.removeItem('ivo-rock-progress-v3'); } catch {}\n",
+              ms,
+              count=1,
+              flags=re.S,
+          )
+          if n != 1:
+              raise SystemExit('Could not remove old progress save reader')
+          ms = ms.replace('mode: Number(saved.mode) === 2 ? 2 : 1,', 'mode: 1,')
+          ms = re.sub(r'\n    maxUnlocked: Math\.max\(1, Math\.min\(4, Number\(saved\.maxUnlocked\) \|\| 1\)\),', '', ms, count=1)
+          ms = ms.replace('1: Math.max(0, Number(saved.p1Lives) || 3),', '1: 3,')
+          ms = ms.replace('2: Math.max(0, Number(saved.p2Lives) || 3)', '2: 3')
+          ms, n = re.subn(r'  const persist = \(\) => \{.*?\n  \};', '  const persist = () => {};', ms, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit('Could not neutralize progress persistence')
+          ms = re.sub(r'\n        \$\{state\.maxUnlocked > 1 \? `<button[^\n]+CONTINUAR[^\n]+` : \'\'\}', '', ms, count=1)
+          ms, n = re.subn(
+              r'    if \(stage != null\) \{\n      state\.maxUnlocked.*?\n    \}\n',
+              '    if (stage != null && state.lastStage != null && stage > state.lastStage && state.mode === 2) switchPlayer(180);\n',
+              ms,
+              count=1,
+              flags=re.S,
+          )
+          if n != 1:
+              raise SystemExit('Could not remove route unlock persistence')
+          ms = ms.replace('function startGame(mode, continueRun = false) {', 'function startGame(mode) {')
+          ms, n = re.subn(
+              r'    if \(!continueRun\) \{.*?\n    \}\n\n    window\.__ivoStartingLives',
+              '    state.playerLives = { 1: 3, 2: 3 };\n    window.__ivoContinueLevel = 0;\n    window.__ivoRockStats?.reset();\n\n    window.__ivoStartingLives',
+              ms,
+              count=1,
+              flags=re.S,
+          )
+          if n != 1:
+              raise SystemExit('Could not make all starts fresh')
+          ms = ms.replace("choices.forEach(btn => btn.classList.toggle('selected', btn.dataset.continue === '1' ? continueRun : Number(btn.dataset.mode) === mode));", "choices.forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.mode) === mode));")
+          ms = ms.replace("      if (button.dataset.continue === '1') startGame(state.mode, true);\n      else startGame(Number(button.dataset.mode), false);", "      startGame(Number(button.dataset.mode));")
+
+          if 'CONTINUAR' in ms or 'data-continue' in ms or 'maxUnlocked' in ms or 'saved.' in ms:
+              raise SystemExit('Continue/progress UI or state still present')
+
+          # Smoke-only auto flow: starts Route 1, loads Route 2 through debug hook, verifies player state.
+          smoke = '''\n  if (new URLSearchParams(location.search).has('smoke')) {\n    setTimeout(() => {\n      try {\n        [...document.querySelectorAll('.ivo-menu-choice')].find(b => b.dataset.mode === '1')?.click();\n        setTimeout(() => {\n          try {\n            window.__ivoDebugLoadLevel?.(1);\n            setTimeout(() => {\n              const st = window.__ivoDebugState?.();\n              const p = st?.player || {};\n              const ok = st?.stage === 2 && !st?.dead && [p.x,p.y,p.w,p.h].every(Number.isFinite) && p.w > 0 && p.h > 0;\n              document.documentElement.dataset.ivoSmoke = ok ? 'ok' : 'fail';\n            }, 900);\n          } catch { document.documentElement.dataset.ivoSmoke = 'fail'; }\n        }, 900);\n      } catch { document.documentElement.dataset.ivoSmoke = 'fail'; }\n    }, 120);\n  }\n'''
+          ms = ms.replace('\n})();', smoke + '\n})();', 1)
+          menu.write_text(ms)
+
+          # Cache-bust the verified build.
+          for path in ['salto-cosmico-rock/mount.js', 'salto-cosmico-rock/index.html']:
+              p = Path(path)
+              text = p.read_text()
+              if 'hero-enemies-1' not in text:
+                  raise SystemExit(f'{path}: cache marker not found')
+              p.write_text(text.replace('hero-enemies-1', 'approved-enemies-2'))
+
+      - name: Static validation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -s salto-cosmico-rock/assets/ivo-roadie.png
+          test -s salto-cosmico-rock/assets/ivo-speaker.png
+          test -s salto-cosmico-rock/assets/ivo-turtle.png
+          test -s salto-cosmico-rock/assets/ivo-crow.png
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+          node --check salto-cosmico-rock/ivo-rock-start-menu.js
+          ! grep -q 'CONTINUAR' salto-cosmico-rock/ivo-rock-start-menu.js
+          ! grep -q 'data-continue' salto-cosmico-rock/ivo-rock-start-menu.js
+          grep -q 'DIABLITO EN LLAMAS' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivo-roadie.png' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivo-speaker.png' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivo-turtle.png' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'ivo-crow.png' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+
+      - name: Browser smoke test Route 1 and Route 2
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?smoke=1&v=approved-enemies-2' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          cat /tmp/chrome.log
+          grep -q 'data-ivo-smoke="ok"' /tmp/dom.txt
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            echo 'Runtime JavaScript error detected'
+            exit 1
+          fi
+
+      - name: Commit verified build
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/ivo-rock-start-menu.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m 'Use approved enemy sprites and remove Continue'
+          git push origin master
