@@ -1,0 +1,104 @@
+name: Ivo Rock grounded running animation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-run-animation-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Ground the running animation without changing gameplay
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+
+          # Capture the boss before the visual-only player patch so we can assert it stays untouched.
+          boss_logic = re.search(r'else if\(n\.kind===`warden`\)\{.*?\}else\{n\.kind===`jumper`', s, re.S)
+          if not boss_logic:
+              raise SystemExit('Could not capture boss logic')
+          boss_logic = boss_logic.group(0)
+
+          # The two-frame run cycle was a little too fast and visually read as skating/floating.
+          old_cycle = 'Math.floor(T*(Math.abs(J.vx)>d.walkSpeed?15:10))%2'
+          new_cycle = 'Math.floor(T*(Math.abs(J.vx)>d.walkSpeed?12:9))%2'
+          if s.count(old_cycle) != 1:
+              raise SystemExit(f'run cycle marker: expected 1, got {s.count(old_cycle)}')
+          s = s.replace(old_cycle, new_cycle, 1)
+
+          # Keep the physics/hitbox exactly where they are. Only lower the rendered sprite by
+          # a few pixels while grounded and moving, and add a tiny contact shadow under the feet.
+          old_anchor = 'let r=J.shotPose>0&&!J.crouching?0:n;e.save(),P===`radiant`&&(e.shadowColor=`#ffc342`,e.shadowBlur=10);let i=w(e,le,r,J.x-20,J.y-11,J.w+40,J.h+11,J.facing)||ut(e,t,n,J.x+J.w/2,J.y-(J.crouching?3:8),J.h+(J.crouching?10:16),J.facing);'
+          new_anchor = 'let r=J.shotPose>0&&!J.crouching?0:n,runGrounded=J.grounded&&!J.crouching&&Math.abs(J.vx)>25,footFix=runGrounded?(Math.abs(J.vx)>d.walkSpeed?4:3):0;e.save(),runGrounded&&(e.globalAlpha=.24,e.fillStyle=`#000`,e.beginPath(),e.ellipse(J.x+J.w/2,J.y+J.h+2,Math.abs(J.vx)>d.walkSpeed?17:14,4,0,0,Math.PI*2),e.fill(),e.globalAlpha=1,e.translate(0,footFix)),P===`radiant`&&(e.shadowColor=`#ffc342`,e.shadowBlur=10);let i=w(e,le,r,J.x-20,J.y-11,J.w+40,J.h+11,J.facing)||ut(e,t,n,J.x+J.w/2,J.y-(J.crouching?3:8),J.h+(J.crouching?10:16),J.facing);'
+          if s.count(old_anchor) != 1:
+              raise SystemExit(f'player render anchor marker: expected 1, got {s.count(old_anchor)}')
+          s = s.replace(old_anchor, new_anchor, 1)
+
+          if boss_logic not in s:
+              raise SystemExit('Boss changed unexpectedly')
+          if 'runGrounded=J.grounded' not in s or 'footFix=runGrounded' not in s:
+              raise SystemExit('Grounded run visual patch missing')
+
+          game.write_text(s)
+
+          mount = Path('salto-cosmico-rock/mount.js')
+          mm = mount.read_text()
+          old_import = "import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=performance-1';"
+          new_import = "import RockTour from './assets/cosmic-jump-DkePWGqE.js?v=run-grounded-1';"
+          if mm.count(old_import) != 1:
+              raise SystemExit('mount game import marker missing')
+          mount.write_text(mm.replace(old_import, new_import, 1))
+
+          index = Path('salto-cosmico-rock/index.html')
+          ix = index.read_text()
+          if ix.count('./mount.js?v=performance-1') != 1:
+              raise SystemExit('index mount marker missing')
+          index.write_text(ix.replace('./mount.js?v=performance-1', './mount.js?v=run-grounded-1', 1))
+
+      - name: Static validation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          node --check salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          node --check salto-cosmico-rock/mount.js
+          grep -q 'runGrounded=J.grounded' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+          grep -q 'run-grounded-1' salto-cosmico-rock/mount.js
+          grep -q 'mount.js?v=run-grounded-1' salto-cosmico-rock/index.html
+          grep -q 'DIABLITO EN LLAMAS' salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js
+
+      - name: Browser smoke test
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?smoke=1&v=run-grounded-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          cat /tmp/chrome.log
+          grep -q 'data-ivo-smoke="ok"' /tmp/dom.txt
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            echo 'Runtime JavaScript error detected'
+            exit 1
+          fi
+
+      - name: Commit visual run fix
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m 'Ground Ivo running animation'
+          git push origin master
