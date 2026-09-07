@@ -2,25 +2,41 @@
   if (window.__ivoRockMenuInstalled) return;
   window.__ivoRockMenuInstalled = true;
 
+  const SAVE_KEY = 'ivo-rock-progress-v3';
+  const readSave = () => {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch { return {}; }
+  };
+  const saved = readSave();
   const state = {
-    mode: 1,
+    mode: Number(saved.mode) === 2 ? 2 : 1,
     activePlayer: 1,
     started: false,
     starting: false,
     lastLives: null,
     lastStage: null,
-    switchTimer: 0
+    switchTimer: 0,
+    maxUnlocked: Math.max(1, Math.min(4, Number(saved.maxUnlocked) || 1)),
+    playerLives: {
+      1: Math.max(0, Number(saved.p1Lives) || 3),
+      2: Math.max(0, Number(saved.p2Lives) || 3)
+    }
   };
 
-  const players = {
-    1: { name: 'IVO' },
-    2: { name: 'VOLT' }
-  };
-
-  window.__ivoGameMode = 1;
+  const players = { 1: { name: 'IVO' }, 2: { name: 'VOLT' } };
+  window.__ivoGameMode = state.mode;
   window.__ivoActivePlayer = 1;
 
-  // Keep the alternate visual identity for player 2, but don't clutter the menu with character cards.
+  const persist = () => {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        mode: state.mode,
+        maxUnlocked: state.maxUnlocked,
+        p1Lives: state.playerLives[1],
+        p2Lives: state.playerLives[2]
+      }));
+    } catch {}
+  };
+
   const proto = window.CanvasRenderingContext2D?.prototype;
   if (proto && !proto.__ivoRockDrawImagePatched) {
     const nativeDrawImage = proto.drawImage;
@@ -36,10 +52,7 @@
         if ('filter' in this) this.filter = 'hue-rotate(155deg) saturate(1.55) contrast(1.08) brightness(.95)';
         nativeDrawImage.apply(this, args);
         if (args.length >= 9) {
-          const dx = Number(args[5]);
-          const dy = Number(args[6]);
-          const dw = Number(args[7]);
-          const dh = Number(args[8]);
+          const dx = Number(args[5]), dy = Number(args[6]), dw = Number(args[7]), dh = Number(args[8]);
           if ([dx, dy, dw, dh].every(Number.isFinite)) {
             this.filter = 'none';
             this.shadowColor = '#65f7ff';
@@ -68,6 +81,7 @@
       <div class="ivo-menu-options" role="group" aria-label="Modo de juego">
         <button type="button" class="ivo-menu-choice selected" data-mode="1"><span>▶</span> 1 PLAYER</button>
         <button type="button" class="ivo-menu-choice" data-mode="2"><span>▶</span> 2 PLAYERS</button>
+        ${state.maxUnlocked > 1 ? `<button type="button" class="ivo-menu-choice ivo-menu-continue" data-continue="1"><span>▶</span> CONTINUAR · RUTA ${state.maxUnlocked}</button>` : ''}
       </div>
       <button type="button" class="ivo-menu-fullscreen" aria-label="Pantalla completa">⛶ PANTALLA COMPLETA</button>
     </div>`;
@@ -80,8 +94,6 @@
     try { window.__rockPlaylist?.play('boss'); } catch {}
   }
 
-  // Ask for the heavy menu track immediately. Mobile browsers may block sound
-  // until the first touch; if that happens, the first touch starts it automatically.
   startMenuMusic();
   const firstGesture = () => {
     startMenuMusic();
@@ -116,6 +128,17 @@
     return tag;
   }
 
+  function renderHudTag() {
+    const tag = ensureHudTag();
+    if (state.mode !== 2 || !state.started) {
+      tag.hidden = true;
+      return;
+    }
+    tag.hidden = false;
+    tag.dataset.player = String(state.activePlayer);
+    tag.innerHTML = `<span class="${state.activePlayer === 1 ? 'active' : ''}">P1 IVO ×${state.playerLives[1]}</span><i>·</i><span class="${state.activePlayer === 2 ? 'active' : ''}">P2 VOLT ×${state.playerLives[2]}</span>`;
+  }
+
   function announcePlayer(player) {
     if (state.mode !== 2 || !state.started) return;
     let banner = document.querySelector('.ivo-turn-banner');
@@ -127,77 +150,101 @@
     banner.innerHTML = `<small>TURNO DE</small><strong>${players[player].name}</strong>`;
     banner.classList.remove('show');
     requestAnimationFrame(() => banner.classList.add('show'));
-    window.setTimeout(() => banner.classList.remove('show'), 900);
+    setTimeout(() => banner.classList.remove('show'), 900);
+  }
+
+  function syncEngineLives() {
+    if (state.mode === 2) window.__rockSetLives?.(state.playerLives[state.activePlayer]);
   }
 
   function setActivePlayer(player, announce = false) {
     state.activePlayer = player;
     window.__ivoActivePlayer = player;
     document.documentElement.dataset.ivoPlayer = String(player);
-    const tag = ensureHudTag();
-    if (state.mode === 2) {
-      tag.hidden = false;
-      tag.textContent = `P${player} · ${players[player].name}`;
-      tag.dataset.player = String(player);
-    } else {
-      tag.hidden = true;
-    }
+    renderHudTag();
+    requestAnimationFrame(syncEngineLives);
     if (announce) announcePlayer(player);
+    persist();
   }
 
   function switchPlayer(delay = 0) {
     if (state.mode !== 2 || !state.started) return;
-    window.clearTimeout(state.switchTimer);
-    state.switchTimer = window.setTimeout(() => {
-      setActivePlayer(state.activePlayer === 1 ? 2 : 1, true);
+    clearTimeout(state.switchTimer);
+    state.switchTimer = setTimeout(() => {
+      const other = state.activePlayer === 1 ? 2 : 1;
+      if (state.playerLives[other] > 0) setActivePlayer(other, true);
+      else if (state.playerLives[state.activePlayer] > 0) setActivePlayer(state.activePlayer, true);
     }, delay);
   }
 
   function readHud() {
     const livesItem = [...document.querySelectorAll('.hud-item')].find(el => el.querySelector('span')?.textContent?.trim() === 'VIDAS');
-    const livesText = livesItem?.querySelector('b')?.textContent || '';
-    const lives = Number((livesText.match(/\d+/) || [])[0]);
-    const stageText = document.querySelector('.hud-stage b')?.textContent || '';
-    const stage = Number((stageText.match(/\d+/) || [])[0]);
+    const lives = Number(((livesItem?.querySelector('b')?.textContent || '').match(/\d+/) || [])[0]);
+    const stage = Number(((document.querySelector('.hud-stage b')?.textContent || '').match(/\d+/) || [])[0]);
     return {
       lives: Number.isFinite(lives) ? lives : null,
       stage: Number.isFinite(stage) ? stage : null
     };
   }
 
-  window.setInterval(() => {
+  setInterval(() => {
     if (!state.started) return;
     const { lives, stage } = readHud();
     if (state.lastLives == null && lives != null) state.lastLives = lives;
     if (state.lastStage == null && stage != null) state.lastStage = stage;
 
-    if (state.mode === 2) {
-      if (lives != null && state.lastLives != null && lives < state.lastLives && lives > 0) switchPlayer(1250);
-      if (stage != null && state.lastStage != null && stage > state.lastStage) switchPlayer(120);
-      if (lives != null && state.lastLives === 0 && lives >= 3 && stage === 1) setActivePlayer(1, true);
+    if (stage != null) {
+      state.maxUnlocked = Math.max(state.maxUnlocked, Math.min(4, stage));
+      if (state.lastStage != null && stage > state.lastStage) {
+        state.maxUnlocked = Math.max(state.maxUnlocked, stage);
+        persist();
+        if (state.mode === 2) switchPlayer(180);
+      }
+    }
+
+    if (state.mode === 2 && lives != null && state.lastLives != null && lives < state.lastLives) {
+      state.playerLives[state.activePlayer] = Math.max(0, lives);
+      renderHudTag();
+      persist();
+      const other = state.activePlayer === 1 ? 2 : 1;
+      if (state.playerLives[other] > 0) switchPlayer(720);
     }
 
     if (lives != null) state.lastLives = lives;
     if (stage != null) state.lastStage = stage;
-  }, 180);
+  }, 120);
 
-  function startGame(mode) {
+  function startGame(mode, continueRun = false) {
     if (state.starting) return;
     state.starting = true;
     state.mode = mode;
     window.__ivoGameMode = mode;
+
+    if (!continueRun) {
+      state.playerLives = { 1: 3, 2: 3 };
+      window.__ivoContinueLevel = 0;
+      window.__ivoRockStats?.reset();
+    } else {
+      state.playerLives[1] = Math.max(1, state.playerLives[1] || 3);
+      state.playerLives[2] = Math.max(1, state.playerLives[2] || 3);
+      window.__ivoContinueLevel = Math.max(0, state.maxUnlocked - 1);
+    }
+
+    window.__ivoStartingLives = state.playerLives[1];
     setActivePlayer(1, false);
     startMenuMusic();
-    choices.forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.mode) === mode));
+    choices.forEach(btn => btn.classList.toggle('selected', btn.dataset.continue === '1' ? continueRun : Number(btn.dataset.mode) === mode));
     menu.classList.add('starting');
+    persist();
 
-    window.setTimeout(() => {
+    setTimeout(() => {
       const playButton = [...document.querySelectorAll('.play-btn')].find(btn => /arrancar la gira/i.test(btn.textContent || ''));
       menu.remove();
       state.started = true;
       const hud = readHud();
       state.lastLives = hud.lives;
       state.lastStage = hud.stage;
+      renderHudTag();
       if (mode === 2) announcePlayer(1);
       playButton?.click();
     }, 420);
@@ -211,21 +258,22 @@
     });
     button.addEventListener('click', e => {
       e.preventDefault();
-      startGame(Number(button.dataset.mode));
+      if (button.dataset.continue === '1') startGame(state.mode, true);
+      else startGame(Number(button.dataset.mode), false);
     });
   });
 
-  let keyboardMode = 1;
+  let keyboardIndex = 0;
   window.addEventListener('keydown', e => {
     if (!document.body.contains(menu) || state.starting) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
-      keyboardMode = keyboardMode === 1 ? 2 : 1;
-      choices.forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.mode) === keyboardMode));
+      keyboardIndex = (keyboardIndex + (e.key === 'ArrowDown' ? 1 : -1) + choices.length) % choices.length;
+      choices.forEach((btn, i) => btn.classList.toggle('selected', i === keyboardIndex));
       startMenuMusic();
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      startGame(keyboardMode);
+      choices[keyboardIndex]?.click();
     }
   });
 })();
