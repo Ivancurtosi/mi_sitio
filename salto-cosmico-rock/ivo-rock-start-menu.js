@@ -2,23 +2,18 @@
   if (window.__ivoRockMenuInstalled) return;
   window.__ivoRockMenuInstalled = true;
 
-  const SAVE_KEY = 'ivo-rock-progress-v3';
-  const readSave = () => {
-    try { return JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch { return {}; }
-  };
-  const saved = readSave();
+  try { localStorage.removeItem('ivo-rock-progress-v3'); } catch {}
   const state = {
-    mode: Number(saved.mode) === 2 ? 2 : 1,
+    mode: 1,
     activePlayer: 1,
     started: false,
     starting: false,
     lastLives: null,
     lastStage: null,
     switchTimer: 0,
-    maxUnlocked: Math.max(1, Math.min(4, Number(saved.maxUnlocked) || 1)),
     playerLives: {
-      1: Math.max(0, Number(saved.p1Lives) || 3),
-      2: Math.max(0, Number(saved.p2Lives) || 3)
+      1: 3,
+      2: 3
     }
   };
 
@@ -26,16 +21,7 @@
   window.__ivoGameMode = state.mode;
   window.__ivoActivePlayer = 1;
 
-  const persist = () => {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({
-        mode: state.mode,
-        maxUnlocked: state.maxUnlocked,
-        p1Lives: state.playerLives[1],
-        p2Lives: state.playerLives[2]
-      }));
-    } catch {}
-  };
+  const persist = () => {};
 
   const proto = window.CanvasRenderingContext2D?.prototype;
   if (proto && !proto.__ivoRockDrawImagePatched) {
@@ -81,7 +67,6 @@
       <div class="ivo-menu-options" role="group" aria-label="Modo de juego">
         <button type="button" class="ivo-menu-choice selected" data-mode="1"><span>▶</span> 1 PLAYER</button>
         <button type="button" class="ivo-menu-choice" data-mode="2"><span>▶</span> 2 PLAYERS</button>
-        ${state.maxUnlocked > 1 ? `<button type="button" class="ivo-menu-choice ivo-menu-continue" data-continue="1"><span>▶</span> CONTINUAR · RUTA ${state.maxUnlocked}</button>` : ''}
       </div>
       <button type="button" class="ivo-menu-fullscreen" aria-label="Pantalla completa">⛶ PANTALLA COMPLETA</button>
     </div>`;
@@ -193,14 +178,7 @@
     if (state.lastLives == null && lives != null) state.lastLives = lives;
     if (state.lastStage == null && stage != null) state.lastStage = stage;
 
-    if (stage != null) {
-      state.maxUnlocked = Math.max(state.maxUnlocked, Math.min(4, stage));
-      if (state.lastStage != null && stage > state.lastStage) {
-        state.maxUnlocked = Math.max(state.maxUnlocked, stage);
-        persist();
-        if (state.mode === 2) switchPlayer(180);
-      }
-    }
+    if (stage != null && state.lastStage != null && stage > state.lastStage && state.mode === 2) switchPlayer(180);
 
     if (state.mode === 2 && lives != null && state.lastLives != null && lives < state.lastLives) {
       state.playerLives[state.activePlayer] = Math.max(0, lives);
@@ -214,26 +192,20 @@
     if (stage != null) state.lastStage = stage;
   }, 120);
 
-  function startGame(mode, continueRun = false) {
+  function startGame(mode) {
     if (state.starting) return;
     state.starting = true;
     state.mode = mode;
     window.__ivoGameMode = mode;
 
-    if (!continueRun) {
-      state.playerLives = { 1: 3, 2: 3 };
-      window.__ivoContinueLevel = 0;
-      window.__ivoRockStats?.reset();
-    } else {
-      state.playerLives[1] = Math.max(1, state.playerLives[1] || 3);
-      state.playerLives[2] = Math.max(1, state.playerLives[2] || 3);
-      window.__ivoContinueLevel = Math.max(0, state.maxUnlocked - 1);
-    }
+    state.playerLives = { 1: 3, 2: 3 };
+    window.__ivoContinueLevel = 0;
+    window.__ivoRockStats?.reset();
 
     window.__ivoStartingLives = state.playerLives[1];
     setActivePlayer(1, false);
     startMenuMusic();
-    choices.forEach(btn => btn.classList.toggle('selected', btn.dataset.continue === '1' ? continueRun : Number(btn.dataset.mode) === mode));
+    choices.forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.mode) === mode));
     menu.classList.add('starting');
     persist();
 
@@ -260,8 +232,7 @@
     });
     button.addEventListener('click', e => {
       e.preventDefault();
-      if (button.dataset.continue === '1') startGame(state.mode, true);
-      else startGame(Number(button.dataset.mode), false);
+      startGame(Number(button.dataset.mode));
     });
   });
 
@@ -278,4 +249,23 @@
       choices[keyboardIndex]?.click();
     }
   });
+  if (new URLSearchParams(location.search).has('smoke')) {
+    setTimeout(() => {
+      try {
+        [...document.querySelectorAll('.ivo-menu-choice')].find(b => b.dataset.mode === '1')?.click();
+        setTimeout(() => {
+          try {
+            window.__ivoDebugLoadLevel?.(1);
+            setTimeout(() => {
+              const st = window.__ivoDebugState?.();
+              const p = st?.player || {};
+              const ok = st?.stage === 2 && !st?.dead && [p.x,p.y,p.w,p.h].every(Number.isFinite) && p.w > 0 && p.h > 0;
+              document.documentElement.dataset.ivoSmoke = ok ? 'ok' : 'fail';
+            }, 900);
+          } catch { document.documentElement.dataset.ivoSmoke = 'fail'; }
+        }, 900);
+      } catch { document.documentElement.dataset.ivoSmoke = 'fail'; }
+    }, 120);
+  }
+
 })();
