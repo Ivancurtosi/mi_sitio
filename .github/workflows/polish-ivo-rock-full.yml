@@ -1,0 +1,202 @@
+name: Full Ivo Rock gameplay polish
+
+on:
+  push:
+    paths:
+      - '.github/workflows/polish-ivo-rock-full.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Polish boss levels enemies celebration and effects
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          game = Path('salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js')
+          s = game.read_text()
+
+          def replace_once(old, new, label):
+              global s
+              if old not in s:
+                  raise SystemExit(f'{label} pattern not found')
+              s = s.replace(old, new, 1)
+
+          # Three new enemy families: flying bat, sound-wave amplifier and jumping roadie.
+          replace_once(
+              "Ae=e=>e===`warden`?{w:92,h:82}:e===`sentry`?{w:44,h:54}:e===`wisp`?{w:44,h:40}:e===`crawler`?{w:44,h:42}:{w:42,h:36}",
+              "Ae=e=>e===`warden`?{w:92,h:82}:e===`amp`?{w:54,h:48}:e===`bat`?{w:50,h:34}:e===`jumper`?{w:44,h:42}:e===`sentry`?{w:44,h:54}:e===`wisp`?{w:44,h:40}:e===`crawler`?{w:44,h:42}:{w:42,h:36}",
+              'enemy sizes'
+          )
+          replace_once(
+              "je=()=>E.enemies.map((e,t)=>{let n=Ae(e.kind),r=De(e.x+n.w/2),i=e.y??r-n.h,a=e.dir??-1,o=e.kind===`crawler`?72:e.kind===`beetle`?82:e.kind===`spike`?68:0;return{id:t,x:e.x,y:i,w:n.w,h:n.h,kind:e.kind,state:`walk`,vx:a*o,vy:0,originX:e.x,originY:i,range:e.range??(e.kind===`warden`?250:80),phase:t*1.73%(Math.PI*2),active:!0,awake:!1,grounded:e.y===void 0,guard:0,cooldown:.7+t%4*.22,health:e.kind===`warden`?6:1}})",
+              "je=()=>E.enemies.map((e,t)=>{let n=Ae(e.kind),r=De(e.x+n.w/2),i=e.y??r-n.h,a=e.dir??-1,o=e.kind===`crawler`?72:e.kind===`beetle`?82:e.kind===`spike`?68:e.kind===`jumper`?94:0;return{id:t,x:e.x,y:i,w:n.w,h:n.h,kind:e.kind,state:`walk`,vx:a*o,vy:0,originX:e.x,originY:i,range:e.range??(e.kind===`warden`?250:e.kind===`bat`?125:80),phase:t*1.73%(Math.PI*2),active:!0,awake:!1,grounded:e.y===void 0,guard:0,cooldown:.7+t%4*.22,phase2:!1,health:e.kind===`warden`?6:1}})",
+              'enemy initialization'
+          )
+
+          def add_enemies(level_id, additions):
+              global s
+              marker = f'{{id:{level_id},name:'
+              start = s.find(marker)
+              if start < 0:
+                  raise SystemExit(f'level {level_id} not found')
+              next_start = s.find('{id:', start + len(marker))
+              end = next_start if next_start >= 0 else s.find('],v=n()', start)
+              chunk = s[start:end]
+              m = re.search(r'enemies:\[(.*?)\],platforms:\[', chunk)
+              if not m:
+                  raise SystemExit(f'level {level_id} enemies array not found')
+              current = m.group(1)
+              if any(f'kind:`{kind}`' in current for kind in ['amp','bat','jumper']):
+                  raise SystemExit(f'level {level_id} already contains polish enemies')
+              insert = current + (',' if current else '') + ','.join(additions)
+              chunk = chunk[:m.start(1)] + insert + chunk[m.end(1):]
+              s = s[:start] + chunk + s[end:]
+
+          add_enemies(1, ["{x:4680,kind:`amp`,dir:-1}", "{x:6040,kind:`jumper`,dir:-1}"])
+          add_enemies(2, ["{x:1780,y:360,kind:`bat`,range:120}", "{x:5140,kind:`amp`,dir:-1}"])
+          add_enemies(3, ["{x:1460,y:330,kind:`bat`,range:135}", "{x:5720,kind:`jumper`,dir:-1}"])
+          add_enemies(4, ["{x:2280,y:340,kind:`bat`,range:125}", "{x:6120,kind:`amp`,dir:-1}"])
+
+          # Flying bats move on a more aggressive oval. Amplifiers shoot horizontal sound waves.
+          old_special = "if(n.kind===`wisp`)n.phase+=e*1.8,n.y=n.originY+Math.sin(n.phase)*n.range*.42,n.x=n.originX+Math.cos(n.phase*.62)*n.range;else if(n.kind===`sentry`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<620){let e=J.x<n.x?-1:1;B.push({x:n.x+n.w/2,y:n.y+14,w:14,h:14,vx:e*260,vy:-32,life:3.1,active:!0,kind:`spark`}),n.cooldown=1.65}}"
+          new_special = "if(n.kind===`wisp`)n.phase+=e*1.8,n.y=n.originY+Math.sin(n.phase)*n.range*.42,n.x=n.originX+Math.cos(n.phase*.62)*n.range;else if(n.kind===`bat`)n.phase+=e*3.25,n.y=n.originY+Math.sin(n.phase)*n.range*.42,n.x=n.originX+Math.cos(n.phase*.72)*n.range*.82,n.vx=Math.cos(n.phase*.72)>=0?78:-78;else if(n.kind===`amp`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<560){let e=J.x<n.x?-1:1;B.push({x:n.x+n.w/2+e*20,y:n.y+15,w:18,h:18,vx:e*300,vy:0,life:3.4,active:!0,kind:`wave`}),B.push({x:n.x+n.w/2+e*18,y:n.y+29,w:14,h:14,vx:e*335,vy:0,life:3.05,active:!0,kind:`wave`}),n.cooldown=1.85}}else if(n.kind===`sentry`){if(n.vx=0,n.cooldown<=0&&Math.abs(J.x-n.x)<620){let e=J.x<n.x?-1:1;B.push({x:n.x+n.w/2,y:n.y+14,w:14,h:14,vx:e*260,vy:-32,life:3.1,active:!0,kind:`spark`}),n.cooldown=1.65}}"
+          replace_once(old_special, new_special, 'new enemy behavior')
+
+          # Final boss now has a real phase two. At half health it ignites, accelerates and fires faster.
+          old_warden = "else if(n.kind===`warden`){if(n.guard<=0){let t=J.x<n.x?-145:145;n.vx=se(n.vx,t,360*e)}if(n.cooldown<=0){if(Math.abs(J.x-n.x)<700){let e=J.x<n.x?-1:1,r=Math.floor(T*1.7)%3;B.push({x:n.x+n.w/2+e*18,y:n.y+30,w:24,h:24,vx:e*330,vy:-300,life:5.2,active:!0,kind:`flare`}),B.push({x:n.x+n.w/2+e*16,y:n.y+42,w:22,h:22,vx:e*355,vy:-180,life:5.2,active:!0,kind:`flare`}),r===2&&B.push({x:n.x+n.w/2+e*12,y:n.y+20,w:20,h:20,vx:e*305,vy:-390,life:5.4,active:!0,kind:`flare`})}n.vy=-420,n.cooldown=1.35}let r=n.x;n.x+=n.vx*e,Ke(n,t,r,!0),n.x=S(n.x,E.goalX-540,E.goalX-180-n.w);let i=n.y+n.h;n.vy=Math.min(780,n.vy+1500*e),n.y+=n.vy*e,n.grounded=!1,Je(n,i,e,0)}else{let r=n.x;"
+          new_warden = "else if(n.kind===`warden`){let r=n.health<=3;r&&!n.phase2&&(n.phase2=!0,K=.32,Z(n.x+n.w/2,n.y+n.h/2,`#ff5a20`,30,`spark`),window.__ivoRockPolish?.bossPhase(),Y(`DIABLITO EN LLAMAS`,`FASE 2 · más rápido y más fuego`,1.7));if(n.guard<=0){let t=J.x<n.x?-(r?185:145):r?185:145;n.vx=se(n.vx,t,(r?470:360)*e)}if(n.cooldown<=0){if(Math.abs(J.x-n.x)<760){let e=J.x<n.x?-1:1,t=Math.floor(T*2.1)%4;B.push({x:n.x+n.w/2+e*18,y:n.y+30,w:r?26:24,h:r?26:24,vx:e*(r?365:330),vy:r?-330:-300,life:r?5.6:5.2,active:!0,kind:`flare`}),B.push({x:n.x+n.w/2+e*16,y:n.y+42,w:22,h:22,vx:e*(r?390:355),vy:r?-150:-180,life:r?5.6:5.2,active:!0,kind:`flare`}),r&&B.push({x:n.x+n.w/2+e*12,y:n.y+18,w:20,h:20,vx:e*340,vy:-430,life:5.8,active:!0,kind:`flare`}),r&&t===3&&B.push({x:n.x+n.w/2+e*14,y:n.y+47,w:18,h:18,vx:e*430,vy:-60,life:4.8,active:!0,kind:`flare`})}n.vy=r?-500:-420,r&&Math.abs(J.x-n.x)>240&&(n.vx+=(J.x<n.x?-1:1)*55),n.cooldown=r?.88:1.35}let i=n.x;n.x+=n.vx*e,Ke(n,t,i,!0),n.x=S(n.x,E.goalX-540,E.goalX-180-n.w);let a=n.y+n.h;n.vy=Math.min(780,n.vy+1500*e),n.y+=n.vy*e,n.grounded=!1,Je(n,a,e,0)}else{n.kind===`jumper`&&n.cooldown<=0&&Math.abs(J.x-n.x)<440&&(n.vx=(J.x<n.x?-1:1)*140,n.vy=-460,n.cooldown=1.55);let r=n.x;"
+          replace_once(old_warden, new_warden, 'boss phase two and jumper behavior')
+
+          # Sound-wave projectiles travel straight; fireballs keep their arc.
+          replace_once("t.vy+=(t.kind===`flare`?440:80)*e", "t.vy+=(t.kind===`flare`?440:t.kind===`wave`?0:80)*e", 'wave physics')
+
+          old_projectiles = "for(let t of B)$(t)&&(e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),t.kind===`flare`?(e.rotate(Math.atan2(t.vy,t.vx)),e.shadowColor=`#ff3a13`,e.shadowBlur=20,e.fillStyle=`rgba(255,67,18,.52)`,e.beginPath(),e.moveTo(-t.w*1.25,0),e.lineTo(-t.w*.12,-t.h*.46),e.lineTo(-t.w*.12,t.h*.46),e.closePath(),e.fill(),e.fillStyle=`#ff5a1f`,e.beginPath(),e.arc(0,0,t.w*.52,0,Math.PI*2),e.fill(),e.fillStyle=`#ffd95a`,e.beginPath(),e.arc(t.w*.10,-t.h*.08,t.w*.25,0,Math.PI*2),e.fill()):(e.shadowColor=`#ff628e`,e.shadowBlur=14,e.fillStyle=`#ff628e`,e.beginPath(),e.arc(0,0,t.w/2,0,Math.PI*2),e.fill()),e.restore());"
+          new_projectiles = "for(let t of B)$(t)&&(e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),t.kind===`flare`?(e.rotate(Math.atan2(t.vy,t.vx)),e.shadowColor=`#ff3a13`,e.shadowBlur=20,e.fillStyle=`rgba(255,67,18,.52)`,e.beginPath(),e.moveTo(-t.w*1.25,0),e.lineTo(-t.w*.12,-t.h*.46),e.lineTo(-t.w*.12,t.h*.46),e.closePath(),e.fill(),e.fillStyle=`#ff5a1f`,e.beginPath(),e.arc(0,0,t.w*.52,0,Math.PI*2),e.fill(),e.fillStyle=`#ffd95a`,e.beginPath(),e.arc(t.w*.10,-t.h*.08,t.w*.25,0,Math.PI*2),e.fill()):t.kind===`wave`?(e.scale(t.vx>=0?1:-1,1),e.shadowColor=`#74fff0`,e.shadowBlur=16,e.strokeStyle=`#8afff4`,e.lineWidth=3,[6,12,18].forEach(n=>{e.beginPath(),e.arc(-7,0,n,-.95,.95),e.stroke()})):(e.shadowColor=`#ff628e`,e.shadowBlur=14,e.fillStyle=`#ff628e`,e.beginPath(),e.arc(0,0,t.w/2,0,Math.PI*2),e.fill()),e.restore());"
+          replace_once(old_projectiles, new_projectiles, 'wave projectile visual')
+
+          # Distinct readable drawings for the three new enemy types.
+          old_sentry_visual = "if(t.kind===`sentry`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#5c4b8f`,e.beginPath();for(let t=0;t<8;t++){let n=t*Math.PI/4,r=t%2==0?28:20,i=Math.cos(n)*r,a=Math.sin(n)*r;t===0?e.moveTo(i,a):e.lineTo(i,a)}e.closePath(),e.fill(),e.fillStyle=`#79fff1`,e.fillRect(-12,-7,24,14),e.fillStyle=`#10152f`,e.fillRect(J.x<t.x?-8:3,-4,5,7),e.restore();return}"
+          new_sentry_visual = "if(t.kind===`bat`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#211128`;let n=8+Math.sin(T*11+t.phase)*7;e.beginPath(),e.moveTo(-5,0),e.lineTo(-25,-n),e.lineTo(-21,9),e.lineTo(-8,5),e.closePath(),e.fill(),e.beginPath(),e.moveTo(5,0),e.lineTo(25,-n),e.lineTo(21,9),e.lineTo(8,5),e.closePath(),e.fill(),e.fillStyle=`#5b245f`,e.beginPath(),e.ellipse(0,2,9,13,0,0,Math.PI*2),e.fill(),e.fillStyle=`#79fff1`;for(let n of[-3,3])e.beginPath(),e.arc(n,-2,1.8,0,Math.PI*2),e.fill();e.restore();return}if(t.kind===`amp`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.shadowColor=`#5dfff0`,e.shadowBlur=t.cooldown<.28?18:5,e.fillStyle=`#111216`,Q(e,-27,-24,54,48,5),e.fill(),e.strokeStyle=`#777b82`,e.lineWidth=3,e.stroke(),e.fillStyle=`#050506`;for(let n of[-13,13]){e.beginPath(),e.arc(n,7,9,0,Math.PI*2),e.fill(),e.strokeStyle=`#4e535a`,e.lineWidth=2,e.stroke()}e.fillStyle=t.cooldown<.28?`#7dfff2`:`#e73b32`,e.fillRect(-20,-17,9,4),e.fillStyle=`#f4ce63`,e.fillRect(12,-17,7,4),e.restore();return}if(t.kind===`jumper`){e.save(),e.translate(t.x+t.w/2,t.y+t.h/2),e.fillStyle=`#5d1525`,e.beginPath(),e.ellipse(0,2,17,16,0,0,Math.PI*2),e.fill(),e.fillStyle=`#17151a`,Q(e,-16,-15,32,12,5),e.fill(),e.fillStyle=`#ffe36e`;for(let n of[-6,6])e.beginPath(),e.arc(n,-3,2.2,0,Math.PI*2),e.fill();e.strokeStyle=`#c6c8ca`,e.lineWidth=3;for(let n of[-9,9]){e.beginPath(),e.moveTo(n,14),e.lineTo(n-3,20),e.lineTo(n+3,25),e.stroke()}e.fillStyle=`#24252a`,e.fillRect(-18,23,13,5),e.fillRect(5,23,13,5),e.restore();return}" + old_sentry_visual
+          replace_once(old_sentry_visual, new_sentry_visual, 'new enemy visuals')
+
+          # Phase-two devil glows hotter and grows a flame aura.
+          replace_once(
+              "if(t.kind===`warden`){e.save();let n=1+Math.sin(T*5)*.025;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n),e.shadowColor=t.guard>0?`#ffe66a`:`#ff2b16`,e.shadowBlur=22,",
+              "if(t.kind===`warden`){e.save();let r=t.health<=3,n=1+Math.sin(T*5)*.025;e.translate(t.x+t.w/2,t.y+t.h/2),e.scale(n,n),r&&(e.globalAlpha=.42,e.fillStyle=`#ff4b17`,[-28,0,28].forEach(n=>{e.beginPath(),e.moveTo(n,35),e.lineTo(n-9,5-Math.sin(T*9+n)*9),e.lineTo(n+9,8),e.closePath(),e.fill()}),e.globalAlpha=1),e.shadowColor=t.guard>0?`#ffe66a`:r?`#ff6a10`:`#ff2b16`,e.shadowBlur=r?30:22,",
+              'boss phase visual prefix'
+          )
+          replace_once("e.fillStyle=`#631017`,e.beginPath(),e.ellipse(0,15,38,33", "e.fillStyle=r?`#8c1110`:`#631017`,e.beginPath(),e.ellipse(0,15,38,33", 'boss phase body')
+          replace_once("e.fillStyle=`#a9161d`,e.beginPath(),e.arc(0,-10,29", "e.fillStyle=r?`#d42a14`:`#a9161d`,e.beginPath(),e.arc(0,-10,29", 'boss phase head')
+          replace_once("e.fillStyle=`#ffd34f`;for(let n of[-11,11])", "e.fillStyle=r?`#fff16b`:`#ffd34f`;for(let n of[-11,11])", 'boss phase eyes')
+          replace_once("e.fillStyle=`#ffb13b`;for(let n=0;n<t.health;n++)", "e.fillStyle=r?`#fff06b`:`#ffb13b`;for(let n=0;n<t.health;n++)", 'boss phase health')
+
+          # More satisfying impacts and particles without changing the core controls.
+          replace_once(
+              "if(e.kind===`brittle`&&P!==`small`)e.active=!1,X(50),Z(e.x+e.w/2,e.y+e.h/2,`#a98cff`,16),K=.18,o.current?.sfx(`smash`);",
+              "if(e.kind===`brittle`&&P!==`small`)e.active=!1,X(50),Z(e.x+e.w/2,e.y+e.h/2,`#a98cff`,24),K=.22,o.current?.sfx(`smash`),window.__ivoRockPolish?.impact(`smash`);",
+              'block smash polish'
+          )
+          replace_once(
+              "Z(e.x+e.w/2,e.y+e.h/2,e.kind===`comet`?`#fff2a6`:`#75fff2`,18,`spark`)}",
+              "Z(e.x+e.w/2,e.y+e.h/2,e.kind===`comet`?`#fff2a6`:`#75fff2`,26,`spark`),window.__ivoRockPolish?.impact(`power`)}",
+              'powerup polish'
+          )
+          replace_once(
+              "Z(e.x+e.w/2,e.y+e.h/2,e.kind===`wisp`?`#78faff`:`#ff8aa8`,12,`spark`),o.current?.sfx(`stomp`)",
+              "Z(e.x+e.w/2,e.y+e.h/2,e.kind===`wisp`||e.kind===`bat`?`#78faff`:e.kind===`amp`?`#ffe16b`:`#ff8aa8`,16,`spark`),K=Math.max(K,.055),o.current?.sfx(`stomp`)",
+              'enemy defeat particles'
+          )
+          replace_once(
+              "e.kind===`warden`?(--e.health,e.guard=.6,e.vx=J.x<e.x?170:-170,X(500),K=.16,o.current?.sfx(`stomp`),e.health<=0&&Ze(e,5e3))",
+              "e.kind===`warden`?(--e.health,e.guard=.6,e.vx=J.x<e.x?170:-170,X(500),K=.16,o.current?.sfx(`stomp`),window.__ivoRockPolish?.impact(`boss`),e.health<=0&&Ze(e,5e3))",
+              'boss stomp impact'
+          )
+          replace_once(
+              "if(e.kind===`warden`){if(e.guard>0)return;--e.health,e.guard=.35,X(300),K=.09,Z(e.x+e.w/2,e.y+e.h/2,`#75fff2`,8,`spark`),e.health<=0&&Ze(e,5e3)}",
+              "if(e.kind===`warden`){if(e.guard>0)return;--e.health,e.guard=.35,X(300),K=.11,Z(e.x+e.w/2,e.y+e.h/2,`#75fff2`,12,`spark`),window.__ivoRockPolish?.impact(`boss`),e.health<=0&&Ze(e,5e3)}",
+              'boss shot impact'
+          )
+          replace_once("stomp:[[40,.065,`square`,.06,0,-4]],", "stomp:[[40,.07,`square`,.06,0,-4],[52,.055,`triangle`,.025,.025,-5]],", 'stomp sound')
+
+          # Stronger identity for every route: concert crowd, underground cables/neon,
+          # storm trusses/lightning and apocalyptic embers/ruins.
+          old_grove = "E.biome===`grove`&&(e.save(),e.globalAlpha=.22,Array.from({length:6},(_,rr)=>rr).forEach(rr=>{let xx=t*(.08+rr*.18);e.fillStyle=rr%2?`rgba(255,55,28,.18)`:`rgba(255,215,82,.14)`,e.beginPath(),e.moveTo(xx-20,0),e.lineTo(xx+20,0),e.lineTo(xx+125,520),e.lineTo(xx-125,520),e.closePath(),e.fill()}),e.restore())"
+          new_grove = "E.biome===`grove`&&(e.save(),e.globalAlpha=.22,Array.from({length:6},(_,rr)=>rr).forEach(rr=>{let xx=t*(.08+rr*.18);e.fillStyle=rr%2?`rgba(255,55,28,.18)`:`rgba(255,215,82,.14)`,e.beginPath(),e.moveTo(xx-20,0),e.lineTo(xx+20,0),e.lineTo(xx+125,520),e.lineTo(xx-125,520),e.closePath(),e.fill()}),e.globalAlpha=.3,e.strokeStyle=`rgba(255,185,90,.32)`,e.lineWidth=4,e.strokeRect(t*.09,58,t*.82,104),e.globalAlpha=.48,e.fillStyle=`#050304`,Array.from({length:20},(_,rr)=>rr).forEach(rr=>{let xx=t*(rr/19),yy=548+(rr%3)*9;e.beginPath(),e.arc(xx,yy,8+rr%4,0,Math.PI*2),e.fill(),e.fillRect(xx-6,yy+7,12,48)}),e.restore())"
+          replace_once(old_grove, new_grove, 'grove identity')
+
+          old_cavern = "E.biome===`cavern`&&(e.save(),e.fillStyle=`rgba(0,0,0,.78)`,e.beginPath(),e.moveTo(0,0),Array.from({length:16},(_,rr)=>rr).forEach(rr=>{let xx=rr*t/15,yy=52+((rr*37)%5)*25;e.lineTo(xx,yy)}),e.lineTo(t,0),e.closePath(),e.fill(),e.globalAlpha=.28,e.fillStyle=`#5e1d78`,e.fillRect(0,500,t,220),e.globalAlpha=.18,e.fillStyle=`#b547cf`,Array.from({length:7},(_,rr)=>rr).forEach(rr=>{let xx=t*(.08+rr*.15);e.fillRect(xx,94+(rr%3)*38,3,300)}),e.restore())"
+          new_cavern = "E.biome===`cavern`&&(e.save(),e.fillStyle=`rgba(0,0,0,.78)`,e.beginPath(),e.moveTo(0,0),Array.from({length:16},(_,rr)=>rr).forEach(rr=>{let xx=rr*t/15,yy=52+((rr*37)%5)*25;e.lineTo(xx,yy)}),e.lineTo(t,0),e.closePath(),e.fill(),e.globalAlpha=.28,e.fillStyle=`#5e1d78`,e.fillRect(0,500,t,220),e.globalAlpha=.18,e.fillStyle=`#b547cf`,Array.from({length:7},(_,rr)=>rr).forEach(rr=>{let xx=t*(.08+rr*.15);e.fillRect(xx,94+(rr%3)*38,3,300)}),e.globalAlpha=.3,e.strokeStyle=`#8b6aa5`,e.lineWidth=6,Array.from({length:5},(_,rr)=>rr).forEach(rr=>{let xx=t*(.12+rr*.19);e.beginPath(),e.moveTo(xx,0),e.bezierCurveTo(xx+40,150,xx-45,285,xx+20,440),e.stroke()}),e.globalAlpha=.22,e.fillStyle=`#d347e5`,e.fillRect(t*.67,174,112,27),e.fillStyle=`#09020c`,e.fillRect(t*.67+7,180,98,15),e.restore())"
+          replace_once(old_cavern, new_cavern, 'cavern identity')
+
+          old_sky = "E.biome===`sky`&&(e.save(),e.globalAlpha=.15,e.fillStyle=`#aab9dc`,e.beginPath(),e.arc(t*.82,112,50,0,Math.PI*2),e.fill(),e.strokeStyle=`rgba(145,175,220,.32)`,e.lineWidth=2,Array.from({length:18},(_,rr)=>rr).forEach(rr=>{let xx=(rr*101+T*185)%Math.max(1,t),yy=(rr*47+T*255)%610;e.beginPath(),e.moveTo(xx,yy),e.lineTo(xx-16,yy+44),e.stroke()}),e.restore())"
+          new_sky = "E.biome===`sky`&&(e.save(),e.globalAlpha=.15,e.fillStyle=`#aab9dc`,e.beginPath(),e.arc(t*.82,112,50,0,Math.PI*2),e.fill(),e.strokeStyle=`rgba(145,175,220,.32)`,e.lineWidth=2,Array.from({length:18},(_,rr)=>rr).forEach(rr=>{let xx=(rr*101+T*185)%Math.max(1,t),yy=(rr*47+T*255)%610;e.beginPath(),e.moveTo(xx,yy),e.lineTo(xx-16,yy+44),e.stroke()}),e.globalAlpha=.25,e.strokeStyle=`#6f7890`,e.lineWidth=5,e.strokeRect(t*.08,390,t*.84,88),e.beginPath(),Array.from({length:9},(_,rr)=>rr).forEach(rr=>{let xx=t*(.1+rr*.1);e.moveTo(xx,390),e.lineTo(xx+45,478)}),e.stroke();let rr=Math.max(0,Math.sin(T*1.55)-.992)*70;rr>0&&(e.globalAlpha=Math.min(.38,rr),e.fillStyle=`#dce8ff`,e.fillRect(0,0,t,720)),e.restore())"
+          replace_once(old_sky, new_sky, 'sky identity')
+
+          old_citadel = "E.biome===`citadel`&&(e.save(),e.globalAlpha=.22,e.fillStyle=`#3b0308`,e.fillRect(0,430,t,290),e.globalAlpha=.18,e.fillStyle=`#7b1119`,Array.from({length:12},(_,rr)=>rr).forEach(rr=>{let xx=(rr*137+T*28)%Math.max(1,t),yy=510-(rr%4)*35;e.beginPath(),e.arc(xx,yy,18+rr%3*9,0,Math.PI*2),e.fill()}),e.restore())"
+          new_citadel = "E.biome===`citadel`&&(e.save(),e.globalAlpha=.22,e.fillStyle=`#3b0308`,e.fillRect(0,430,t,290),e.globalAlpha=.18,e.fillStyle=`#7b1119`,Array.from({length:12},(_,rr)=>rr).forEach(rr=>{let xx=(rr*137+T*28)%Math.max(1,t),yy=510-(rr%4)*35;e.beginPath(),e.arc(xx,yy,18+rr%3*9,0,Math.PI*2),e.fill()}),e.globalAlpha=.46,e.fillStyle=`#120507`,Array.from({length:7},(_,rr)=>rr).forEach(rr=>{let xx=t*(.04+rr*.155),hh=58+(rr%3)*34;e.fillRect(xx,500-hh,48,hh),e.fillStyle=`#050506`,e.beginPath(),e.arc(xx+24,480-hh*.45,13,0,Math.PI*2),e.fill(),e.fillStyle=`#120507`}),e.globalAlpha=.6,Array.from({length:25},(_,rr)=>rr).forEach(rr=>{let xx=(rr*83+T*(26+rr%5*7))%Math.max(1,t),yy=610-((rr*57+T*80)%360);e.fillStyle=rr%3?`#ff7a25`:`#ffd05a`,e.fillRect(xx,yy,2+rr%3,4+rr%4)}),e.restore())"
+          replace_once(old_citadel, new_citadel, 'citadel identity')
+
+          # Dynamic boss warning reflects the phase change.
+          replace_once(
+              "Y(`DIABLITO DEL METAL`,`Saltalo o derrotalo · cuidado con el fuego`,1.2)",
+              "Y(n.health<=3?`DIABLITO EN LLAMAS`:`DIABLITO DEL METAL`,n.health<=3?`FASE 2 · más rápido y más fuego`:`Saltalo o derrotalo · cuidado con el fuego`,1.2)",
+              'dynamic boss warning'
+          )
+
+          # A longer, more satisfying finish: extra score, particles, flash and an original mini guitar solo.
+          old_goal = "!Te&&J.x+J.w>=E.goalX&&(Te=!0,G=2.35,J.invulnerable=9,u.current.left=!1,u.current.right=!1,X(Math.max(0,Math.ceil(O))*10+2e3),Y(ve===_.length-1?`¡GIRA COMPLETA!`:`RECITAL COMPLETO`,`Etapa ${E.id} superada`,2.1),o.current?.stopMusic(),o.current?.sfx(`goal`));"
+          new_goal = "!Te&&J.x+J.w>=E.goalX&&(Te=!0,G=3.05,J.invulnerable=9,u.current.left=!1,u.current.right=!1,X(Math.max(0,Math.ceil(O))*10+2500),Z(E.goalX-42,520,`#ffe56b`,28,`spark`),Z(E.goalX+18,470,`#75fff2`,24,`spark`),Z(E.goalX-8,410,`#ff6d8f`,22,`spark`),Y(ve===_.length-1?`¡GIRA COMPLETA!`:`RECITAL COMPLETO`,`Etapa ${E.id} superada · bonus de tiempo`,2.65),o.current?.stopMusic(),o.current?.sfx(`goal`),window.__ivoRockPolish?.goal(ve===_.length-1,Math.max(0,Math.ceil(O))*10+2500));"
+          replace_once(old_goal, new_goal, 'goal celebration')
+
+          game.write_text(s)
+
+          # Load the polish helper and bust caches without touching the simple start menu.
+          mount = Path('salto-cosmico-rock/mount.js')
+          ms = mount.read_text()
+          if "cosmic-jump-DkePWGqE.js?v=devil-boss-1" not in ms:
+              raise SystemExit('mount game cache pattern not found')
+          ms = ms.replace("cosmic-jump-DkePWGqE.js?v=devil-boss-1", "cosmic-jump-DkePWGqE.js?v=full-polish-1", 1)
+          if "await import('./ivo-rock-polish.js?v=full-polish-1');" not in ms:
+              marker = "await import('./ivo-rock-start-menu.js?v=simple-menu-1');"
+              if marker not in ms:
+                  raise SystemExit('start menu import marker not found')
+              ms = ms.replace(marker, "await import('./ivo-rock-polish.js?v=full-polish-1');\n" + marker, 1)
+          mount.write_text(ms)
+
+          index = Path('salto-cosmico-rock/index.html')
+          ix = index.read_text()
+          if "mount.js?v=devil-boss-1" not in ix:
+              raise SystemExit('index mount cache pattern not found')
+          ix = ix.replace("mount.js?v=devil-boss-1", "mount.js?v=full-polish-1", 1)
+          if "ivo-rock-polish.css?v=full-polish-1" not in ix:
+              css_marker = '<link rel="stylesheet" href="./ivo-rock-start-menu.css?v=simple-menu-1">'
+              if css_marker not in ix:
+                  raise SystemExit('menu css marker not found')
+              ix = ix.replace(css_marker, css_marker + '\n  <link rel="stylesheet" href="./ivo-rock-polish.css?v=full-polish-1">', 1)
+          index.write_text(ix)
+
+      - name: Syntax check
+        run: |
+          cp salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js /tmp/game.mjs
+          cp salto-cosmico-rock/mount.js /tmp/mount.mjs
+          node --check /tmp/game.mjs
+          node --check /tmp/mount.mjs
+          node --check salto-cosmico-rock/ivo-rock-polish.js
+
+      - name: Commit full polish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add salto-cosmico-rock/assets/cosmic-jump-DkePWGqE.js salto-cosmico-rock/mount.js salto-cosmico-rock/index.html
+          git commit -m "Polish Ivo Rock boss levels enemies and finale"
+          git push origin master
