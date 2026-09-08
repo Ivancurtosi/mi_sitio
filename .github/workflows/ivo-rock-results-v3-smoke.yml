@@ -1,0 +1,40 @@
+name: Ivo Rock results v3 smoke test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-results-v3-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Static validation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          node --check salto-cosmico-rock/ivo-rock-results-v3.js
+          node --check salto-cosmico-rock/mount.js
+          node --check salto-cosmico-rock/service-worker.js
+          grep -q 'RUTA COMPLETADA' salto-cosmico-rock/ivo-rock-results-v3.js
+          grep -q '¡GANASTE!' salto-cosmico-rock/ivo-rock-results-v3.js
+          grep -q 'ivo-rock-results-v3.css' salto-cosmico-rock/index.html
+          grep -q 'ivo-rock-results-v3.js' salto-cosmico-rock/mount.js
+      - name: Browser smoke test
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --enable-logging=stderr --virtual-time-budget=7500 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?smoke=1&v=results-simple-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          cat /tmp/chrome.log
+          grep -q 'data-ivo-smoke="ok"' /tmp/dom.txt
+          grep -q 'ivo-results-v3-layer' /tmp/dom.txt
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            echo 'Runtime JavaScript error detected'
+            exit 1
+          fi
