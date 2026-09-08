@@ -1,0 +1,10 @@
+/* Hotfix: hidden result overlays must never intercept menu/game controls. */
+.ivo-results-v3-layer .ivo-route-card,
+.ivo-results-v3-layer .ivo-victory-screen {
+  pointer-events: none !important;
+}
+
+.ivo-results-v3-layer .ivo-route-card.show,
+.ivo-results-v3-layer .ivo-victory-screen.show {
+  pointer-events: auto !important;
+}
