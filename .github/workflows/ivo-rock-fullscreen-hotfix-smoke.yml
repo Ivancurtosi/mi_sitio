@@ -1,0 +1,53 @@
+name: Ivo Rock fullscreen hotfix smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ivo-rock-fullscreen-hotfix-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Static checks
+        shell: bash
+        run: |
+          set -euxo pipefail
+          grep -q 'ivo-rock-fullscreen-hotfix.css?v=fullscreen-hotfix-1' salto-cosmico-rock/index.html
+          grep -q 'pointer-events: none !important' salto-cosmico-rock/ivo-rock-fullscreen-hotfix.css
+          grep -q 'pointer-events: auto !important' salto-cosmico-rock/ivo-rock-fullscreen-hotfix.css
+          grep -q "ivo-rock-pwa-v3" salto-cosmico-rock/service-worker.js
+
+      - name: Browser hit-test for fullscreen button
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('salto-cosmico-rock/index.html')
+          s = p.read_text()
+          probe = '''<script>
+          setTimeout(() => {
+            const b = document.querySelector('.ivo-menu-fullscreen');
+            if (!b) { document.documentElement.dataset.fullscreenHit = 'missing'; return; }
+            const r = b.getBoundingClientRect();
+            const hit = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
+            document.documentElement.dataset.fullscreenHit = (hit === b || b.contains(hit)) ? 'ok' : ('blocked-' + (hit?.className || hit?.tagName || 'unknown'));
+          }, 1800);
+          </script>'''
+          p.write_text(s.replace('</body>', probe + '</body>'))
+          PY
+          python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4500 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?v=fullscreen-hotfix-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          cat /tmp/chrome.log
+          grep -q 'data-fullscreen-hit="ok"' /tmp/dom.txt
+          if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
+            echo 'Runtime JavaScript error detected'
+            exit 1
+          fi
