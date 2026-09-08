@@ -309,3 +309,39 @@
 
 /* Short end-of-tour concert scene behind the score card. */
 .ivo-final-stage{position:absolute;inset:0;opacity:0;overflow:hidden;background:linear-gradient(rgba(7,0,8,.25),rgba(18,0,3,.7));transition:opacity .18s ease}.ivo-final-stage.show{opacity:1}.ivo-final-beams i{position:absolute;top:-12%;width:16vw;height:92vh;transform-origin:50% 0;clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);background:rgba(255,62,32,.12);filter:blur(2px);animation:ivoFinalBeam .55s ease-in-out infinite alternate}.ivo-final-beams i:nth-child(1){left:15%;transform:rotate(13deg);background:rgba(255,205,75,.12)}.ivo-final-beams i:nth-child(2){left:42%;transform:rotate(-5deg);background:rgba(255,48,63,.14)}.ivo-final-beams i:nth-child(3){right:15%;transform:rotate(-13deg);background:rgba(100,255,241,.1)}.ivo-final-crowd{position:absolute;left:5%;right:5%;bottom:0;height:25%;display:flex;align-items:flex-end;justify-content:space-around}.ivo-final-crowd i{width:3.3%;max-width:24px;height:42%;border-radius:50% 50% 18% 18%;background:#08080a;box-shadow:0 -8px 0 -3px #08080a;animation:ivoCrowd .28s ease-in-out infinite alternate}.ivo-final-crowd i:nth-child(3n){height:58%;animation-delay:.12s}.ivo-final-crowd i:nth-child(4n){height:48%;animation-delay:.2s}.ivo-final-riser{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);width:112px;height:92px;border:3px solid #73767c;background:#111216;display:grid;place-items:center;box-shadow:0 0 45px rgba(255,65,30,.38)}.ivo-final-riser span{font-size:42px;color:#ffd95b;text-shadow:0 0 18px #ff6b29}.ivo-final-riser b{position:absolute;bottom:7px;color:#fff1c2;font:1000 12px ui-monospace,monospace;letter-spacing:.12em}.ivo-final-stage>strong,.ivo-final-stage>small{position:absolute;left:50%;transform:translateX(-50%);text-align:center;text-shadow:0 3px 18px #000}.ivo-final-stage>strong{top:10%;font:1000 clamp(25px,5vw,56px) ui-monospace,monospace;color:#ffe16b;letter-spacing:.08em}.ivo-final-stage>small{top:18%;font:1000 12px ui-monospace,monospace;color:#8afff4;letter-spacing:.18em}@keyframes ivoFinalBeam{to{filter:brightness(1.5) blur(1px);opacity:.55}}@keyframes ivoCrowd{to{transform:translateY(-8px) rotate(2deg)}}
+
+
+/* IVO ROCK RESULTS SCREEN V2 */
+.ivo-polish-celebration{
+  top:50%;
+  width:min(780px,calc(100vw - 30px));
+  min-width:0;
+  padding:14px 18px 16px;
+  border:3px solid #8b5a26;
+  border-radius:18px;
+  color:#fff7dc;
+  background:radial-gradient(circle at 50% -20%,rgba(255,94,21,.28),transparent 42%),linear-gradient(180deg,rgba(27,12,13,.98),rgba(7,7,9,.98));
+  box-shadow:0 0 0 100vmax rgba(0,0,0,.58),0 18px 70px rgba(0,0,0,.72),0 0 42px rgba(255,66,23,.38),inset 0 0 0 2px rgba(255,210,89,.14);
+  overflow:hidden;
+  clip-path:polygon(2% 0,98% 0,100% 8%,100% 92%,98% 100%,2% 100%,0 92%,0 8%);
+}
+.ivo-polish-celebration::before,.ivo-polish-celebration::after{content:'';position:absolute;top:-14px;width:28%;height:52px;opacity:.72;filter:blur(.2px);background:linear-gradient(105deg,transparent 0 8%,#ff4720 10% 18%,#ffb52e 22% 30%,transparent 34% 43%,#ff6a20 46% 55%,transparent 60%);pointer-events:none}
+.ivo-polish-celebration::before{left:0;transform:skewX(-17deg)}
+.ivo-polish-celebration::after{right:0;transform:scaleX(-1) skewX(-17deg)}
+.ivo-results-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px;padding:0 8px;color:#ffb34a;font:1000 10px/1 ui-monospace,monospace;letter-spacing:.16em}
+.ivo-results-topline i{font-style:normal;padding:5px 9px;border:1px solid rgba(255,113,37,.7);border-radius:999px;background:#2b0909;color:#ff5f36;box-shadow:0 0 16px rgba(255,75,27,.2)}
+.ivo-results-title{position:relative;text-align:center;padding:1px 10px 10px;border-bottom:1px solid rgba(255,203,80,.28)}
+.ivo-results-title small{display:block;margin:0 0 3px;color:#d6d4cf;font-size:11px;letter-spacing:.22em}
+.ivo-results-title strong{display:block;font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;font-style:italic;font-size:clamp(34px,5.4vw,64px);line-height:.92;letter-spacing:.035em;color:#ffbd3f;text-shadow:0 3px 0 #802014,0 0 26px rgba(255,86,26,.48);transform:skewX(-4deg)}
+.ivo-results-body{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:stretch;margin-top:12px}
+.ivo-results-mark{min-height:176px;border:2px solid rgba(255,124,43,.56);border-radius:14px;background:linear-gradient(rgba(18,7,8,.22),rgba(18,7,8,.72)),url('./icons/ivo-rock-192.png') center/88% auto no-repeat;box-shadow:inset 0 0 30px rgba(255,71,20,.19),0 0 18px rgba(255,82,25,.14)}
+.ivo-results-stats{display:grid;gap:8px}
+.ivo-result-row{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;min-height:49px;padding:4px 13px;border:1px solid #5b4d45;border-left:4px solid #ff8b29;border-radius:8px;background:linear-gradient(90deg,#171719,#0c0c0e);box-shadow:inset 0 1px rgba(255,255,255,.06),0 5px 12px rgba(0,0,0,.25)}
+.ivo-result-row>span{display:grid;place-items:center;width:32px;height:32px;color:#ffc33f;font-size:25px;font-weight:1000;text-shadow:0 0 14px rgba(255,146,35,.65)}
+.ivo-result-row>b{font-size:12px;letter-spacing:.07em;color:#d7d5d0;text-align:left}
+.ivo-result-row>em{font-style:normal;font-size:24px;font-weight:1000;letter-spacing:.05em;color:#ffc947;text-shadow:0 0 13px rgba(255,122,28,.28)}
+.ivo-result-row.total{border-left-color:#ffdb53;background:linear-gradient(90deg,#211915,#0e0d0e)}
+.ivo-result-row.total>em{font-size:28px;color:#ffe06a}
+.ivo-polish-celebration .ivo-polish-next{margin:12px 0 0;padding:11px 14px 9px;border:2px solid #e54124;border-radius:9px;background:linear-gradient(#7c1715,#3a0d0d);color:#fff0c6;font:1000 14px/1.15 ui-monospace,monospace;letter-spacing:.06em;text-shadow:0 2px 0 #200;box-shadow:0 0 18px rgba(255,62,25,.28),inset 0 0 0 2px rgba(255,180,63,.12)}
+.ivo-polish-celebration.final .ivo-results-title strong{color:#fff06f;text-shadow:0 3px 0 #9d2819,0 0 34px rgba(255,98,26,.62)}
+@media (max-height:560px){.ivo-polish-celebration{top:49%;width:min(650px,calc(100vw - 20px));padding:8px 12px 10px}.ivo-results-title small{font-size:8px}.ivo-results-title strong{font-size:clamp(28px,5vw,44px)}.ivo-results-body{grid-template-columns:100px 1fr;gap:8px;margin-top:7px}.ivo-results-mark{min-height:132px}.ivo-results-stats{gap:5px}.ivo-result-row{min-height:38px;grid-template-columns:28px 1fr auto;padding:2px 8px;gap:6px}.ivo-result-row>span{width:25px;height:25px;font-size:20px}.ivo-result-row>b{font-size:9px}.ivo-result-row>em{font-size:19px}.ivo-result-row.total>em{font-size:21px}.ivo-polish-celebration .ivo-polish-next{margin-top:7px;padding:8px 10px;font-size:10px}}

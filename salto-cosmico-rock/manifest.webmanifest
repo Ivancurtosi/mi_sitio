@@ -1,0 +1,34 @@
+{
+  "name": "Ivo Rock",
+  "short_name": "Ivo Rock",
+  "description": "Plataformas, guitarras y una gira de puro rock.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "landscape",
+  "background_color": "#080508",
+  "theme_color": "#180709",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "./icons/ivo-rock-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/ivo-rock-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

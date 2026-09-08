@@ -6,11 +6,17 @@
   layer.innerHTML = `
     <div class="ivo-polish-flash"></div>
     <div class="ivo-polish-hit"></div>
-    <div class="ivo-polish-celebration">
-      <small>IVO ROCK</small>
-      <strong>RUTA COMPLETA</strong>
-      <b class="ivo-polish-height">ALTURA +0000</b>
-      <em class="ivo-polish-total">TIEMPO +0000 · TOTAL +0000</em>
+    <div class="ivo-polish-celebration" aria-hidden="true">
+      <div class="ivo-results-topline"><span>⚡ IVO ROCK ⚡</span><i>ROCK BONUS</i></div>
+      <div class="ivo-results-title"><small>EL ESCENARIO ES TUYO</small><strong>RUTA COMPLETADA</strong></div>
+      <div class="ivo-results-body">
+        <div class="ivo-results-mark" aria-hidden="true"></div>
+        <div class="ivo-results-stats">
+          <div class="ivo-result-row"><span>↑</span><b>BONUS DE ALTURA</b><em class="ivo-polish-height">00000</em></div>
+          <div class="ivo-result-row"><span>◷</span><b>BONUS DE TIEMPO</b><em class="ivo-polish-time">00000</em></div>
+          <div class="ivo-result-row total"><span>★</span><b>PUNTAJE TOTAL</b><em class="ivo-polish-total">000000</em></div>
+        </div>
+      </div>
       <span class="ivo-polish-next"></span>
     </div>
     <div class="ivo-final-stage"><div class="ivo-final-beams"><i></i><i></i><i></i></div><div class="ivo-final-crowd">${'<i></i>'.repeat(18)}</div><div class="ivo-final-riser"><span>⚡</span><b>IVO</b></div><strong>ÚLTIMO BIS</strong><small>GIRA COMPLETA</small></div>
@@ -22,6 +28,7 @@
   const celebration = layer.querySelector('.ivo-polish-celebration');
   const celebrationTitle = celebration.querySelector('strong');
   const celebrationHeight = celebration.querySelector('.ivo-polish-height');
+  const celebrationTime = celebration.querySelector('.ivo-polish-time');
   const celebrationTotal = celebration.querySelector('.ivo-polish-total');
   const celebrationNext = celebration.querySelector('.ivo-polish-next');
   const phase = layer.querySelector('.ivo-polish-phase');
@@ -164,14 +171,18 @@
         requestAnimationFrame(() => finalStage.classList.add('show'));
         setTimeout(() => finalStage.classList.remove('show'), 3900);
       }
-      celebrationTitle.textContent = final ? '¡GIRA COMPLETA!' : '¡RUTA COMPLETA!';
-      celebrationHeight.textContent = `ALTURA +${height.toString().padStart(4, '0')}`;
-      celebrationTotal.textContent = `TIEMPO +${time.toString().padStart(4, '0')} · TOTAL +${total.toString().padStart(4, '0')}`;
-      celebrationNext.textContent = final ? 'FIN DE LA GIRA' : (nextName ? `PRÓXIMA PARADA · ${String(nextName).toUpperCase()}` : '');
+      celebration.classList.toggle('final', final);
+      celebrationTitle.textContent = final ? 'GIRA COMPLETA' : 'RUTA COMPLETADA';
+      celebrationHeight.textContent = height.toString().padStart(5, '0');
+      celebrationTime.textContent = time.toString().padStart(5, '0');
+      const hudScore = () => Number((document.querySelector('.hud-score b')?.textContent || '').replace(/\D/g, '')) || total;
+      celebrationTotal.textContent = hudScore().toString().padStart(6, '0');
+      requestAnimationFrame(() => { celebrationTotal.textContent = hudScore().toString().padStart(6, '0'); });
+      celebrationNext.textContent = final ? '★ FIN DE LA GIRA ★' : (nextName ? `SIGUIENTE RUTA  ›  ${String(nextName).toUpperCase()}` : 'SIGUIENTE RUTA');
       window.__ivoRockStats?.goal(height, time, final);
       celebration.classList.remove('show');
       requestAnimationFrame(() => celebration.classList.add('show'));
-      setTimeout(() => celebration.classList.remove('show'), final ? 3400 : 2850);
+      setTimeout(() => celebration.classList.remove('show'), final ? 3600 : 3300);
       navigator.vibrate?.(final ? [60, 35, 70, 35, 100] : [45, 30, 65]);
     },
 
