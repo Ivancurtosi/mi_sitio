@@ -1,4 +1,4 @@
-name: Ivo Rock fullscreen hotfix smoke
+name: Ivo Rock fullscreen and compact results smoke
 
 on:
   push:
@@ -17,12 +17,17 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          grep -q 'ivo-rock-fullscreen-hotfix.css?v=fullscreen-hotfix-1' salto-cosmico-rock/index.html
+          node --check salto-cosmico-rock/ivo-rock-results-v3.js
+          node --check salto-cosmico-rock/mount.js
+          grep -q 'ivo-rock-results-v3.css?v=results-compact-1' salto-cosmico-rock/index.html
+          grep -q 'ivo-rock-results-v3.js?v=results-compact-1' salto-cosmico-rock/mount.js
+          grep -q 'width:min(520px' salto-cosmico-rock/ivo-rock-results-v3.css
+          ! grep -q 'ivo-route-follow' salto-cosmico-rock/ivo-rock-results-v3.js
+          grep -q "ivo-rock-pwa-v4" salto-cosmico-rock/service-worker.js
           grep -q 'pointer-events: none !important' salto-cosmico-rock/ivo-rock-fullscreen-hotfix.css
           grep -q 'pointer-events: auto !important' salto-cosmico-rock/ivo-rock-fullscreen-hotfix.css
-          grep -q "ivo-rock-pwa-v3" salto-cosmico-rock/service-worker.js
 
-      - name: Browser hit-test for fullscreen button
+      - name: Browser UI smoke test
         shell: bash
         run: |
           set -euxo pipefail
@@ -37,16 +42,26 @@ jobs:
             const r = b.getBoundingClientRect();
             const hit = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
             document.documentElement.dataset.fullscreenHit = (hit === b || b.contains(hit)) ? 'ok' : ('blocked-' + (hit?.className || hit?.tagName || 'unknown'));
-          }, 1800);
+          }, 1700);
+          setTimeout(() => {
+            try { window.__ivoRockPolish?.goal(false, 2660, 1500, 'CLUB SUBTERRÁNEO'); } catch {}
+          }, 2000);
+          setTimeout(() => {
+            const card = document.querySelector('.ivo-route-card');
+            const follow = document.querySelector('.ivo-route-follow');
+            const width = card?.getBoundingClientRect().width || 9999;
+            document.documentElement.dataset.compactRoute = (card && !follow && width <= 540) ? 'ok' : `fail-${Math.round(width)}-${!!follow}`;
+          }, 2250);
           </script>'''
           p.write_text(s.replace('</body>', probe + '</body>'))
           PY
           python3 -m http.server 8765 >/tmp/ivo-http.log 2>&1 &
           sleep 2
           CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=4500 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?v=fullscreen-hotfix-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8765/salto-cosmico-rock/?v=results-compact-1' >/tmp/dom.txt 2>/tmp/chrome.log || true
           cat /tmp/chrome.log
           grep -q 'data-fullscreen-hit="ok"' /tmp/dom.txt
+          grep -q 'data-compact-route="ok"' /tmp/dom.txt
           if grep -Eq 'INFO:CONSOLE.*(Uncaught|ReferenceError|TypeError|SyntaxError)' /tmp/chrome.log; then
             echo 'Runtime JavaScript error detected'
             exit 1
