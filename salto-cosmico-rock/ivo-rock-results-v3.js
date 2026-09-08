@@ -15,7 +15,6 @@
         <div><span>◷</span><b>BONUS TIEMPO</b><strong class="ivo-v3-time">0</strong></div>
         <div class="total"><span>◆</span><b>TOTAL</b><strong class="ivo-v3-total">0</strong></div>
       </div>
-      <button type="button" class="ivo-route-follow">⚡ SEGUIR ⚡</button>
     </section>
 
     <section class="ivo-victory-screen" aria-hidden="true">
@@ -75,7 +74,7 @@
     routeCard.classList.remove('show');
     requestAnimationFrame(() => routeCard.classList.add('show'));
     clearTimeout(showRoute.timer);
-    showRoute.timer = setTimeout(hideRoute, 3150);
+    showRoute.timer = setTimeout(hideRoute, 2550);
   };
 
   const showVictory = (time, height) => {
@@ -87,7 +86,6 @@
     requestAnimationFrame(() => victory.classList.add('show'));
   };
 
-  layer.querySelector('.ivo-route-follow')?.addEventListener('click', hideRoute);
   layer.querySelector('.ivo-v3-menu')?.addEventListener('click', () => {
     try { sessionStorage.removeItem('ivo-rock-v3-autoplay'); } catch {}
     location.reload();
