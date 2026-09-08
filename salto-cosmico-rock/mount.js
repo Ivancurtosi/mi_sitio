@@ -155,5 +155,5 @@ await import('./rock-tour-controls.js?v=performance-1');
 await import('./ivo-rock-polish.js?v=results-pwa-1');
 await import('./ivo-rock-stats.js?v=performance-1');
 await import('./ivo-rock-start-menu.js?v=performance-1');
-await import('./ivo-rock-results-v3.js?v=results-simple-1');
+await import('./ivo-rock-results-v3.js?v=results-compact-1');
 await import('./pwa.js?v=results-pwa-1');
