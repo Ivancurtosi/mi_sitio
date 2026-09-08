@@ -1,8 +1,8 @@
-const CACHE = 'ivo-rock-pwa-v1';
+const CACHE = 'ivo-rock-pwa-v2';
 const CORE = [
   './','./index.html','./manifest.webmanifest','./mount.js','./pwa.js',
   './rock-tour-controls.js','./rock-tour-updates.css','./rock-tour-lose-sfx.js',
-  './ivo-rock-start-menu.js','./ivo-rock-start-menu.css','./ivo-rock-polish.js','./ivo-rock-polish.css','./ivo-rock-stats.js','./ivo-rock-stats.css','./ivo-rock-fireworks.css',
+  './ivo-rock-start-menu.js','./ivo-rock-start-menu.css','./ivo-rock-polish.js','./ivo-rock-polish.css','./ivo-rock-results-v3.js','./ivo-rock-results-v3.css','./ivo-rock-stats.js','./ivo-rock-stats.css','./ivo-rock-fireworks.css',
   './assets/rolldown-runtime-S-ySWqyJ.js','./assets/framework-CXnKph_e.js','./assets/index-BKMDMKjr.css','./assets/cosmic-jump-DkePWGqE.js',
   './assets/rock-concert.webp','./assets/metal-wasteland.webp','./assets/metal-forge.webp','./assets/prism-cavern.png','./assets/metal-storm.webp','./assets/dawn-isles.png',
   './assets/lumi-atlas.webp','./assets/lumi-atlas.png','./assets/rock-hero.webp','./assets/rock-props.webp',
