@@ -1,4 +1,4 @@
-const CACHE = 'ivo-rock-pwa-v3';
+const CACHE = 'ivo-rock-pwa-v4';
 const CORE = [
   './','./index.html','./manifest.webmanifest','./mount.js','./pwa.js',
   './rock-tour-controls.js','./rock-tour-updates.css','./rock-tour-lose-sfx.js',
